@@ -44,8 +44,8 @@
 
 ```bash
 # 1. クローン
-git clone https://github.com/kumagallium/Crucible-registry.git
-cd Crucible-registry
+git clone https://github.com/kumagallium/Crucible.git
+cd Crucible
 
 # 2. 環境変数を設定
 cp .env.example .env
@@ -77,15 +77,18 @@ docker compose up -d
 
 詳細は [.env.example](.env.example) を参照してください。
 
-## VPN 経由での利用
+## リモートアクセス（オプション）
 
-WireGuard VPN 環境で外部から MCP サーバーにアクセスする場合:
+別のマシンから Crucible にアクセスしたい場合は、環境変数でバインド先 IP を変更してください。
 
 ```env
+# 例: VPN 経由でアクセスする場合
 CRUCIBLE_HOST=10.0.0.1
 CRUCIBLE_BASE_URL=http://10.0.0.1
 CRUCIBLE_CORS_ORIGINS=http://10.0.0.1:8081,http://localhost:8081
 ```
+
+ローカルで利用する場合（デフォルト）は設定不要です。
 
 ## MCP クライアントからの接続
 

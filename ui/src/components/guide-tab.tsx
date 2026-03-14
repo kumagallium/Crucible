@@ -1,6 +1,6 @@
 "use client";
 
-import { Wifi, Copy, Check, Monitor, Terminal, MousePointerClick, Plug } from "lucide-react";
+import { Copy, Check, Monitor, Terminal, MousePointerClick, Plug } from "lucide-react";
 import { useState } from "react";
 
 function CopyBlock({ code }: { code: string }) {
@@ -55,11 +55,11 @@ export function GuideTab() {
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
             Crucible の MCP サーバーは SSE（Server-Sent
-            Events）エンドポイント経由で利用できます。VPN
-            に接続した状態であれば、MCP 対応の任意のクライアントから接続可能です。
+            Events）エンドポイント経由で利用できます。MCP
+            対応の任意のクライアントから接続可能です。
           </p>
           <div className="flex flex-col sm:flex-row gap-2">
-            {["1. VPN に接続", "2. エンドポイントを確認", "3. クライアントに登録"].map(
+            {["1. エンドポイントを確認", "2. クライアントに登録"].map(
               (step) => (
                 <div
                   key={step}
@@ -75,21 +75,8 @@ export function GuideTab() {
         {/* Step 1 */}
         <section className="rounded-xl border bg-card p-6">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <Wifi className="h-4 w-4 text-muted-foreground" />
-            Step 1 — VPN に接続する
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Crucible の MCP
-            サーバーはプライベートネットワーク上で動作しています。お使いの端末で
-            WireGuard VPN に接続してください。接続方法は管理者から配布された設定ファイルと接続マニュアルを参照してください。
-          </p>
-        </section>
-
-        {/* Step 2 */}
-        <section className="rounded-xl border bg-card p-6">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-            Step 2 — SSE エンドポイントを確認する
+            Step 1 — SSE エンドポイントを確認する
           </h3>
           <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
             <p>
@@ -98,16 +85,16 @@ export function GuideTab() {
               を確認し、コピーボタンでコピーします。
             </p>
             <div className="text-xs font-mono bg-muted border rounded-lg px-4 py-3">
-              http://10.0.0.1:&lt;ポート番号&gt;/sse
+              http://localhost:&lt;ポート番号&gt;/sse
             </div>
           </div>
         </section>
 
-        {/* Step 3 */}
+        {/* Step 2 */}
         <section className="rounded-xl border bg-card p-6">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Terminal className="h-4 w-4 text-muted-foreground" />
-            Step 3 — MCP クライアントに登録する
+            Step 2 — MCP クライアントに登録する
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
             お使いの MCP 対応クライアントの設定に、コピーした SSE
@@ -164,7 +151,7 @@ npm root -g
       "command": "/Users/you/.nvm/versions/node/v22.14.0/bin/node",
       "args": [
         "/Users/you/.npm-global/lib/node_modules/mcp-remote/dist/proxy.js",
-        "http://10.0.0.1:<ポート>/sse",
+        "http://localhost:<ポート>/sse",
         "--allow-http"
       ]
     }
@@ -195,7 +182,7 @@ npm root -g
             <p className="text-xs text-muted-foreground mb-2">
               SSE に直接対応しているため、ワンコマンドで追加できます。
             </p>
-            <CopyBlock code="claude mcp add --transport sse サーバー名 http://10.0.0.1:<ポート>/sse" />
+            <CopyBlock code="claude mcp add --transport sse サーバー名 http://localhost:<ポート>/sse" />
           </div>
 
           {/* Cursor */}
@@ -211,7 +198,7 @@ npm root -g
               code={`{
   "mcpServers": {
     "サーバー名": {
-      "url": "http://10.0.0.1:<ポート>/sse"
+      "url": "http://localhost:<ポート>/sse"
     }
   }
 }`}
@@ -269,7 +256,7 @@ npm root -g
               <p className="text-xs text-muted-foreground leading-relaxed">
                 mcp-remote の引数に{" "}
                 <code className="font-mono bg-background px-1 rounded">--allow-http</code>{" "}
-                を追加してください。VPN 経由の HTTP 接続にはこのフラグが必須です。
+                を追加してください。localhost 以外の HTTP 接続にはこのフラグが必須です。
               </p>
             </div>
             <div className="rounded-lg bg-muted border px-4 py-3">
@@ -277,9 +264,9 @@ npm root -g
                 Server disconnected / 接続できない
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                WireGuard VPN が接続中であることを確認してください。
+                Crucible が起動しているか確認してください。
                 ターミナルから{" "}
-                <code className="font-mono bg-background px-1 rounded">curl http://10.0.0.1:&lt;ポート&gt;/sse</code>{" "}
+                <code className="font-mono bg-background px-1 rounded">curl http://localhost:&lt;ポート&gt;/sse</code>{" "}
                 でエンドポイントに到達できるかテストできます。
               </p>
             </div>
