@@ -1,0 +1,103 @@
+services:
+  # ==============================================================================
+  # Docker socket プロキシ (コンテナへの raw socket 公開を防ぐ)
+  # 許可する Docker API エンドポイントをここで絞り込む
+  # ==============================================================================
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: mcp-socket-proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # 必要な操作のみ許可 (デフォルトは全て 0=拒否)
+      CONTAINERS: 1   # docker ps / inspect
+      IMAGES: 1       # docker build / images
+      NETWORKS: 1     # docker network inspect / connect
+      BUILD: 1        # docker build
+      POST: 1         # start / stop / rm / run 等
+      DELETE: 1       # docker rm / rmi
+    networks:
+      - socket_proxy_net
+
+  # ==============================================================================
+  # FastAPI バックエンド
+  # ==============================================================================
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: mcp-registry-api
+    restart: unless-stopped
+    ports:
+      - "${CRUCIBLE_HOST:-127.0.0.1}:${CRUCIBLE_API_PORT:-8080}:8000"
+    environment:
+      # レジストリファイルのパス
+      - REGISTRY_FILE=/var/lib/crucible-registry/servers.json
+      # Dify 認証情報 (.env ファイルで設定)
+      - DIFY_EMAIL=${DIFY_EMAIL:-}
+      - DIFY_PASSWORD=${DIFY_PASSWORD:-}
+      - DIFY_API_BASE=${DIFY_API_BASE:-http://host.docker.internal/console/api}
+      # GitHub 認証 (プライベートリポジトリ用)
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      # GitHub Token 暗号化マスターキー (AES-256-GCM)
+      # 生成: python3 -c "import secrets; print(secrets.token_hex(32))"
+      - TOKEN_ENCRYPTION_KEY=${TOKEN_ENCRYPTION_KEY:-}
+      # Docker ネットワーク名
+      - MCP_NETWORK=${MCP_NETWORK:-mcp-net}
+      - DIFY_NETWORK=${DIFY_NETWORK:-docker_default}
+      # API キー認証 (未設定の場合は無認証で動作するが警告が出る)
+      - REGISTRY_API_KEY=${REGISTRY_API_KEY:-}
+      # ポートバインド先 IP（MCP サーバーコンテナの公開先）
+      - CRUCIBLE_HOST=${CRUCIBLE_HOST:-127.0.0.1}
+      # UI に表示するベース URL
+      - CRUCIBLE_BASE_URL=${CRUCIBLE_BASE_URL:-http://127.0.0.1}
+      # CORS 許可オリジン（カンマ区切り）
+      - CRUCIBLE_CORS_ORIGINS=${CRUCIBLE_CORS_ORIGINS:-}
+      # socket-proxy 経由で Docker CLI を使用
+      - DOCKER_HOST=tcp://socket-proxy:2375
+    extra_hosts:
+      # コンテナ内から host の Dify API に接続するため
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # レジストリデータ永続化
+      - registry_data:/var/lib/crucible-registry
+      # docker.sock は直接マウントせず socket-proxy 経由で操作
+    depends_on:
+      - socket-proxy
+    networks:
+      - registry_net
+      - socket_proxy_net
+      - dify_net   # Dify API への自動登録に必要
+
+  # ==============================================================================
+  # Next.js フロントエンド (shadcn/ui)
+  # ==============================================================================
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: mcp-registry-ui
+    restart: unless-stopped
+    ports:
+      - "${CRUCIBLE_HOST:-127.0.0.1}:${CRUCIBLE_UI_PORT:-8081}:3000"
+    environment:
+      - API_BASE_URL=http://api:8000
+      - REGISTRY_API_KEY=${REGISTRY_API_KEY:-}
+    depends_on:
+      - api
+    networks:
+      - registry_net
+
+volumes:
+  registry_data:
+
+networks:
+  registry_net:
+    driver: bridge
+  socket_proxy_net:
+    driver: bridge
+    internal: true   # socket-proxy は外部ネットワークに出られない
+  dify_net:
+    name: ${DIFY_NETWORK:-docker_default}
+    external: true   # Dify の Docker Compose が作成するネットワーク

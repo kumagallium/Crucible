@@ -1,0 +1,33 @@
+#!/bin/bash
+# ==============================================================================
+# post-commit hook: リリースノート JSON の自動更新
+# ==============================================================================
+# コミット後に release_notes.json を再生成し、変更があれば --amend で
+# 同じコミットに含める。無限ループ防止のため環境変数でガードする。
+#
+# セットアップ:
+#   git config core.hooksPath .githooks
+# ==============================================================================
+
+# 無限ループ防止（amend → post-commit → amend → ...）
+[[ "${CRUCIBLE_POST_COMMIT}" == "1" ]] && exit 0
+export CRUCIBLE_POST_COMMIT=1
+
+SCRIPT="registry/ui/generate_release_notes.py"
+
+# スクリプトが存在しなければスキップ
+[[ -f "${SCRIPT}" ]] || exit 0
+
+# python3 が使えなければスキップ
+command -v python3 &>/dev/null || exit 0
+
+# リリースノートを再生成
+python3 "${SCRIPT}" >/dev/null 2>&1 || exit 0
+
+# 変更があれば amend で現在のコミットに含める
+if ! git diff --quiet registry/ui/public/release_notes.json 2>/dev/null; then
+    git add registry/ui/public/release_notes.json
+    git commit --amend --no-edit >/dev/null 2>&1
+fi
+
+exit 0
