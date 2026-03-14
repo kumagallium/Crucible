@@ -25,6 +25,7 @@ const meta = {
     ),
   ],
   args: {
+    baseUrl: "http://127.0.0.1",
     onAction: () => console.log("onAction called"),
   },
   // API コールをモック（fetch をインターセプト）
