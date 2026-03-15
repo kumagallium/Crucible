@@ -81,7 +81,8 @@ a:hover {
 
 .header-logo-img {
   width: 140px;
-  height: 42px;
+  height: auto;
+  margin: -8px 0;
 }
 
 .header-nav {
