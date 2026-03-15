@@ -1,11 +1,31 @@
 [
   {
-    "sha": "ac97247",
+    "sha": "813feaf",
+    "message": "[fix] Regenerate package-lock.json with Node 22 for Docker compatibility",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "027f2f4",
+    "message": "Merge pull request #2 from kumagallium/feat/i18n-support",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "6b13e5f",
+    "message": "Merge branch 'main' into feat/i18n-support",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "cefb264",
     "message": "[feat] Add i18n support with JA/EN language switching",
     "date": "2026-03-15"
   },
   {
-    "sha": "b3daaa1",
+    "sha": "141ed52",
+    "message": "Merge pull request #1 from kumagallium/feat/readme-and-lp",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "240020d",
     "message": "[fix] ヘッダーロゴのサイズを本体 UI と統一 (140px幅)",
     "date": "2026-03-15"
   },
