@@ -1,6 +1,11 @@
 [
   {
-    "sha": "98db8cf",
+    "sha": "70e568f",
+    "message": "[chore] .gitignore に .claude を追加",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "4189c89",
     "message": "[fix] post-commit hook のパスをルート構成に修正 + リリースノート再生成",
     "date": "2026-03-15"
   },

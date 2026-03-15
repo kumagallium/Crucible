@@ -33,3 +33,5 @@ ui/.next/
 
 # Registry データ
 servers.json
+
+.claude
