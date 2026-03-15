@@ -17,8 +17,10 @@ import {
 import { Rocket, ChevronDown, ChevronRight, CheckCircle2, XCircle, Plus } from "lucide-react";
 import { registerServer, fetchJobLogs } from "@/lib/api";
 import type { RegisterRequest } from "@/lib/types";
+import { useI18n } from "@/i18n";
 
 export function RegisterTab() {
+  const { t } = useI18n();
   const [deploying, setDeploying] = useState(false);
   const [deployStatus, setDeployStatus] = useState<"success" | "error" | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
@@ -70,7 +72,7 @@ export function RegisterTab() {
       await streamLogs(result.job_id);
     } catch (err) {
       setDeployStatus("error");
-      setLogs((prev) => [...prev, `エラー: ${err instanceof Error ? err.message : String(err)}`]);
+      setLogs((prev) => [...prev, `${t("register.error")}${err instanceof Error ? err.message : String(err)}`]);
     } finally {
       setDeploying(false);
     }
@@ -87,7 +89,6 @@ export function RegisterTab() {
           allLines.push(...data.logs);
           offset = data.total;
           setLogs([...allLines]);
-          // ログ末尾にスクロール
           setTimeout(() => {
             logRef.current?.scrollTo(0, logRef.current.scrollHeight);
           }, 50);
@@ -97,45 +98,42 @@ export function RegisterTab() {
           return;
         }
       } catch {
-        // ポーリング続行
+        // continue polling
       }
       await new Promise((r) => setTimeout(r, 2000));
     }
   }
 
-  // デプロイ完了後の結果画面
   if (deployStatus !== null) {
     const isSuccess = deployStatus === "success";
     return (
       <div>
-        <h2 className="text-lg font-semibold mb-1">新規 MCP サーバーを登録</h2>
+        <h2 className="text-lg font-semibold mb-1">{t("register.title")}</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          GitHub リポジトリ URL を入力するだけで clone → build → 起動 → Dify 登録まで自動化します。
+          {t("register.description")}
         </p>
 
-        {/* 結果バナー */}
         {isSuccess ? (
           <div className="flex items-center gap-3 p-4 rounded-xl bg-[#e8f5e9] border border-[#a5d6a7] mb-6">
             <CheckCircle2 className="h-6 w-6 text-[#2e7d32] shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-[#1b5e20]">デプロイ完了</p>
-              <p className="text-xs text-[#2e7d32]">「Servers」タブで確認できます。</p>
+              <p className="text-sm font-semibold text-[#1b5e20]">{t("register.deploySuccess")}</p>
+              <p className="text-xs text-[#2e7d32]">{t("register.deploySuccessHint")}</p>
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 mb-6">
             <XCircle className="h-6 w-6 text-red-600 shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-red-800">デプロイに失敗しました</p>
-              <p className="text-xs text-red-600">ログを確認してください。</p>
+              <p className="text-sm font-semibold text-red-800">{t("register.deployFailed")}</p>
+              <p className="text-xs text-red-600">{t("register.deployFailedHint")}</p>
             </div>
           </div>
         )}
 
-        {/* デプロイログ */}
         {logs.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-sm font-medium mb-2">デプロイログ</h3>
+            <h3 className="text-sm font-medium mb-2">{t("register.deployLog")}</h3>
             <div
               ref={logRef}
               className="h-56 overflow-y-auto rounded-lg border bg-stone-900 text-stone-400 font-mono text-xs leading-relaxed p-3 whitespace-pre-wrap break-all"
@@ -145,10 +143,9 @@ export function RegisterTab() {
           </div>
         )}
 
-        {/* 次のアクション */}
         <Button onClick={handleReset} className="w-full" size="lg">
           <Plus className="h-4 w-4" />
-          別のサーバーを登録する
+          {t("register.registerAnother")}
         </Button>
       </div>
     );
@@ -156,18 +153,17 @@ export function RegisterTab() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-1">新規 MCP サーバーを登録</h2>
+      <h2 className="text-lg font-semibold mb-1">{t("register.title")}</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        GitHub リポジトリ URL を入力するだけで clone → build → 起動 → Dify 登録まで自動化します。
+        {t("register.description")}
       </p>
 
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        {/* GitHub リポジトリ */}
         <div>
-          <h3 className="text-sm font-medium mb-3">GitHub リポジトリ</h3>
+          <h3 className="text-sm font-medium mb-3">{t("register.githubRepo")}</h3>
           <div className="grid grid-cols-4 gap-3">
             <div className="col-span-3">
-              <Label htmlFor="github_url">GitHub URL *</Label>
+              <Label htmlFor="github_url">{t("register.githubUrl")}</Label>
               <Input
                 id="github_url"
                 name="github_url"
@@ -176,26 +172,26 @@ export function RegisterTab() {
               />
             </div>
             <div>
-              <Label htmlFor="branch">ブランチ</Label>
+              <Label htmlFor="branch">{t("register.branch")}</Label>
               <Input id="branch" name="branch" defaultValue="main" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-3">
             <div>
-              <Label htmlFor="subdir">サブディレクトリ</Label>
+              <Label htmlFor="subdir">{t("register.subdir")}</Label>
               <Input
                 id="subdir"
                 name="subdir"
-                placeholder="sub-server (モノリポの場合)"
+                placeholder={t("register.subdirPlaceholder")}
               />
             </div>
             <div>
-              <Label htmlFor="github_token">GitHub Token</Label>
+              <Label htmlFor="github_token">{t("register.githubToken")}</Label>
               <Input
                 id="github_token"
                 name="github_token"
                 type="password"
-                placeholder="プライベートリポジトリの場合のみ"
+                placeholder={t("register.githubTokenPlaceholder")}
               />
             </div>
           </div>
@@ -203,7 +199,6 @@ export function RegisterTab() {
 
         <Separator />
 
-        {/* 詳細設定 (折りたたみ) */}
         <div>
           <button
             type="button"
@@ -215,19 +210,19 @@ export function RegisterTab() {
             ) : (
               <ChevronRight className="h-4 w-4" />
             )}
-            基本情報を手動指定 (mcp.json がない場合)
+            {t("register.advancedToggle")}
           </button>
 
           {showAdvanced && (
             <div className="mt-3 space-y-3 pl-1">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="name">サーバー名</Label>
+                  <Label htmlFor="name">{t("register.serverName")}</Label>
                   <Input id="name" name="name" placeholder="my-server" pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]" />
-                  <p className="text-xs text-muted-foreground mt-1">小文字英数字とハイフンのみ（3〜50 文字）</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("register.serverNameHint")}</p>
                 </div>
                 <div>
-                  <Label htmlFor="display_name">表示名</Label>
+                  <Label htmlFor="display_name">{t("register.displayName")}</Label>
                   <Input
                     id="display_name"
                     name="display_name"
@@ -237,7 +232,7 @@ export function RegisterTab() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="icon">アイコン (絵文字)</Label>
+                  <Label htmlFor="icon">{t("register.icon")}</Label>
                   <Input
                     id="icon"
                     name="icon"
@@ -246,28 +241,28 @@ export function RegisterTab() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="group">グループ</Label>
+                  <Label htmlFor="group">{t("register.group")}</Label>
                   <Select name="group" defaultValue="user">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">
-                        Community (8100-8199)
+                        {t("register.groupCommunity")}
                       </SelectItem>
                       <SelectItem value="default">
-                        Official (8001-8099)
+                        {t("register.groupOfficial")}
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div>
-                <Label htmlFor="description">説明</Label>
+                <Label htmlFor="description">{t("register.descriptionLabel")}</Label>
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="このサーバーの機能を説明してください"
+                  placeholder={t("register.descriptionPlaceholder")}
                   rows={2}
                 />
               </div>
@@ -277,16 +272,15 @@ export function RegisterTab() {
 
         <Separator />
 
-        {/* オプション */}
         <div className="flex items-center gap-2">
           <Checkbox id="dify_auto" name="dify_auto" defaultChecked />
           <Label htmlFor="dify_auto" className="cursor-pointer">
-            Dify に自動登録する
+            {t("register.difyAutoRegister")}
           </Label>
         </div>
 
         <div>
-          <Label htmlFor="env_vars">環境変数 (KEY=VALUE、1行1変数)</Label>
+          <Label htmlFor="env_vars">{t("register.envVars")}</Label>
           <Textarea
             id="env_vars"
             name="env_vars"
@@ -302,14 +296,13 @@ export function RegisterTab() {
           disabled={deploying}
         >
           <Rocket className="h-4 w-4" />
-          {deploying ? "デプロイ中..." : "デプロイ開始"}
+          {deploying ? t("register.deploying") : t("register.deployStart")}
         </Button>
       </form>
 
-      {/* デプロイ中のログ */}
       {deploying && logs.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-sm font-medium mb-2">デプロイログ</h3>
+          <h3 className="text-sm font-medium mb-2">{t("register.deployLog")}</h3>
           <div
             ref={logRef}
             className="h-56 overflow-y-auto rounded-lg border bg-stone-900 text-stone-400 font-mono text-xs leading-relaxed p-3 whitespace-pre-wrap break-all"

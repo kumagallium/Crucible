@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import type { ReleaseNote } from "@/lib/types";
+import { useI18n } from "@/i18n";
 
-// コミットメッセージのパース
 const COMMIT_RE = /^\[(\w+)\]\s*([\s\S]+)/;
 const TAG_LABELS: Record<string, string> = {
   feat: "NEW",
@@ -58,6 +58,7 @@ function parseCommit(commit: ReleaseNote): ParsedCommit {
 type FilterType = "all" | "NEW" | "FIX";
 
 export function ReleaseNotesTab() {
+  const { t } = useI18n();
   const [commits, setCommits] = useState<ParsedCommit[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const [loading, setLoading] = useState(true);
@@ -79,19 +80,17 @@ export function ReleaseNotesTab() {
       <div className="text-center py-16 px-8 bg-muted border border-dashed rounded-xl">
         <div className="text-4xl mb-3">📋</div>
         <h3 className="text-sm font-semibold text-foreground mb-1">
-          リリースノートがありません
+          {t("releaseNotes.empty")}
         </h3>
         <p className="text-xs text-muted-foreground">
-          release_notes.json が見つかりません。
+          {t("releaseNotes.emptyHint")}
         </p>
       </div>
     );
   }
 
-  // 新機能ハイライト
   const featItems = commits.filter((c) => c.tag === "NEW");
 
-  // 日付ごとにグルーピング
   const grouped = new Map<string, ParsedCommit[]>();
   for (const c of commits) {
     const list = grouped.get(c.date) || [];
@@ -101,15 +100,14 @@ export function ReleaseNotesTab() {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-1">リリースノート</h2>
+      <h2 className="text-lg font-semibold mb-1">{t("releaseNotes.title")}</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Crucible MCP Registry の最新の変更履歴です。
+        {t("releaseNotes.description")}
       </p>
 
-      {/* 新機能ハイライト */}
       {featItems.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-[#2e7d32]" />新機能ハイライト</h3>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-[#2e7d32]" />{t("releaseNotes.highlights")}</h3>
           <div className="space-y-2">
             {featItems.map((item) => (
               <div
@@ -131,13 +129,12 @@ export function ReleaseNotesTab() {
         </div>
       )}
 
-      {/* フィルター */}
       <div className="flex gap-2 mb-4">
         {(
           [
-            ["all", "すべて"],
-            ["NEW", "新機能のみ"],
-            ["FIX", "バグ修正のみ"],
+            ["all", t("releaseNotes.filterAll")],
+            ["NEW", t("releaseNotes.filterNew")],
+            ["FIX", t("releaseNotes.filterFix")],
           ] as const
         ).map(([value, label]) => (
           <button
@@ -156,7 +153,6 @@ export function ReleaseNotesTab() {
 
       <hr className="border-border mb-6" />
 
-      {/* タイムライン */}
       {Array.from(grouped.entries()).map(([date, items]) => {
         const filteredItems =
           filter === "all" ? items : items.filter((i) => i.tag === filter);

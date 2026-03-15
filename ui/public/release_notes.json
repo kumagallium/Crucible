@@ -1,6 +1,11 @@
 [
   {
-    "sha": "70e568f",
+    "sha": "ac97247",
+    "message": "[feat] Add i18n support with JA/EN language switching",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "ce7e785",
     "message": "[chore] .gitignore に .claude を追加",
     "date": "2026-03-15"
   },
