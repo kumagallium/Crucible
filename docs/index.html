@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crucible — Self-hosted MCP Server Registry</title>
+  <meta name="description" content="Build, deploy, and manage MCP servers from GitHub URLs. Your infrastructure, your control.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="header-logo"><img src="logo.png" alt="Crucible" class="header-logo-img"></a>
+      <nav class="header-nav">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="https://github.com/kumagallium/Crucible">GitHub</a>
+        <a href="ja/" class="lang-switch">JA</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <img src="logo.png" alt="Crucible" class="hero-logo">
+    <p class="tagline">Your MCP servers, on your infrastructure, under your control.</p>
+    <p class="description">
+      The self-hosted registry that builds, deploys, and manages
+      MCP servers from a single place.
+    </p>
+    <div class="hero-buttons">
+      <a href="#quickstart" class="btn btn-primary">Get Started</a>
+      <a href="https://github.com/kumagallium/Crucible" class="btn btn-secondary">GitHub</a>
+    </div>
+  </section>
+
+  <!-- What is Crucible? -->
+  <section class="section" id="about">
+    <h2 class="section-title">What is Crucible?</h2>
+    <p class="about-text">
+      MCP servers give AI assistants the ability to use external tools — but managing them is painful.
+      You have to build, configure, and run each server individually, across different clients and machines.
+    </p>
+    <br>
+    <p class="about-text">
+      Crucible solves this. Paste a GitHub URL and it automatically builds, deploys, and exposes the server
+      as an SSE endpoint. Manage everything from a single UI. No external SaaS required — it runs entirely
+      on your own infrastructure.
+    </p>
+  </section>
+
+  <!-- Is Crucible for you? -->
+  <section class="section" id="scenarios">
+    <h2 class="section-title">Is Crucible for you?</h2>
+    <p class="section-subtitle">
+      See if any of these situations sound familiar.
+    </p>
+
+    <div class="scenarios">
+
+      <!-- Scenario 1 -->
+      <div class="scenario">
+        <div class="scenario-header">Individual Developer — MCP server management fatigue</div>
+        <div class="scenario-columns">
+          <div class="scenario-before">
+            <div class="scenario-label">Before</div>
+            <ul>
+              <li>Using MCP servers across Claude Code, Cursor, Windsurf, and other clients</li>
+              <li>Manually building, launching, and writing config files for each server</li>
+              <li>Finding new MCP servers on GitHub but skipping them because setup is too much work</li>
+              <li>Wanting to access stdio servers remotely but struggling with mcp-proxy configuration</li>
+            </ul>
+          </div>
+          <div class="scenario-after">
+            <div class="scenario-label">After</div>
+            <ul>
+              <li>Just paste a GitHub URL — build, deploy, and SSE endpoint are all automatic</li>
+              <li>Monitor, restart, and remove all servers from a single management UI</li>
+              <li>stdio servers are automatically converted to SSE — ready for remote access instantly</li>
+              <li>"See something interesting? Paste the URL and try it" becomes your workflow</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenario 2 -->
+      <div class="scenario">
+        <div class="scenario-header">Small Team — Sharing MCP tools internally</div>
+        <div class="scenario-columns">
+          <div class="scenario-before">
+            <div class="scenario-label">Before</div>
+            <ul>
+              <li>Sharing "this MCP server is useful" with teammates, but everyone has to set it up locally</li>
+              <li>Different environments cause "it doesn't work on my machine" issues</li>
+              <li>Everyone running the same server individually is wasteful</li>
+              <li>SaaS-hosted MCP platforms are off-limits due to company policy</li>
+            </ul>
+          </div>
+          <div class="scenario-after">
+            <div class="scenario-label">After</div>
+            <ul>
+              <li>Deploy Crucible on a shared team server</li>
+              <li>One person registers the server, others just add the SSE URL to their client</li>
+              <li>No more environment inconsistency — everything runs in Docker</li>
+              <li>No external SaaS needed — stays within your VPN</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenario 3 -->
+      <div class="scenario">
+        <div class="scenario-header">Security-conscious Organization — Sovereignty over AI tool access</div>
+        <div class="scenario-columns">
+          <div class="scenario-before">
+            <div class="scenario-label">Before</div>
+            <ul>
+              <li>Hosting MCP servers on external SaaS means tool call data passes through third parties</li>
+              <li>Hard to track which servers access what</li>
+              <li>Approval processes for external hosting are heavy under security policies</li>
+              <li>Building your own management infrastructure is costly</li>
+            </ul>
+          </div>
+          <div class="scenario-after">
+            <div class="scenario-label">After</div>
+            <ul>
+              <li>Everything runs on your own infrastructure — data never leaves your network</li>
+              <li>Docker Socket Proxy restricts Docker operations to minimum privileges</li>
+              <li>Management UI gives you a clear overview of all server statuses</li>
+              <li><code>docker compose up -d</code> and you're running — no dedicated infrastructure needed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="section" id="features">
+    <h2 class="section-title">Key Features</h2>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#128279;</div>
+        <h3>Build from GitHub URL</h3>
+        <p>Paste a repository URL and Crucible builds and deploys it automatically. No pre-built images required.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <h3>Private Repository Support</h3>
+        <p>Works with private GitHub repositories. Your proprietary MCP servers stay private.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128260;</div>
+        <h3>Automatic stdio to SSE</h3>
+        <p>stdio-only servers are automatically exposed as SSE endpoints via mcp-proxy for remote access.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128421;</div>
+        <h3>Management UI</h3>
+        <p>Monitor status, restart, and remove servers from your browser.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128737;</div>
+        <h3>Secure by Default</h3>
+        <p>Docker Socket Proxy limits Docker operations to minimum privileges.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#127968;</div>
+        <h3>Fully Self-hosted</h3>
+        <p>No external dependencies. Everything runs on your machine, your network, under your control.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section" id="how-it-works">
+    <h2 class="section-title">How it works</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Paste a GitHub URL</h3>
+        <p>Enter the URL of any MCP server repository — public or private.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Auto build &amp; deploy</h3>
+        <p>Crucible builds a Docker container and starts the server with an SSE endpoint.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Connect from any client</h3>
+        <p>Add the SSE URL to Claude Code, Cursor, or any MCP-compatible client.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="section" id="quickstart">
+    <h2 class="section-title">Quick Start</h2>
+
+    <div class="quickstart-code">
+      <pre><span class="comment"># Clone the repository</span>
+<span class="command">git clone https://github.com/kumagallium/Crucible.git</span>
+<span class="command">cd Crucible</span>
+
+<span class="comment"># Configure environment variables</span>
+<span class="command">cp .env.example .env</span>
+<span class="command">chmod 600 .env</span>
+
+<span class="comment"># Start Crucible</span>
+<span class="command">docker compose up -d</span>
+
+<span class="comment"># Access the UI at http://127.0.0.1:8081</span></pre>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="https://github.com/kumagallium/Crucible">GitHub</a>
+        <a href="https://github.com/kumagallium/Crucible/blob/main/LICENSE">MIT License</a>
+        <a href="ja/">JA</a>
+      </div>
+      <div class="footer-copy">&copy; 2025 Crucible</div>
+    </div>
+  </footer>
+
+</body>
+</html>

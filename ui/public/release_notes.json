@@ -5,6 +5,21 @@
     "date": "2026-03-15"
   },
   {
+    "sha": "b3daaa1",
+    "message": "[fix] ヘッダーロゴのサイズを本体 UI と統一 (140px幅)",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "d8008bd",
+    "message": "[feat] LP にロゴ適用 + ライトモード化 + デザインガイド準拠",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "b769d08",
+    "message": "[feat] README 英語化・日本語版分離 + GitHub Pages LP を作成",
+    "date": "2026-03-15"
+  },
+  {
     "sha": "ce7e785",
     "message": "[chore] .gitignore に .claude を追加",
     "date": "2026-03-15"
