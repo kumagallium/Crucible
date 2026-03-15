@@ -15,9 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { RotateCw, Trash2, ExternalLink, Copy, Check } from "lucide-react";
 import { restartServer, deleteServer, fetchJobLogs } from "@/lib/api";
+import { useI18n } from "@/i18n";
 
-// ステータスごとのバナー色
-// テーマグリーンに合わせたバナー色
 const bannerStyles: Record<string, string> = {
   running: "bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9]",
   stopped: "bg-gradient-to-br from-stone-100 to-stone-200",
@@ -39,16 +38,15 @@ interface ServerCardProps {
 }
 
 export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // SSE エンドポイント URL（ベース URL は API settings から取得）
   const sse = `${baseUrl}:${server.port}/sse`;
   const repoShort = server.github_url.replace("https://github.com/", "");
   const subdir = server.subdir ? ` / ${server.subdir}` : "";
 
-  // ジョブ完了待ち
   async function waitForJob(jobId: string) {
     const poll = async (): Promise<string> => {
       const data = await fetchJobLogs(jobId, 0);
@@ -66,7 +64,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
       await waitForJob(result.job_id);
       onAction();
     } catch {
-      // エラーは静かに処理
+      // silently handle
     } finally {
       setLoading(false);
     }
@@ -80,7 +78,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
       await waitForJob(result.job_id);
       onAction();
     } catch {
-      // エラーは静かに処理
+      // silently handle
     } finally {
       setLoading(false);
     }
@@ -88,7 +86,6 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
 
   return (
     <div className="group rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30 overflow-hidden">
-      {/* バナー */}
       <div
         className={`relative flex items-end h-13 px-3.5 pb-2 ${bannerStyles[server.status] || bannerStyles.stopped}`}
       >
@@ -102,7 +99,6 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
         </div>
       </div>
 
-      {/* ボディ */}
       <div className="px-4 pt-2.5 pb-2.5">
         <h3 className="text-sm font-semibold text-foreground truncate">
           {server.display_name}
@@ -114,14 +110,12 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           {server.description}
         </p>
 
-        {/* エラーメッセージ */}
         {server.status === "error" && server.error_message && (
           <p className="text-xs text-red-600 mb-1.5">
             {server.error_message}
           </p>
         )}
 
-        {/* バッジ群 */}
         <div className="flex flex-wrap gap-1.5 mb-2">
           <Badge variant={server.group === "default" ? "official" : "community"}>
             {server.group === "default" ? "Official" : "Community"}
@@ -132,7 +126,6 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Badge variant="port">:{server.port}</Badge>
         </div>
 
-        {/* SSE エンドポイント */}
         <div className="flex items-center gap-1 mb-1.5">
           <div className="flex-1 text-xs font-mono text-muted-foreground bg-muted border rounded-lg px-2 py-1 truncate">
             {sse}
@@ -142,7 +135,6 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             size="sm"
             className="h-7 w-7 p-0 shrink-0 text-muted-foreground"
             onClick={() => {
-              // HTTP 環境では navigator.clipboard が使えないため fallback
               const textarea = document.createElement("textarea");
               textarea.value = sse;
               textarea.style.position = "fixed";
@@ -159,7 +151,6 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           </Button>
         </div>
 
-        {/* リポジトリリンク */}
         <div className="text-xs text-muted-foreground">
           <a
             href={server.github_url}
@@ -177,7 +168,6 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
         </div>
       </div>
 
-      {/* フッター */}
       <div className="flex justify-end gap-1 px-3.5 py-2 border-t bg-muted/50">
         <Button
           variant="ghost"
@@ -187,7 +177,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           disabled={loading}
         >
           <RotateCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-          再起動
+          {t("serverCard.restart")}
         </Button>
 
         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -199,22 +189,22 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
               disabled={loading}
             >
               <Trash2 className="h-3 w-3" />
-              削除
+              {t("serverCard.delete")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>サーバーを削除</DialogTitle>
+              <DialogTitle>{t("serverCard.deleteTitle")}</DialogTitle>
               <DialogDescription>
-                「{server.name}」を削除しますか？この操作は取り消せません。
+                {t("serverCard.deleteConfirm", { name: server.name })}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-                キャンセル
+                {t("serverCard.cancel")}
               </Button>
               <Button variant="destructive" onClick={handleDelete}>
-                削除する
+                {t("serverCard.deleteButton")}
               </Button>
             </DialogFooter>
           </DialogContent>

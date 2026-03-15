@@ -1,5 +1,10 @@
 [
   {
+    "sha": "ac97247",
+    "message": "[feat] Add i18n support with JA/EN language switching",
+    "date": "2026-03-15"
+  },
+  {
     "sha": "b3daaa1",
     "message": "[fix] ヘッダーロゴのサイズを本体 UI と統一 (140px幅)",
     "date": "2026-03-15"

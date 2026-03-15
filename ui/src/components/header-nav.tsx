@@ -4,22 +4,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Servers" },
-  { href: "/register", label: "Register" },
-  { href: "/guide", label: "Guide" },
-  { href: "/about", label: "About" },
-  { href: "/release-notes", label: "Release Notes" },
-];
+import { useI18n, type Locale } from "@/i18n";
+import { Globe } from "lucide-react";
 
 export function HeaderNav() {
   const pathname = usePathname();
+  const { locale, setLocale, t } = useI18n();
+
+  const NAV_ITEMS = [
+    { href: "/", label: t("nav.servers") },
+    { href: "/register", label: t("nav.register") },
+    { href: "/guide", label: t("nav.guide") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/release-notes", label: t("nav.releaseNotes") },
+  ];
+
+  const toggleLocale = () => {
+    const next: Locale = locale === "ja" ? "en" : "ja";
+    setLocale(next);
+  };
 
   return (
     <header className="border-b border-border">
       <div className="mx-auto max-w-[1200px] px-6 flex items-center justify-between h-14">
-        {/* ロゴ */}
         <Link href="/" className="shrink-0">
           <Image
             src="/logo.png"
@@ -31,30 +38,42 @@ export function HeaderNav() {
           />
         </Link>
 
-        {/* ナビゲーション */}
-        <nav className="flex items-center gap-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
+        <div className="flex items-center gap-1">
+          <nav className="flex items-center gap-1">
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200",
-                  isActive
-                    ? "text-foreground bg-accent"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200",
+                    isActive
+                      ? "text-foreground bg-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="w-px h-5 bg-border mx-1.5" />
+
+          <button
+            onClick={toggleLocale}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors duration-200"
+            title={locale === "ja" ? "Switch to English" : "日本語に切り替え"}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {locale === "ja" ? "EN" : "JA"}
+          </button>
+        </div>
       </div>
     </header>
   );

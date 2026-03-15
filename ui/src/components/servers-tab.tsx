@@ -7,23 +7,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RefreshCw, Search, Plug, SearchX } from "lucide-react";
+import { useI18n } from "@/i18n";
 
 type FilterValue = "all" | ServerStatus;
 
-const FILTERS: { value: FilterValue; label: string }[] = [
-  { value: "all", label: "すべて" },
-  { value: "running", label: "Running" },
-  { value: "stopped", label: "Stopped" },
-  { value: "error", label: "Error" },
-  { value: "deploying", label: "Deploying" },
-];
-
 export function ServersTab() {
+  const { t } = useI18n();
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterValue>("all");
   const [baseUrl, setBaseUrl] = useState("http://127.0.0.1");
+
+  const FILTERS: { value: FilterValue; label: string }[] = [
+    { value: "all", label: t("servers.filterAll") },
+    { value: "running", label: "Running" },
+    { value: "stopped", label: "Stopped" },
+    { value: "error", label: "Error" },
+    { value: "deploying", label: "Deploying" },
+  ];
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,13 +48,11 @@ export function ServersTab() {
     load();
   }, [load]);
 
-  // 集計
   const total = servers.length;
   const running = servers.filter((s) => s.status === "running").length;
   const stopped = servers.filter((s) => s.status === "stopped").length;
   const deploying = servers.filter((s) => s.status === "deploying").length;
 
-  // フィルタリング
   let filtered = servers;
   if (query) {
     const q = query.toLowerCase();
@@ -69,7 +69,6 @@ export function ServersTab() {
 
   return (
     <div>
-      {/* ステータスバッジ */}
       <div className="flex flex-wrap gap-2 mb-4">
         <Badge variant="outline">{total} servers</Badge>
         <Badge variant="running">
@@ -88,12 +87,11 @@ export function ServersTab() {
         )}
       </div>
 
-      {/* 検索 + 更新 */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="サーバー名・説明で検索..."
+            placeholder={t("servers.searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"
@@ -101,11 +99,10 @@ export function ServersTab() {
         </div>
         <Button variant="outline" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          更新
+          {t("servers.refresh")}
         </Button>
       </div>
 
-      {/* フィルターピル */}
       <div className="flex flex-wrap gap-1.5 mb-6">
         {FILTERS.map((f) => (
           <button
@@ -129,7 +126,6 @@ export function ServersTab() {
         ))}
       </div>
 
-      {/* カードグリッド or 空状態 */}
       {filtered.length === 0 ? (
         <EmptyState hasServers={servers.length > 0} />
       ) : (
@@ -159,15 +155,17 @@ function statusDotColor(status: string): string {
 }
 
 function EmptyState({ hasServers }: { hasServers: boolean }) {
+  const { t } = useI18n();
+
   if (hasServers) {
     return (
       <div className="text-center py-16 px-8 bg-muted border border-dashed rounded-xl">
         <SearchX className="h-9 w-9 text-muted-foreground mx-auto mb-3" />
         <h3 className="text-sm font-semibold text-foreground mb-1">
-          検索結果がありません
+          {t("servers.noResults")}
         </h3>
         <p className="text-xs text-muted-foreground">
-          検索条件を変更してみてください
+          {t("servers.noResultsHint")}
         </p>
       </div>
     );
@@ -176,10 +174,10 @@ function EmptyState({ hasServers }: { hasServers: boolean }) {
     <div className="text-center py-16 px-8 bg-muted border border-dashed rounded-xl">
       <Plug className="h-9 w-9 text-muted-foreground mx-auto mb-3" />
       <h3 className="text-sm font-semibold text-foreground mb-1">
-        サーバーが登録されていません
+        {t("servers.noServers")}
       </h3>
       <p className="text-xs text-muted-foreground">
-        「Register」タブから追加してください
+        {t("servers.noServersHint")}
       </p>
     </div>
   );
