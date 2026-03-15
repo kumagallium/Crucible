@@ -1,5 +1,20 @@
 [
   {
+    "sha": "98db8cf",
+    "message": "[fix] post-commit hook のパスをルート構成に修正 + リリースノート再生成",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "29285b2",
+    "message": "[fix] VPN 前提の記述を削除し localhost ベースに修正",
+    "date": "2026-03-14"
+  },
+  {
+    "sha": "faf0ec9",
+    "message": "[fix] リリースノートを公開リポジトリの履歴に修正",
+    "date": "2026-03-14"
+  },
+  {
     "sha": "db61ef5",
     "message": "[fix] ServerCard Storybook に baseUrl prop を追加",
     "date": "2026-03-14"

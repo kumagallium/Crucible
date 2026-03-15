@@ -13,7 +13,7 @@
 [[ "${CRUCIBLE_POST_COMMIT}" == "1" ]] && exit 0
 export CRUCIBLE_POST_COMMIT=1
 
-SCRIPT="registry/ui/generate_release_notes.py"
+SCRIPT="ui/generate_release_notes.py"
 
 # スクリプトが存在しなければスキップ
 [[ -f "${SCRIPT}" ]] || exit 0
@@ -25,8 +25,8 @@ command -v python3 &>/dev/null || exit 0
 python3 "${SCRIPT}" >/dev/null 2>&1 || exit 0
 
 # 変更があれば amend で現在のコミットに含める
-if ! git diff --quiet registry/ui/public/release_notes.json 2>/dev/null; then
-    git add registry/ui/public/release_notes.json
+if ! git diff --quiet ui/public/release_notes.json 2>/dev/null; then
+    git add ui/public/release_notes.json
     git commit --amend --no-edit >/dev/null 2>&1
 fi
 
