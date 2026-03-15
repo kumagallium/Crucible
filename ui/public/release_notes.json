@@ -1,6 +1,11 @@
 [
   {
-    "sha": "2077a73",
+    "sha": "c263907",
+    "message": "[feat] LP にロゴ適用 + ライトモード化 + デザインガイド準拠",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "b769d08",
     "message": "[feat] README 英語化・日本語版分離 + GitHub Pages LP を作成",
     "date": "2026-03-15"
   },
