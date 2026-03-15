@@ -1,18 +1,29 @@
+[日本語](README.ja.md)
+
 # Crucible
 
-> *Crucible（るつぼ）— 多様な MCP サーバーが一つの場所に集まり、AI エージェントの力へと変わる器。*
+> **Your MCP servers, on your infrastructure, under your control.**
 
-**Crucible** は MCP (Model Context Protocol) サーバーの登録・デプロイ・管理を行うセルフホスト型レジストリです。GitHub リポジトリを登録するだけで、MCP サーバーを自動ビルド・デプロイし、Claude Desktop、Claude Code、Cursor などの MCP クライアントからすぐに利用できます。
+**Crucible** is a self-hosted registry for building, deploying, and managing MCP (Model Context Protocol) servers. Just paste a GitHub repository URL and Crucible automatically builds and deploys it as a running MCP server, ready to connect from Claude Desktop, Claude Code, Cursor, and other MCP clients.
 
-## 特徴
+## Key Features
 
-- **ワンクリックデプロイ** — GitHub URL を入力するだけで Docker ビルド＆起動
-- **stdio / SSE 自動変換** — stdio サーバーも mcp-proxy で自動的に SSE 化
-- **Dify 連携** — デプロイ時に Dify へ自動でツール登録（オプション）
-- **管理 UI** — サーバーの状態確認・再起動・削除をブラウザから操作
-- **セキュア** — Docker Socket Proxy 経由で Docker 操作を最小権限に制限
+- **Build from GitHub URL** — Paste any GitHub repository URL and Crucible automatically builds and deploys it as a running MCP server. No pre-built images or package registry required.
+- **Private repository support** — Works with private GitHub repositories. Your proprietary MCP servers never need to be published to a public registry.
+- **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints via mcp-proxy, so any MCP client can connect remotely.
+- **Management UI** — Monitor status, restart, and remove servers from your browser.
+- **Secure by default** — Docker Socket Proxy limits Docker operations to minimum privileges.
+- **Fully self-hosted** — No external service dependencies. Everything runs on your machine, your network, under your control.
 
-## アーキテクチャ
+## Who is Crucible for?
+
+- **Individual developers** juggling multiple MCP servers across Claude Code, Cursor, and other clients — tired of managing each one manually.
+- **Small teams** that want to share MCP tools internally without relying on external SaaS platforms.
+- **Organizations** that need to keep AI tool access on their own infrastructure for security, compliance, or policy reasons.
+
+> [See detailed use cases and scenarios on our website](https://kumagallium.github.io/Crucible/)
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────┐
@@ -24,7 +35,7 @@
 │                          │          │
 │              ┌───────────▼────────┐ │
 │              │  Socket Proxy      │ │
-│              │  (Docker 操作)     │ │
+│              │  (Docker ops)      │ │
 │              └───────────┬────────┘ │
 │                          │          │
 │  ┌──────┐ ┌──────┐ ┌──────┐       │
@@ -33,90 +44,101 @@
 └─────────────────────────────────────┘
 ```
 
-## クイックスタート
+<!-- TODO: Add demo GIF showing: paste GitHub URL → auto build → deploy → connect from Claude Code via SSE -->
 
-### 前提条件
+## Quick Start
+
+### Prerequisites
 
 - Docker & Docker Compose
 - Git
 
-### セットアップ
+### Setup
 
 ```bash
-# 1. クローン
+# 1. Clone
 git clone https://github.com/kumagallium/Crucible.git
 cd Crucible
 
-# 2. 環境変数を設定
+# 2. Configure environment variables
 cp .env.example .env
 chmod 600 .env
-# .env を編集して必要な値を設定
+# Edit .env and set the required values
 
-# 3. 起動
+# 3. Start
 docker compose up -d
 ```
 
-### アクセス
+### Access
 
 - **UI**: http://127.0.0.1:8081
 - **API**: http://127.0.0.1:8080
 
-## 環境変数
+## Environment Variables
 
-| 変数名 | デフォルト | 説明 |
-|--------|-----------|------|
-| `CRUCIBLE_HOST` | `127.0.0.1` | ポートバインド先 IP |
-| `CRUCIBLE_API_PORT` | `8080` | API 公開ポート |
-| `CRUCIBLE_UI_PORT` | `8081` | UI 公開ポート |
-| `CRUCIBLE_BASE_URL` | `http://127.0.0.1` | MCP サーバーの SSE ベース URL |
-| `CRUCIBLE_CORS_ORIGINS` | *(localhost)* | CORS 許可オリジン（カンマ区切り） |
-| `REGISTRY_API_KEY` | *(なし)* | API 認証キー |
-| `DIFY_EMAIL` | *(なし)* | Dify 自動登録用メール |
-| `DIFY_PASSWORD` | *(なし)* | Dify 自動登録用パスワード |
-| `TOKEN_ENCRYPTION_KEY` | *(なし)* | GitHub Token 暗号化キー |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CRUCIBLE_HOST` | `127.0.0.1` | IP address to bind ports to |
+| `CRUCIBLE_API_PORT` | `8080` | API port |
+| `CRUCIBLE_UI_PORT` | `8081` | UI port |
+| `CRUCIBLE_BASE_URL` | `http://127.0.0.1` | Base URL for MCP server SSE endpoints |
+| `CRUCIBLE_CORS_ORIGINS` | *(localhost)* | Allowed CORS origins (comma-separated) |
+| `REGISTRY_API_KEY` | *(none)* | API authentication key |
+| `TOKEN_ENCRYPTION_KEY` | *(none)* | Encryption key for GitHub tokens |
 
-詳細は [.env.example](.env.example) を参照してください。
+See [.env.example](.env.example) for details.
 
-## リモートアクセス（オプション）
+## Remote Access (Optional)
 
-別のマシンから Crucible にアクセスしたい場合は、環境変数でバインド先 IP を変更してください。
+To access Crucible from another machine, update the bind address in your environment variables:
 
 ```env
-# 例: VPN 経由でアクセスする場合
+# Example: access via VPN
 CRUCIBLE_HOST=10.0.0.1
 CRUCIBLE_BASE_URL=http://10.0.0.1
 CRUCIBLE_CORS_ORIGINS=http://10.0.0.1:8081,http://localhost:8081
 ```
 
-ローカルで利用する場合（デフォルト）は設定不要です。
+No configuration is needed for local-only use (default).
 
-## MCP クライアントからの接続
+## Connecting from MCP Clients
 
-Crucible にデプロイした MCP サーバーは SSE エンドポイント経由で接続できます。
+MCP servers deployed on Crucible are accessible via SSE endpoints.
 
 ### Claude Code
 
 ```bash
-claude mcp add --transport sse <サーバー名> http://<host>:<port>/sse
+claude mcp add --transport sse <server-name> http://<host>:<port>/sse
 ```
 
 ### Cursor / Windsurf
 
-設定画面から SSE URL を追加するだけで接続できます。
+Add the SSE URL from the settings screen.
 
 ### Claude Desktop
 
-Claude Desktop は SSE に直接対応していないため、[mcp-remote](https://www.npmjs.com/package/mcp-remote) を使って stdio-SSE 変換を行います。詳しくは UI の **Guide** タブを参照してください。
+Claude Desktop does not natively support SSE. Use [mcp-remote](https://www.npmjs.com/package/mcp-remote) for stdio-to-SSE bridging. See the **Guide** tab in the UI for details.
 
-## 技術スタック
+## Integrations (Optional)
 
-| 要素 | 技術 |
-|------|------|
+### Dify
+
+Crucible can automatically register deployed MCP servers as tools in Dify.
+Set `DIFY_EMAIL` and `DIFY_PASSWORD` in your `.env` to enable.
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
 | API | Python / FastAPI |
 | UI | TypeScript / Next.js / shadcn/ui |
-| コンテナ管理 | Docker / Docker Socket Proxy |
+| Container management | Docker / Docker Socket Proxy |
 | MCP SDK | `@modelcontextprotocol/sdk` / `mcp` (Python) |
 
-## ライセンス
+## Documentation & Website
+
+- [Website (detailed use cases)](https://kumagallium.github.io/Crucible/)
+
+## License
 
 [MIT License](LICENSE)

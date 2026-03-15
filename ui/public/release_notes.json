@@ -1,6 +1,11 @@
 [
   {
-    "sha": "70e568f",
+    "sha": "2077a73",
+    "message": "[feat] README 英語化・日本語版分離 + GitHub Pages LP を作成",
+    "date": "2026-03-15"
+  },
+  {
+    "sha": "ce7e785",
     "message": "[chore] .gitignore に .claude を追加",
     "date": "2026-03-15"
   },
