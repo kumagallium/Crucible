@@ -413,10 +413,11 @@ def _health_check(name: str, port: int, log: LogFn) -> None:
             continue
 
         # HTTP 応答を確認（/mcp または /sse に接続を試行）
+        # CRUCIBLE_HOST にバインドされているため localhost ではなく CRUCIBLE_HOST を使用
         # 404 でもサーバーが応答していれば OK
         for path in ("/mcp", "/sse"):
             try:
-                resp = req_lib.get(f"http://localhost:{port}{path}", timeout=2)
+                resp = req_lib.get(f"http://{CRUCIBLE_HOST}:{port}{path}", timeout=2)
                 log(f"  ヘルスチェック OK — HTTP 応答確認 ({path} → {resp.status_code}) ({i}/{HEALTH_CHECK_RETRIES})")
                 return
             except req_lib.exceptions.Timeout:
