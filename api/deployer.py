@@ -474,14 +474,16 @@ def _register_dify(
 
     # エンドポイント URL の決定: トランスポート自動検出
     # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後
-    # ※ ヘルスチェックで HTTP 応答を確認済みなので、ここでは応答待ち不要
-    base_url = f"http://{static_ip}:8000"
-    server_url = f"{base_url}/sse"  # デフォルトは SSE
+    # ヘルスチェック同様、CRUCIBLE_HOST:port でプローブし、
+    # Dify 登録用の URL は static_ip:8000 で構築する
+    dify_base_url = f"http://{static_ip}:8000"
+    probe_base_url = f"http://{CRUCIBLE_HOST}:{port}"
+    server_url = f"{dify_base_url}/sse"  # デフォルトは SSE
     try:
         # /mcp を確認（Streamable HTTP: 即座にレスポンスが返る）
-        mcp_resp = req_lib.get(f"{base_url}/mcp", timeout=3)
+        mcp_resp = req_lib.get(f"{probe_base_url}/mcp", timeout=3)
         if mcp_resp.status_code != 404:
-            server_url = f"{base_url}/mcp"
+            server_url = f"{dify_base_url}/mcp"
             log(f"  トランスポート: Streamable HTTP (/mcp)")
         else:
             log(f"  トランスポート: SSE (/sse)")
