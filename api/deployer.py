@@ -225,9 +225,12 @@ def _strip_mount_options(dockerfile: Path, log: LogFn) -> None:
 
 
 def _detect_transport(src_dir: Path, transport: str) -> str:
-    """MCP サーバーのトランスポートを検出する。
+    """MCP サーバーのトランスポート種別を検出する。
 
-    auto の場合: Dockerfile に EXPOSE があれば SSE、なければ stdio と判定。
+    auto の場合: Dockerfile に EXPOSE があれば HTTP ベース（SSE or Streamable HTTP）、
+    なければ stdio と判定する。
+    ここでは "sse" を返すが、実際のエンドポイントパス（/sse vs /mcp）は
+    Dify 登録時の HTTP プローブで自動検出される。
     """
     if transport != "auto":
         return transport
