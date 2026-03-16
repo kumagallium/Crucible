@@ -464,27 +464,28 @@ def _register_dify(
         return False
 
     # エンドポイント URL の決定: トランスポート自動検出
-    # SSE (/sse) → Streamable HTTP (/mcp) の順でチェック
+    # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後
     base_url = f"http://{static_ip}:8000"
     server_url = f"{base_url}/sse"  # デフォルトは SSE
+
+    # サーバー HTTP 応答待ち（コンテナ起動直後はまだ準備中の場合がある）
+    for _retry in range(5):
+        try:
+            req_lib.get(f"{base_url}/mcp", timeout=2)
+            break  # 何かレスポンスが返れば OK（404 でも）
+        except Exception:
+            time.sleep(1)
+
     try:
-        # /sse を確認（タイムアウト=SSEストリーム接続中で正常の可能性あり）
-        sse_resp = req_lib.get(f"{base_url}/sse", timeout=3)
-        if sse_resp.status_code == 404:
-            # /mcp を確認
-            mcp_resp = req_lib.get(f"{base_url}/mcp", timeout=3)
-            if mcp_resp.status_code != 404:
-                server_url = f"{base_url}/mcp"
-                log(f"  トランスポート: Streamable HTTP (/mcp)")
-            else:
-                log(f"  トランスポート: SSE (/sse) — フォールバック")
+        # /mcp を確認（Streamable HTTP: 即座にレスポンスが返る）
+        mcp_resp = req_lib.get(f"{base_url}/mcp", timeout=3)
+        if mcp_resp.status_code != 404:
+            server_url = f"{base_url}/mcp"
+            log(f"  トランスポート: Streamable HTTP (/mcp)")
         else:
             log(f"  トランスポート: SSE (/sse)")
-    except req_lib.exceptions.Timeout:
-        # タイムアウト = SSE ストリーム接続中（正常）
-        log(f"  トランスポート: SSE (/sse)")
     except Exception:
-        # 接続エラー時は /sse をデフォルトで使用
+        # /mcp に接続できない場合は /sse をデフォルトで使用
         log(f"  トランスポート: SSE (/sse) — フォールバック")
 
     # MCP ツールプロバイダーとして登録
