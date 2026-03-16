@@ -3,5 +3,5 @@
 以下のテキストを awesome-mcp-servers への PR 時に使用する。
 
 ```
-kumagallium/Crucible 🐍 🏠 - Self-hosted MCP server registry that auto-builds and deploys MCP servers from GitHub URLs with automatic stdio-to-SSE conversion. Sovereign-first: runs entirely on your own infrastructure.
+kumagallium/Crucible 🐍 🏠 - Self-hosted sandbox for MCP server development. Paste a GitHub URL (including private repos) to auto-build, deploy, and expose as an SSE endpoint.
 ```
