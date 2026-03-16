@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crucible — MCP サーバー開発のためのセルフホスト型サンドボックス</title>
-  <meta name="description" content="GitHub URL を貼るだけで MCP サーバーを自動ビルド・デプロイ・テスト。プライベートリポジトリ対応。">
+  <title>Crucible — MCP サーバーのためのセルフホスト型デプロイメントプラットフォーム</title>
+  <meta name="description" content="GitHub URL を貼るだけで MCP サーバーを自動ビルド・デプロイ・接続。プライベートリポジトリ対応。">
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -26,9 +26,9 @@
   <!-- Hero -->
   <section class="hero">
     <img src="../logo.png" alt="Crucible" class="hero-logo">
-    <p class="tagline">MCP サーバーの開発・実験のためのサンドボックス。</p>
+    <p class="tagline">MCP サーバーのためのセルフホスト型デプロイメントプラットフォーム。</p>
     <p class="description">
-      GitHub URL を貼るだけ。ビルド、デプロイ、実験 — すべてを一箇所で。
+      GitHub URL を貼るだけ。ビルド、デプロイ、接続 — 数分で完了。
     </p>
     <div class="hero-buttons">
       <a href="#quickstart" class="btn btn-primary">はじめる</a>
@@ -40,14 +40,14 @@
   <section class="section" id="about">
     <h2 class="section-title">Crucible とは？</h2>
     <p class="about-text">
-      Crucible は MCP サーバー開発のためのセルフホスト型サンドボックスです。
-      GitHub リポジトリの URL を貼るだけで — プライベートリポジトリにも対応 —
-      自動でビルド・デプロイし、SSE エンドポイントとして公開します。
+      Crucible は GitHub リポジトリから MCP サーバーを直接ビルド・デプロイする
+      セルフホスト型プラットフォームです。プライベートリポジトリにも対応。
+      URL を貼るだけで自動ビルド・デプロイし、SSE エンドポイントとして公開します。
     </p>
     <br>
     <p class="about-text">
       npm や Docker Hub への公開は不要。
-      試して、壊して、やり直す — すべてを一つのダッシュボードから。
+      チームの共有インフラとしても、個人の実験用サンドボックスとしても。
       あなたのインフラで、あなたの管理下に。
     </p>
   </section>
@@ -166,7 +166,7 @@
       <div class="feature-card">
         <div class="feature-icon">&#128421;</div>
         <h3>管理 UI</h3>
-        <p>実験中のサーバーをダッシュボードで一覧管理。起動・停止・削除でサンドボックスを整理。</p>
+        <p>デプロイ済みサーバーをダッシュボードで一覧管理。起動・停止・削除で環境を整理。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128737;</div>

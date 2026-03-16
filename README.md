@@ -2,10 +2,10 @@
 
 # Crucible
 
-> **The sandbox for building and testing MCP servers.**
-> Paste a GitHub URL. Build, deploy, experiment — all in one place.
+> **The self-hosted deployment platform for MCP servers.**
+> Paste a GitHub URL — build, deploy, and connect in minutes.
 
-**Crucible** is a self-hosted sandbox for MCP server development. Paste a GitHub repository URL — including private repos — and Crucible automatically builds, deploys, and exposes it as an SSE endpoint. No need to publish to npm or Docker Hub first. Try it, break it, iterate — all from a single dashboard.
+**Crucible** is a self-hosted platform that builds and deploys MCP servers directly from GitHub repositories — including private repos. Paste a URL and Crucible automatically builds, deploys, and exposes it as an SSE endpoint. No need to publish to npm or Docker Hub first. Use it as your team's shared infrastructure or as a personal sandbox to iterate fast.
 
 ## Key Features
 
@@ -13,13 +13,13 @@
 - **Private repository support** — Works with private GitHub repositories. Develop your MCP servers behind closed doors and deploy them without ever making them public.
 - **Instant iteration** — Made a change? Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
 - **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints, so you can test them from any MCP client, local or remote.
-- **Management UI** — See all your experimental servers in one dashboard. Start, stop, remove — keep your sandbox clean.
+- **Management UI** — See all your servers in one dashboard. Start, stop, remove — keep your environment clean.
 - **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges. Nothing leaves your network.
 
 ## Who is Crucible for?
 
-- **MCP server developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first.
-- **Research teams and organizations** encouraging members to build domain-specific MCP servers — Crucible gives everyone a shared sandbox to deploy and experiment.
+- **MCP server developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first. Use Crucible as your sandbox to iterate fast.
+- **Research teams and organizations** encouraging members to build domain-specific MCP servers — Crucible gives everyone a shared platform to deploy and experiment.
 - **Anyone exploring GitHub** for MCP servers that aren't on npm or Docker Hub yet — just paste the URL and try it.
 
 > [See detailed use cases and scenarios on our website](https://kumagallium.github.io/Crucible/)
