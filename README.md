@@ -2,24 +2,25 @@
 
 # Crucible
 
-> **Your MCP servers, on your infrastructure, under your control.**
+> **The sandbox for building and testing MCP servers.**
+> Paste a GitHub URL. Build, deploy, experiment — all in one place.
 
-**Crucible** is a self-hosted registry for building, deploying, and managing MCP (Model Context Protocol) servers. Just paste a GitHub repository URL and Crucible automatically builds and deploys it as a running MCP server, ready to connect from Claude Desktop, Claude Code, Cursor, and other MCP clients.
+**Crucible** is a self-hosted sandbox for MCP server development. Paste a GitHub repository URL — including private repos — and Crucible automatically builds, deploys, and exposes it as an SSE endpoint. No need to publish to npm or Docker Hub first. Try it, break it, iterate — all from a single dashboard.
 
 ## Key Features
 
-- **Build from GitHub URL** — Paste any GitHub repository URL and Crucible automatically builds and deploys it as a running MCP server. No pre-built images or package registry required.
-- **Private repository support** — Works with private GitHub repositories. Your proprietary MCP servers never need to be published to a public registry.
-- **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints via mcp-proxy, so any MCP client can connect remotely.
-- **Management UI** — Monitor status, restart, and remove servers from your browser.
-- **Secure by default** — Docker Socket Proxy limits Docker operations to minimum privileges.
-- **Fully self-hosted** — No external service dependencies. Everything runs on your machine, your network, under your control.
+- **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys it automatically. Skip the publish-to-npm step and go straight from source to running server.
+- **Private repository support** — Works with private GitHub repositories. Develop your MCP servers behind closed doors and deploy them without ever making them public.
+- **Instant iteration** — Made a change? Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
+- **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints, so you can test them from any MCP client, local or remote.
+- **Management UI** — See all your experimental servers in one dashboard. Start, stop, remove — keep your sandbox clean.
+- **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges. Nothing leaves your network.
 
 ## Who is Crucible for?
 
-- **Individual developers** juggling multiple MCP servers across Claude Code, Cursor, and other clients — tired of managing each one manually.
-- **Small teams** that want to share MCP tools internally without relying on external SaaS platforms.
-- **Organizations** that need to keep AI tool access on their own infrastructure for security, compliance, or policy reasons.
+- **MCP server developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first.
+- **Research teams and organizations** encouraging members to build domain-specific MCP servers — Crucible gives everyone a shared sandbox to deploy and experiment.
+- **Anyone exploring GitHub** for MCP servers that aren't on npm or Docker Hub yet — just paste the URL and try it.
 
 > [See detailed use cases and scenarios on our website](https://kumagallium.github.io/Crucible/)
 

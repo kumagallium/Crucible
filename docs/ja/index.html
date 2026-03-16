@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crucible — セルフホスト型 MCP サーバーレジストリ</title>
-  <meta name="description" content="GitHub URL から MCP サーバーをビルド・デプロイ・管理。あなたのインフラで、あなたの管理下に。">
+  <title>Crucible — MCP サーバー開発のためのセルフホスト型サンドボックス</title>
+  <meta name="description" content="GitHub URL を貼るだけで MCP サーバーを自動ビルド・デプロイ・テスト。プライベートリポジトリ対応。">
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -26,10 +26,9 @@
   <!-- Hero -->
   <section class="hero">
     <img src="../logo.png" alt="Crucible" class="hero-logo">
-    <p class="tagline">あなたの MCP サーバーを、あなたのインフラで、あなたの管理下に。</p>
+    <p class="tagline">MCP サーバーの開発・実験のためのサンドボックス。</p>
     <p class="description">
-      MCP サーバーのビルド・デプロイ・管理を一箇所で行う、
-      セルフホスト型レジストリ。
+      GitHub URL を貼るだけ。ビルド、デプロイ、実験 — すべてを一箇所で。
     </p>
     <div class="hero-buttons">
       <a href="#quickstart" class="btn btn-primary">はじめる</a>
@@ -41,14 +40,15 @@
   <section class="section" id="about">
     <h2 class="section-title">Crucible とは？</h2>
     <p class="about-text">
-      MCP サーバーは AI アシスタントに外部ツールを使う力を与えます。しかし、その管理は大変です。
-      サーバーごとにビルド・設定・起動を行い、クライアントやマシンごとに個別管理が必要です。
+      Crucible は MCP サーバー開発のためのセルフホスト型サンドボックスです。
+      GitHub リポジトリの URL を貼るだけで — プライベートリポジトリにも対応 —
+      自動でビルド・デプロイし、SSE エンドポイントとして公開します。
     </p>
     <br>
     <p class="about-text">
-      Crucible はこの問題を解決します。GitHub URL を貼るだけで、サーバーを自動ビルド・デプロイし、
-      SSE エンドポイントとして公開。すべてを一つの管理画面で操作できます。
-      外部 SaaS は不要 — すべてあなたのインフラ上で完結します。
+      npm や Docker Hub への公開は不要。
+      試して、壊して、やり直す — すべてを一つのダッシュボードから。
+      あなたのインフラで、あなたの管理下に。
     </p>
   </section>
 
@@ -63,24 +63,24 @@
 
       <!-- シナリオ 1 -->
       <div class="scenario">
-        <div class="scenario-header">個人開発者 — MCP サーバーの管理疲れ</div>
+        <div class="scenario-header">MCP サーバー開発者 — コードから動作確認までが遠い</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>Claude Code、Cursor、Windsurf など複数のクライアントで MCP サーバーを使っている</li>
-              <li>サーバーごとに手動でビルド、起動、設定ファイルを書いている</li>
-              <li>新しい MCP サーバーを GitHub で見つけても「試すの面倒だな」でスルーしてしまう</li>
-              <li>stdio のサーバーをリモートから使いたいが、mcp-proxy の設定が面倒</li>
+              <li>MCP サーバーのコードを書いた</li>
+              <li>動作確認するには、ローカルでビルドして、設定ファイルを書いて、クライアントに繋いで…</li>
+              <li>ちょっとした修正のたびにこのサイクルを繰り返す</li>
+              <li>他の人に試してもらうには npm や PyPI に公開する必要がある</li>
             </ul>
           </div>
           <div class="scenario-after">
             <div class="scenario-label">After</div>
             <ul>
-              <li>GitHub URL を貼るだけ。ビルド・デプロイ・SSE エンドポイント公開まで自動</li>
-              <li>全サーバーを 1 つの管理画面で確認・再起動・削除</li>
-              <li>stdio サーバーも自動で SSE 化されるのでリモートからすぐ使える</li>
-              <li>「気になったら URL を貼って試す」ができるようになる</li>
+              <li>GitHub に push したら、Crucible で URL を貼るだけ</li>
+              <li>ビルド → デプロイ → SSE エンドポイント公開まで自動</li>
+              <li>修正したら再デプロイするだけ。フィードバックループが最短になる</li>
+              <li>パッケージ公開前でも、チームメンバーは SSE URL で即座に試せる</li>
             </ul>
           </div>
         </div>
@@ -88,24 +88,24 @@
 
       <!-- シナリオ 2 -->
       <div class="scenario">
-        <div class="scenario-header">小規模チーム — MCP ツールの社内共有</div>
+        <div class="scenario-header">プロジェクトリーダー — メンバーに MCP サーバーを作ってもらいたい</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>チーム内で「この MCP サーバー便利だよ」と共有しても、各自がローカルでセットアップしないといけない</li>
-              <li>人によって環境が違い、「動かない」が頻発する</li>
-              <li>同じサーバーを全員が個別に起動するのは無駄</li>
-              <li>SaaS 型の MCP ホスティングは社内ポリシー的に使えない</li>
+              <li>プロジェクトの各メンバーに専門領域の MCP サーバーを開発してもらいたい</li>
+              <li>でも MCP サーバーの開発からデプロイまでの手順が人によってバラバラ</li>
+              <li>「作ったけどどうやって共有すればいいの？」で止まる人が出る</li>
+              <li>各自のローカル環境に閉じてしまい、他の人が試せない</li>
             </ul>
           </div>
           <div class="scenario-after">
             <div class="scenario-label">After</div>
             <ul>
-              <li>チーム共有のサーバーに Crucible をデプロイ</li>
-              <li>1 人がサーバーを登録すれば、他のメンバーは SSE URL を追加するだけで使える</li>
-              <li>環境差異の問題がなくなる（Docker で統一）</li>
-              <li>外部 SaaS 不要。VPN 内で完結</li>
+              <li>Crucible をプロジェクトの共有サーバーにデプロイ</li>
+              <li>メンバーは GitHub にコードを push して、URL を Crucible に登録するだけ</li>
+              <li>全員の MCP サーバーが一箇所に集まり、誰でも試せる状態になる</li>
+              <li>まさに「るつぼ」— 多様な MCP サーバーが混ざり合い、新しい可能性が生まれる場</li>
             </ul>
           </div>
         </div>
@@ -113,24 +113,23 @@
 
       <!-- シナリオ 3 -->
       <div class="scenario">
-        <div class="scenario-header">セキュリティ重視の組織 — AI ツールアクセスの主権</div>
+        <div class="scenario-header">GitHub で見つけた MCP サーバーを試したい人</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>MCP サーバーを外部 SaaS に置くと、ツール呼び出しのデータが外部を経由する</li>
-              <li>どのサーバーが何にアクセスしているか把握しづらい</li>
-              <li>情報セキュリティポリシー上、外部ホスティングの承認プロセスが重い</li>
-              <li>かといって自前で管理するインフラ構築コストも高い</li>
+              <li>GitHub で面白そうな MCP サーバーを見つけた</li>
+              <li>でも npm にも PyPI にも Docker Hub にも公開されていない</li>
+              <li>README を読んでビルド手順を調べて、依存関係を入れて…</li>
+              <li>「面倒だからいいや」でスルーしてしまう</li>
             </ul>
           </div>
           <div class="scenario-after">
             <div class="scenario-label">After</div>
             <ul>
-              <li>全て自組織のインフラ上で動作。データが外部に出ない</li>
-              <li>Docker Socket Proxy で Docker 操作を最小権限に制限</li>
-              <li>管理 UI でサーバーの状態を一覧把握</li>
-              <li><code>docker compose up -d</code> で構築完了。専用インフラ不要</li>
+              <li>GitHub URL を Crucible に貼るだけ</li>
+              <li>ビルドからデプロイまで自動。数分で動作確認できる</li>
+              <li>合わなければ削除するだけ。試すコストがほぼゼロ</li>
             </ul>
           </div>
         </div>
@@ -147,32 +146,32 @@
       <div class="feature-card">
         <div class="feature-icon">&#128279;</div>
         <h3>GitHub URL からビルド</h3>
-        <p>リポジトリ URL を貼るだけで自動ビルド＆デプロイ。ビルド済みイメージは不要。</p>
+        <p>リポジトリ URL を貼るだけで自動ビルド＆デプロイ。npm への公開ステップを飛ばして、ソースから直接サーバーを起動。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128274;</div>
         <h3>プライベートリポジトリ対応</h3>
-        <p>プライベート GitHub リポジトリにも対応。独自の MCP サーバーを公開する必要なし。</p>
+        <p>プライベート GitHub リポジトリに対応。非公開のまま MCP サーバーを開発・デプロイ可能。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128260;</div>
+        <h3>即座にイテレーション</h3>
+        <p>コードを修正したら GitHub に push して再デプロイするだけ。フィードバックループが最短に。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128259;</div>
         <h3>stdio → SSE 自動変換</h3>
-        <p>stdio サーバーも mcp-proxy で自動的に SSE エンドポイントとして公開。</p>
+        <p>stdio サーバーも自動的に SSE エンドポイントとして公開。ローカルでもリモートでもテスト可能。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128421;</div>
         <h3>管理 UI</h3>
-        <p>サーバーの状態確認・再起動・削除をブラウザから操作。</p>
+        <p>実験中のサーバーをダッシュボードで一覧管理。起動・停止・削除でサンドボックスを整理。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128737;</div>
-        <h3>セキュア設計</h3>
-        <p>Docker Socket Proxy で Docker 操作を最小権限に制限。</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&#127968;</div>
-        <h3>完全セルフホスト</h3>
-        <p>外部依存なし。すべてあなたのマシン、あなたのネットワーク内で完結。</p>
+        <h3>セキュア＆セルフホスト</h3>
+        <p>すべてあなたのインフラ上で動作。Docker Socket Proxy で最小権限に制限。データが外部に出ない。</p>
       </div>
     </div>
   </section>
@@ -184,18 +183,23 @@
     <div class="steps">
       <div class="step">
         <div class="step-number">1</div>
-        <h3>GitHub URL を入力</h3>
-        <p>MCP サーバーのリポジトリ URL を入力。パブリック・プライベート両対応。</p>
+        <h3>GitHub に push</h3>
+        <p>あなたの MCP サーバーリポジトリ — パブリック・プライベート両対応。</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
-        <h3>自動ビルド＆デプロイ</h3>
-        <p>Docker コンテナをビルドし、SSE エンドポイント付きでサーバーを起動。</p>
+        <h3>Crucible に URL を貼る</h3>
+        <p>プライベートリポジトリも GitHub トークンで対応。</p>
       </div>
       <div class="step">
         <div class="step-number">3</div>
-        <h3>MCP クライアントから接続</h3>
-        <p>Claude Code、Cursor など、お好みの MCP クライアントから SSE URL で接続。</p>
+        <h3>自動ビルド＆デプロイ</h3>
+        <p>Docker コンテナ + SSE エンドポイントが自動で立ち上がる。</p>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <h3>接続＆テスト</h3>
+        <p>あらゆる MCP クライアントから接続。修正したら再デプロイするだけ。</p>
       </div>
     </div>
   </section>
