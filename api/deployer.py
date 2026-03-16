@@ -185,6 +185,28 @@ def _clone_repo(req: RegisterRequest, dest: Path, log: LogFn, stored_token_enc: 
     )
 
 
+def _patch_fastmcp_enabled(src_dir: Path, log: LogFn) -> None:
+    """FastMCP 3.x 互換パッチ: @mcp.tool(enabled=...) を除去する。
+
+    FastMCP 3.x では @mcp.tool() / @mcp.prompt() の enabled パラメータが
+    廃止されたため、ビルド前にソースコードから自動除去する。
+    """
+    patched_files = []
+    for py_file in src_dir.rglob("*.py"):
+        original = py_file.read_text(encoding="utf-8")
+        # enabled=True/False を除去（前後のカンマ・スペースも処理）
+        modified = re.sub(r",?\s*enabled\s*=\s*(True|False)\s*,?", lambda m: ", " if m.group(0).startswith(",") and m.group(0).rstrip().endswith(",") else "", original)
+        # 括弧直後の不要なスペース・カンマを整理: (  name= → (name=
+        modified = re.sub(r"\(\s+", "(", modified)
+        # 末尾カンマ + 閉じ括弧を整理: , ) → )
+        modified = re.sub(r",\s*\)", ")", modified)
+        if modified != original:
+            py_file.write_text(modified, encoding="utf-8")
+            patched_files.append(py_file.name)
+    if patched_files:
+        log(f"  FastMCP 互換パッチ適用: enabled= を除去 ({', '.join(patched_files)})")
+
+
 def _strip_mount_options(dockerfile: Path, log: LogFn) -> None:
     """Dockerfile から BuildKit 専用の --mount オプションを除去する。
 
@@ -298,6 +320,9 @@ def _build_image(
     サブディレクトリ指定時はリポジトリルートをコンテキストにして Dockerfile を指定する
     (デファクトスタンダード: modelcontextprotocol/servers 等の COPY src/xxx /app 形式)。
     """
+    # FastMCP 3.x 互換: enabled= パラメータを除去
+    _patch_fastmcp_enabled(src_dir, log)
+
     # socket-proxy 環境では BuildKit（gRPC）が使えないため、レガシービルダーを使用
     # Dockerfile 内の --mount オプション（BuildKit 専用）を除去して互換性を確保
     dockerfile = src_dir / "Dockerfile"
