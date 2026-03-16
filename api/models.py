@@ -100,6 +100,9 @@ class ServerRecord(BaseModel):
     )
     error_message: Optional[str] = None
     dify_registered: bool = False
+    endpoint_path: str = Field(
+        "/sse", description="MCP エンドポイントパス (/sse or /mcp)"
+    )
     github_token_enc: str = Field(
         "", description="暗号化済み GitHub Token (AES-256-GCM + base64url)"
     )

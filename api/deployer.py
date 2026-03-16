@@ -439,11 +439,18 @@ def _register_dify(
     name: str, static_ip: str, port: int,
     icon: str, display_name: str,
     log: LogFn,
-) -> bool:
-    """Dify に MCP ツールプロバイダーとして登録する。"""
+) -> tuple[bool, str]:
+    """Dify に MCP ツールプロバイダーとして登録する。
+
+    Returns:
+        (dify_ok, endpoint_path): 登録成功フラグと検出されたエンドポイントパス
+    """
+    # デフォルトのエンドポイントパス
+    detected_path = "/sse"
+
     if not (DIFY_EMAIL and DIFY_PASSWORD):
         log("DIFY_EMAIL / DIFY_PASSWORD が未設定のため Dify 登録をスキップします")
-        return False
+        return False, detected_path
 
     import http.client
     import json as _json
@@ -484,6 +491,7 @@ def _register_dify(
         mcp_resp = req_lib.get(f"{probe_base_url}/mcp", timeout=3)
         if mcp_resp.status_code != 404:
             server_url = f"{dify_base_url}/mcp"
+            detected_path = "/mcp"
             log(f"  トランスポート: Streamable HTTP (/mcp)")
         else:
             log(f"  トランスポート: SSE (/sse)")
@@ -530,12 +538,12 @@ def _register_dify(
 
         if resp.status >= 400:
             log(f"Dify 登録失敗 (手動で登録してください — URL: {server_url}): HTTP {resp.status} {resp_body}")
-            return False
+            return False, detected_path
         log(f"Dify 登録完了: {name} ({server_url})")
-        return True
+        return True, detected_path
     except Exception as e:
         log(f"Dify 登録失敗 (手動で登録してください — URL: {server_url}): {e}")
-        return False
+        return False, detected_path
 
 
 def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
@@ -649,7 +657,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
 
         # Dify 登録
         _step(7, TOTAL, "Dify への登録...", log)
-        dify_ok = _register_dify(
+        dify_ok, endpoint_path = _register_dify(
             req.name, static_ip, port, req.icon, req.display_name, log
         )
 
@@ -678,6 +686,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         static_ip=static_ip,
         status="running",
         dify_registered=dify_ok,
+        endpoint_path=endpoint_path,
         error_message=None,
         github_token_enc=token_enc,
     )
