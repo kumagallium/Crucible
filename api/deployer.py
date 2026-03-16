@@ -144,8 +144,8 @@ def _generate_mcp_json(
         "version": "0.1.0",
         "author": "user",
         "port": port,
-        "transport": "sse",
-        "health_check": "/sse",
+        "transport": "auto",
+        "health_check": "/mcp",
         "dify": {
             "auto_register": req.dify_auto_register,
             "label": req.display_name,
@@ -183,6 +183,28 @@ def _clone_repo(req: RegisterRequest, dest: Path, log: LogFn, stored_token_enc: 
         log,
         env=env,
     )
+
+
+def _patch_fastmcp_enabled(src_dir: Path, log: LogFn) -> None:
+    """FastMCP 3.x 互換パッチ: @mcp.tool(enabled=...) を除去する。
+
+    FastMCP 3.x では @mcp.tool() / @mcp.prompt() の enabled パラメータが
+    廃止されたため、ビルド前にソースコードから自動除去する。
+    """
+    patched_files = []
+    for py_file in src_dir.rglob("*.py"):
+        original = py_file.read_text(encoding="utf-8")
+        # enabled=True/False を除去（前後のカンマ・スペースも処理）
+        modified = re.sub(r",?\s*enabled\s*=\s*(True|False)\s*,?", lambda m: ", " if m.group(0).startswith(",") and m.group(0).rstrip().endswith(",") else "", original)
+        # 括弧直後の不要なスペース・カンマを整理: (  name= → (name=
+        modified = re.sub(r"\(\s+", "(", modified)
+        # 末尾カンマ + 閉じ括弧を整理: , ) → )
+        modified = re.sub(r",\s*\)", ")", modified)
+        if modified != original:
+            py_file.write_text(modified, encoding="utf-8")
+            patched_files.append(py_file.name)
+    if patched_files:
+        log(f"  FastMCP 互換パッチ適用: enabled= を除去 ({', '.join(patched_files)})")
 
 
 def _strip_mount_options(dockerfile: Path, log: LogFn) -> None:
@@ -298,6 +320,9 @@ def _build_image(
     サブディレクトリ指定時はリポジトリルートをコンテキストにして Dockerfile を指定する
     (デファクトスタンダード: modelcontextprotocol/servers 等の COPY src/xxx /app 形式)。
     """
+    # FastMCP 3.x 互換: enabled= パラメータを除去
+    _patch_fastmcp_enabled(src_dir, log)
+
     # socket-proxy 環境では BuildKit（gRPC）が使えないため、レガシービルダーを使用
     # Dockerfile 内の --mount オプション（BuildKit 専用）を除去して互換性を確保
     dockerfile = src_dir / "Dockerfile"
@@ -438,8 +463,29 @@ def _register_dify(
         log("Dify ログイン失敗: access_token クッキーが見つかりません")
         return False
 
-    # SSE URL 決定: 固定 IP を使用
-    sse_url = f"http://{static_ip}:8000/sse"
+    # エンドポイント URL の決定: トランスポート自動検出
+    # SSE (/sse) → Streamable HTTP (/mcp) の順でチェック
+    base_url = f"http://{static_ip}:8000"
+    server_url = f"{base_url}/sse"  # デフォルトは SSE
+    try:
+        # /sse を確認（タイムアウト=SSEストリーム接続中で正常の可能性あり）
+        sse_resp = req_lib.get(f"{base_url}/sse", timeout=3)
+        if sse_resp.status_code == 404:
+            # /mcp を確認
+            mcp_resp = req_lib.get(f"{base_url}/mcp", timeout=3)
+            if mcp_resp.status_code != 404:
+                server_url = f"{base_url}/mcp"
+                log(f"  トランスポート: Streamable HTTP (/mcp)")
+            else:
+                log(f"  トランスポート: SSE (/sse) — フォールバック")
+        else:
+            log(f"  トランスポート: SSE (/sse)")
+    except req_lib.exceptions.Timeout:
+        # タイムアウト = SSE ストリーム接続中（正常）
+        log(f"  トランスポート: SSE (/sse)")
+    except Exception:
+        # 接続エラー時は /sse をデフォルトで使用
+        log(f"  トランスポート: SSE (/sse) — フォールバック")
 
     # MCP ツールプロバイダーとして登録
     # http.client を使用: requests の DefaultCookiePolicy (シングルラベルホスト名の
@@ -447,7 +493,7 @@ def _register_dify(
     try:
         parsed   = urllib.parse.urlparse(DIFY_API_BASE)
         body     = _json.dumps({
-            "server_url":        sse_url,
+            "server_url":        server_url,
             "name":              name,
             "icon":              icon,
             "icon_type":         "emoji",
@@ -479,12 +525,12 @@ def _register_dify(
             conn.close()
 
         if resp.status >= 400:
-            log(f"Dify 登録失敗 (手動で登録してください — URL: {sse_url}): HTTP {resp.status} {resp_body}")
+            log(f"Dify 登録失敗 (手動で登録してください — URL: {server_url}): HTTP {resp.status} {resp_body}")
             return False
-        log(f"Dify 登録完了: {name} ({sse_url})")
+        log(f"Dify 登録完了: {name} ({server_url})")
         return True
     except Exception as e:
-        log(f"Dify 登録失敗 (手動で登録してください — URL: {sse_url}): {e}")
+        log(f"Dify 登録失敗 (手動で登録してください — URL: {server_url}): {e}")
         return False
 
 
@@ -573,7 +619,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         if transport == "stdio":
             log(f"  トランスポート: stdio（supergateway で SSE 化）")
         else:
-            log(f"  トランスポート: SSE")
+            log(f"  トランスポート: {transport}（Dify 登録時に自動検出）")
 
         # Docker ビルド
         # サブディレクトリ指定時はリポジトリルートをコンテキストにして Dockerfile を指定

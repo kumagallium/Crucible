@@ -107,7 +107,7 @@
   },
   "releaseNotes": {
     "title": "Release Notes",
-    "description": "Latest changelog for Crucible MCP Registry.",
+    "description": "Latest changelog for Crucible.",
     "highlights": "New Feature Highlights",
     "filterAll": "All",
     "filterNew": "New features only",

@@ -107,7 +107,7 @@
   },
   "releaseNotes": {
     "title": "リリースノート",
-    "description": "Crucible MCP Registry の最新の変更履歴です。",
+    "description": "Crucible の最新の変更履歴です。",
     "highlights": "新機能ハイライト",
     "filterAll": "すべて",
     "filterNew": "新機能のみ",
