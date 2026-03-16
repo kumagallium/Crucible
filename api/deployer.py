@@ -397,28 +397,36 @@ def _start_container(
 
 
 def _health_check(name: str, port: int, log: LogFn) -> None:
-    """コンテナのヘルスチェックを行う。"""
+    """コンテナのヘルスチェックを行う。HTTP 応答を確認する。"""
+    import requests as req_lib
+
     log(f"ヘルスチェック中 (localhost:{port}) ...")
     for i in range(1, HEALTH_CHECK_RETRIES + 1):
-        # TCP ポートが開いているか確認
-        tcp_check = subprocess.run(
-            ["bash", "-c", f"echo >/dev/tcp/localhost/{port}"],
-            capture_output=True,
-        )
-        if tcp_check.returncode == 0:
-            log(f"ヘルスチェック OK — ポート {port} 開通 ({i}/{HEALTH_CHECK_RETRIES})")
-            return
-
-        # コンテナが Running かも確認
+        # コンテナが Running か確認
         state = subprocess.run(
             ["docker", "inspect", "--format", "{{.State.Running}}", name],
             capture_output=True, text=True,
         ).stdout.strip()
-        if state == "true":
-            log(f"コンテナ起動確認済み ({i}/{HEALTH_CHECK_RETRIES})")
-            return
+        if state != "true":
+            log(f"  待機中... ({i}/{HEALTH_CHECK_RETRIES})")
+            time.sleep(HEALTH_CHECK_INTERVAL)
+            continue
 
-        log(f"待機中... ({i}/{HEALTH_CHECK_RETRIES})")
+        # HTTP 応答を確認（/mcp または /sse に接続を試行）
+        # 404 でもサーバーが応答していれば OK
+        for path in ("/mcp", "/sse"):
+            try:
+                resp = req_lib.get(f"http://localhost:{port}{path}", timeout=2)
+                log(f"  ヘルスチェック OK — HTTP 応答確認 ({path} → {resp.status_code}) ({i}/{HEALTH_CHECK_RETRIES})")
+                return
+            except req_lib.exceptions.Timeout:
+                # タイムアウト = SSE ストリーム接続中（応答あり）
+                log(f"  ヘルスチェック OK — HTTP 応答確認 ({path} → streaming) ({i}/{HEALTH_CHECK_RETRIES})")
+                return
+            except req_lib.exceptions.ConnectionError:
+                pass  # サーバーまだ準備中
+
+        log(f"  HTTP 未応答、待機中... ({i}/{HEALTH_CHECK_RETRIES})")
         time.sleep(HEALTH_CHECK_INTERVAL)
 
     raise RuntimeError(
@@ -465,17 +473,9 @@ def _register_dify(
 
     # エンドポイント URL の決定: トランスポート自動検出
     # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後
+    # ※ ヘルスチェックで HTTP 応答を確認済みなので、ここでは応答待ち不要
     base_url = f"http://{static_ip}:8000"
     server_url = f"{base_url}/sse"  # デフォルトは SSE
-
-    # サーバー HTTP 応答待ち（コンテナ起動直後はまだ準備中の場合がある）
-    for _retry in range(5):
-        try:
-            req_lib.get(f"{base_url}/mcp", timeout=2)
-            break  # 何かレスポンスが返れば OK（404 でも）
-        except Exception:
-            time.sleep(1)
-
     try:
         # /mcp を確認（Streamable HTTP: 即座にレスポンスが返る）
         mcp_resp = req_lib.get(f"{base_url}/mcp", timeout=3)
