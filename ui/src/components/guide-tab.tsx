@@ -80,7 +80,8 @@ export function GuideTab() {
           <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
             <p>{t("guide.step1Desc")}</p>
             <div className="text-xs font-mono bg-muted border rounded-lg px-4 py-3">
-              http://localhost:&lt;{t("guide.portNumber")}&gt;/sse
+              http://localhost:&lt;{t("guide.portNumber")}&gt;/mcp{" "}
+              <span className="text-muted-foreground">({t("guide.orSse")})</span>
             </div>
           </div>
         </section>
@@ -141,13 +142,16 @@ npm root -g
       "command": "/Users/you/.nvm/versions/node/v22.14.0/bin/node",
       "args": [
         "/Users/you/.npm-global/lib/node_modules/mcp-remote/dist/proxy.js",
-        "http://localhost:<${t("guide.port")}>/sse",
+        "http://localhost:<${t("guide.port")}>/mcp",
         "--allow-http"
       ]
     }
   }
 }`}
             />
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("guide.endpointNote")}
+            </p>
 
             <div className="rounded-lg bg-muted border px-3 py-2 mt-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -165,7 +169,10 @@ npm root -g
             <p className="text-xs text-muted-foreground mb-2">
               {t("guide.claudeCodeDesc")}
             </p>
-            <CopyBlock code={`claude mcp add --transport sse ${t("guide.serverName")} http://localhost:<${t("guide.port")}>/sse`} />
+            <CopyBlock code={`claude mcp add --transport sse ${t("guide.serverName")} http://localhost:<${t("guide.port")}>/mcp`} />
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("guide.endpointNote")}
+            </p>
           </div>
 
           <div className="mb-5">
@@ -180,11 +187,14 @@ npm root -g
               code={`{
   "mcpServers": {
     "${t("guide.serverName")}": {
-      "url": "http://localhost:<${t("guide.port")}>/sse"
+      "url": "http://localhost:<${t("guide.port")}>/mcp"
     }
   }
 }`}
             />
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("guide.endpointNote")}
+            </p>
           </div>
 
           <div className="mb-5">

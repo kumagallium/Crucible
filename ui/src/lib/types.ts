@@ -16,6 +16,7 @@ export interface Server {
   updated_at: string;
   error_message: string | null;
   dify_registered: boolean;
+  endpoint_path?: string;
 }
 
 export interface RegisterRequest {

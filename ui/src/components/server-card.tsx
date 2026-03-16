@@ -43,7 +43,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const sse = `${baseUrl}:${server.port}/sse`;
+  const endpoint = `${baseUrl}:${server.port}${server.endpoint_path ?? "/sse"}`;
   const repoShort = server.github_url.replace("https://github.com/", "");
   const subdir = server.subdir ? ` / ${server.subdir}` : "";
 
@@ -128,7 +128,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
 
         <div className="flex items-center gap-1 mb-1.5">
           <div className="flex-1 text-xs font-mono text-muted-foreground bg-muted border rounded-lg px-2 py-1 truncate">
-            {sse}
+            {endpoint}
           </div>
           <Button
             variant="ghost"
@@ -136,7 +136,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             className="h-7 w-7 p-0 shrink-0 text-muted-foreground"
             onClick={() => {
               const textarea = document.createElement("textarea");
-              textarea.value = sse;
+              textarea.value = endpoint;
               textarea.style.position = "fixed";
               textarea.style.opacity = "0";
               document.body.appendChild(textarea);

@@ -225,9 +225,12 @@ def _strip_mount_options(dockerfile: Path, log: LogFn) -> None:
 
 
 def _detect_transport(src_dir: Path, transport: str) -> str:
-    """MCP サーバーのトランスポートを検出する。
+    """MCP サーバーのトランスポート種別を検出する。
 
-    auto の場合: Dockerfile に EXPOSE があれば SSE、なければ stdio と判定。
+    auto の場合: Dockerfile に EXPOSE があれば HTTP ベース（SSE or Streamable HTTP）、
+    なければ stdio と判定する。
+    ここでは "sse" を返すが、実際のエンドポイントパス（/sse vs /mcp）は
+    Dify 登録時の HTTP プローブで自動検出される。
     """
     if transport != "auto":
         return transport
@@ -397,28 +400,37 @@ def _start_container(
 
 
 def _health_check(name: str, port: int, log: LogFn) -> None:
-    """コンテナのヘルスチェックを行う。"""
+    """コンテナのヘルスチェックを行う。HTTP 応答を確認する。"""
+    import requests as req_lib
+
     log(f"ヘルスチェック中 (localhost:{port}) ...")
     for i in range(1, HEALTH_CHECK_RETRIES + 1):
-        # TCP ポートが開いているか確認
-        tcp_check = subprocess.run(
-            ["bash", "-c", f"echo >/dev/tcp/localhost/{port}"],
-            capture_output=True,
-        )
-        if tcp_check.returncode == 0:
-            log(f"ヘルスチェック OK — ポート {port} 開通 ({i}/{HEALTH_CHECK_RETRIES})")
-            return
-
-        # コンテナが Running かも確認
+        # コンテナが Running か確認
         state = subprocess.run(
             ["docker", "inspect", "--format", "{{.State.Running}}", name],
             capture_output=True, text=True,
         ).stdout.strip()
-        if state == "true":
-            log(f"コンテナ起動確認済み ({i}/{HEALTH_CHECK_RETRIES})")
-            return
+        if state != "true":
+            log(f"  待機中... ({i}/{HEALTH_CHECK_RETRIES})")
+            time.sleep(HEALTH_CHECK_INTERVAL)
+            continue
 
-        log(f"待機中... ({i}/{HEALTH_CHECK_RETRIES})")
+        # HTTP 応答を確認（/mcp または /sse に接続を試行）
+        # CRUCIBLE_HOST にバインドされているため localhost ではなく CRUCIBLE_HOST を使用
+        # 404 でもサーバーが応答していれば OK
+        for path in ("/mcp", "/sse"):
+            try:
+                resp = req_lib.get(f"http://{CRUCIBLE_HOST}:{port}{path}", timeout=2)
+                log(f"  ヘルスチェック OK — HTTP 応答確認 ({path} → {resp.status_code}) ({i}/{HEALTH_CHECK_RETRIES})")
+                return
+            except req_lib.exceptions.Timeout:
+                # タイムアウト = SSE ストリーム接続中（応答あり）
+                log(f"  ヘルスチェック OK — HTTP 応答確認 ({path} → streaming) ({i}/{HEALTH_CHECK_RETRIES})")
+                return
+            except req_lib.exceptions.ConnectionError:
+                pass  # サーバーまだ準備中
+
+        log(f"  HTTP 未応答、待機中... ({i}/{HEALTH_CHECK_RETRIES})")
         time.sleep(HEALTH_CHECK_INTERVAL)
 
     raise RuntimeError(
@@ -430,11 +442,18 @@ def _register_dify(
     name: str, static_ip: str, port: int,
     icon: str, display_name: str,
     log: LogFn,
-) -> bool:
-    """Dify に MCP ツールプロバイダーとして登録する。"""
+) -> tuple[bool, str]:
+    """Dify に MCP ツールプロバイダーとして登録する。
+
+    Returns:
+        (dify_ok, endpoint_path): 登録成功フラグと検出されたエンドポイントパス
+    """
+    # デフォルトのエンドポイントパス
+    detected_path = "/sse"
+
     if not (DIFY_EMAIL and DIFY_PASSWORD):
         log("DIFY_EMAIL / DIFY_PASSWORD が未設定のため Dify 登録をスキップします")
-        return False
+        return False, detected_path
 
     import http.client
     import json as _json
@@ -465,22 +484,17 @@ def _register_dify(
 
     # エンドポイント URL の決定: トランスポート自動検出
     # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後
-    base_url = f"http://{static_ip}:8000"
-    server_url = f"{base_url}/sse"  # デフォルトは SSE
-
-    # サーバー HTTP 応答待ち（コンテナ起動直後はまだ準備中の場合がある）
-    for _retry in range(5):
-        try:
-            req_lib.get(f"{base_url}/mcp", timeout=2)
-            break  # 何かレスポンスが返れば OK（404 でも）
-        except Exception:
-            time.sleep(1)
-
+    # ヘルスチェック同様、CRUCIBLE_HOST:port でプローブし、
+    # Dify 登録用の URL は static_ip:8000 で構築する
+    dify_base_url = f"http://{static_ip}:8000"
+    probe_base_url = f"http://{CRUCIBLE_HOST}:{port}"
+    server_url = f"{dify_base_url}/sse"  # デフォルトは SSE
     try:
         # /mcp を確認（Streamable HTTP: 即座にレスポンスが返る）
-        mcp_resp = req_lib.get(f"{base_url}/mcp", timeout=3)
+        mcp_resp = req_lib.get(f"{probe_base_url}/mcp", timeout=3)
         if mcp_resp.status_code != 404:
-            server_url = f"{base_url}/mcp"
+            server_url = f"{dify_base_url}/mcp"
+            detected_path = "/mcp"
             log(f"  トランスポート: Streamable HTTP (/mcp)")
         else:
             log(f"  トランスポート: SSE (/sse)")
@@ -527,12 +541,12 @@ def _register_dify(
 
         if resp.status >= 400:
             log(f"Dify 登録失敗 (手動で登録してください — URL: {server_url}): HTTP {resp.status} {resp_body}")
-            return False
+            return False, detected_path
         log(f"Dify 登録完了: {name} ({server_url})")
-        return True
+        return True, detected_path
     except Exception as e:
         log(f"Dify 登録失敗 (手動で登録してください — URL: {server_url}): {e}")
-        return False
+        return False, detected_path
 
 
 def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
@@ -646,7 +660,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
 
         # Dify 登録
         _step(7, TOTAL, "Dify への登録...", log)
-        dify_ok = _register_dify(
+        dify_ok, endpoint_path = _register_dify(
             req.name, static_ip, port, req.icon, req.display_name, log
         )
 
@@ -675,6 +689,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         static_ip=static_ip,
         status="running",
         dify_registered=dify_ok,
+        endpoint_path=endpoint_path,
         error_message=None,
         github_token_enc=token_enc,
     )
