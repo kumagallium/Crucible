@@ -61,19 +61,53 @@
 git clone https://github.com/kumagallium/Crucible.git
 cd Crucible
 
-# 2. Configure environment variables
-cp .env.example .env
-chmod 600 .env
-# Edit .env and set the required values
+# 2. Run setup script (generates .env with auto-generated keys, configures git hooks)
+./setup.sh
 
 # 3. Start
 docker compose up -d
+```
+
+#### With Dify integration
+
+If you run Dify on the same host and want automatic tool registration:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dify.yml up -d
 ```
 
 ### Access
 
 - **UI**: http://127.0.0.1:8081
 - **API**: http://127.0.0.1:8080
+
+## Server Deployment
+
+Tested on **Ubuntu 22.04 LTS**. The setup script installs Docker, configures security hardening, and starts Crucible.
+
+```bash
+git clone https://github.com/kumagallium/Crucible.git
+cd Crucible
+sudo bash setup-server.sh
+```
+
+### What `setup-server.sh` does
+
+| Step | Description |
+|------|-------------|
+| Docker | Installs Docker CE + Compose plugin |
+| SSH | Key-only auth, root login disabled |
+| Firewall (UFW) | Inbound deny (SSH / 8080 / 8081 only), outbound allowlist |
+| fail2ban | Auto-ban after 5 failed SSH attempts (24h) |
+| Docker iptables | Blocks external access to Socket Proxy, UDP flood protection |
+| Auto-update | Unattended security patches |
+
+### Options
+
+```bash
+# Change SSH port (recommended for production)
+SSH_PORT=<your-port> sudo bash setup-server.sh
+```
 
 ## Environment Variables
 

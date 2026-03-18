@@ -1,0 +1,17 @@
+# ==============================================================================
+# Dify 連携用オーバーライド
+# Dify と同じホストで動かす場合に使用
+#
+# 使い方:
+#   docker compose -f docker-compose.yml -f docker-compose.dify.yml up -d
+# ==============================================================================
+
+services:
+  api:
+    networks:
+      - dify_net   # Dify API への自動登録に必要
+
+networks:
+  dify_net:
+    name: ${DIFY_NETWORK:-docker_default}
+    external: true   # Dify の Docker Compose が作成するネットワーク

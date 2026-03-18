@@ -61,19 +61,53 @@
 git clone https://github.com/kumagallium/Crucible.git
 cd Crucible
 
-# 2. 環境変数を設定
-cp .env.example .env
-chmod 600 .env
-# .env を編集して必要な値を設定
+# 2. セットアップスクリプトを実行（.env 自動生成 + git hooks 設定）
+./setup.sh
 
 # 3. 起動
 docker compose up -d
+```
+
+#### Dify 連携を使う場合
+
+同じホストで Dify を動かしている場合、自動ツール登録を有効にできます:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dify.yml up -d
 ```
 
 ### アクセス
 
 - **UI**: http://127.0.0.1:8081
 - **API**: http://127.0.0.1:8080
+
+## サーバーデプロイ
+
+**Ubuntu 22.04 LTS** でテスト済み。セットアップスクリプトが Docker のインストール、セキュリティ強化、Crucible の起動を一括で行います。
+
+```bash
+git clone https://github.com/kumagallium/Crucible.git
+cd Crucible
+sudo bash setup-server.sh
+```
+
+### `setup-server.sh` が行うこと
+
+| ステップ | 内容 |
+|---------|------|
+| Docker | Docker CE + Compose plugin をインストール |
+| SSH | 鍵認証のみ、root ログイン禁止 |
+| ファイアウォール (UFW) | インバウンド deny（SSH / 8080 / 8081 のみ許可） |
+| fail2ban | SSH 5回失敗で24時間 BAN |
+| Docker iptables | Socket Proxy への外部アクセスをブロック、UDP フラッド対策 |
+| 自動更新 | セキュリティパッチを自動適用 |
+
+### オプション
+
+```bash
+# SSH ポートを変更（本番環境では推奨）
+SSH_PORT=<your-port> sudo bash setup-server.sh
+```
 
 ## 環境変数
 

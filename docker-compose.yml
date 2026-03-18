@@ -68,7 +68,6 @@ services:
     networks:
       - registry_net
       - socket_proxy_net
-      - dify_net   # Dify API への自動登録に必要
 
   # ==============================================================================
   # Next.js フロントエンド (shadcn/ui)
@@ -98,6 +97,3 @@ networks:
   socket_proxy_net:
     driver: bridge
     internal: true   # socket-proxy は外部ネットワークに出られない
-  dify_net:
-    name: ${DIFY_NETWORK:-docker_default}
-    external: true   # Dify の Docker Compose が作成するネットワーク
