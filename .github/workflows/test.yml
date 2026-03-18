@@ -27,30 +27,30 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
 
       - name: Run tests with coverage
-        run: pytest --cov-report=term-missing --cov-report=json:coverage.json
+        run: pytest --cov=. --cov-report=term-missing --cov-report=json:coverage.json --cov-config=.coveragerc -v --tb=short
 
       - name: Generate coverage summary
         if: always()
         run: |
           python -c "
-          import json
+          import json, os
           with open('coverage.json') as f:
               data = json.load(f)
           totals = data['totals']
           pct = totals['percent_covered_display']
 
-          # Job Summary に出力
-          with open('$GITHUB_STEP_SUMMARY', 'a') as summary:
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
               summary.write('## Python API Coverage\n\n')
               summary.write(f'**Total: {pct}%**\n\n')
               summary.write('| File | Stmts | Miss | Cover |\n')
               summary.write('|------|-------|------|-------|\n')
               for fname, fdata in data['files'].items():
                   s = fdata['summary']
-                  summary.write(f\"| {fname} | {s['num_statements']} | {s['missing_lines']} | {s['percent_covered_display']}% |\n\")
+                  summary.write(f'| {fname} | {s[\"num_statements\"]} | {s[\"missing_lines\"]} | {s[\"percent_covered_display\"]}% |\n')
           "
 
   typescript-ui:
@@ -67,7 +67,7 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run tests with coverage
         run: npx vitest run --coverage
@@ -79,7 +79,6 @@ jobs:
           const fs = require('fs');
           const lcov = fs.readFileSync('coverage/lcov.info', 'utf8');
 
-          // lcov から行カバレッジを集計
           const files = {};
           let current = null;
           for (const line of lcov.split('\n')) {

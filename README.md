@@ -1,5 +1,7 @@
 [日本語](README.ja.md)
 
+[![Tests & Coverage](https://github.com/kumagallium/Crucible/actions/workflows/test.yml/badge.svg)](https://github.com/kumagallium/Crucible/actions/workflows/test.yml)
+
 # Crucible
 
 > **The self-hosted deployment platform for MCP servers.**
