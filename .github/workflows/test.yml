@@ -1,0 +1,113 @@
+name: Tests & Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  python-api:
+    name: Python API Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests with coverage
+        run: pytest --cov-report=term-missing --cov-report=json:coverage.json
+
+      - name: Generate coverage summary
+        if: always()
+        run: |
+          python -c "
+          import json
+          with open('coverage.json') as f:
+              data = json.load(f)
+          totals = data['totals']
+          pct = totals['percent_covered_display']
+
+          # Job Summary に出力
+          with open('$GITHUB_STEP_SUMMARY', 'a') as summary:
+              summary.write('## Python API Coverage\n\n')
+              summary.write(f'**Total: {pct}%**\n\n')
+              summary.write('| File | Stmts | Miss | Cover |\n')
+              summary.write('|------|-------|------|-------|\n')
+              for fname, fdata in data['files'].items():
+                  s = fdata['summary']
+                  summary.write(f\"| {fname} | {s['num_statements']} | {s['missing_lines']} | {s['percent_covered_display']}% |\n\")
+          "
+
+  typescript-ui:
+    name: TypeScript UI Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npx vitest run --coverage
+
+      - name: Generate coverage summary
+        if: always()
+        run: |
+          node -e "
+          const fs = require('fs');
+          const lcov = fs.readFileSync('coverage/lcov.info', 'utf8');
+
+          // lcov から行カバレッジを集計
+          const files = {};
+          let current = null;
+          for (const line of lcov.split('\n')) {
+            if (line.startsWith('SF:')) {
+              current = line.slice(3).replace(process.cwd() + '/', '');
+              files[current] = { found: 0, hit: 0 };
+            } else if (line.startsWith('LF:')) {
+              files[current].found = parseInt(line.slice(3));
+            } else if (line.startsWith('LH:')) {
+              files[current].hit = parseInt(line.slice(3));
+            }
+          }
+
+          let totalFound = 0, totalHit = 0;
+          const rows = [];
+          for (const [f, d] of Object.entries(files)) {
+            totalFound += d.found;
+            totalHit += d.hit;
+            const pct = d.found ? ((d.hit / d.found) * 100).toFixed(1) : '100.0';
+            rows.push('| ' + f + ' | ' + d.found + ' | ' + (d.found - d.hit) + ' | ' + pct + '% |');
+          }
+          const totalPct = totalFound ? ((totalHit / totalFound) * 100).toFixed(1) : '100.0';
+
+          let md = '## TypeScript UI Coverage\n\n';
+          md += '**Total: ' + totalPct + '%**\n\n';
+          md += '| File | Lines | Miss | Cover |\n';
+          md += '|------|-------|------|-------|\n';
+          md += rows.join('\n') + '\n';
+
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+          "

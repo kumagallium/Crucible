@@ -31,6 +31,14 @@ node_modules/
 .next/
 ui/.next/
 
+# テスト・カバレッジ成果物
+.coverage
+*.coverage
+coverage.xml
+coverage.json
+htmlcov/
+ui/coverage/
+
 # Registry データ
 servers.json
 
