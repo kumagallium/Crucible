@@ -1,6 +1,11 @@
 [
   {
-    "sha": "813feaf",
+    "sha": "f72995c",
+    "message": "[docs] Add related projects section with ecosystem diagram",
+    "date": "2026-03-25"
+  },
+  {
+    "sha": "3748dac",
     "message": "[fix] Regenerate package-lock.json with Node 22 for Docker compatibility",
     "date": "2026-03-15"
   },

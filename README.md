@@ -176,6 +176,30 @@ Set `DIFY_EMAIL` and `DIFY_PASSWORD` in your `.env` to enable.
 
 - [Website (detailed use cases)](https://kumagallium.github.io/Crucible/)
 
+## Related Projects
+
+Crucible is part of a broader ecosystem:
+
+```
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│    Crucible       │    │ Crucible Agent    │    │    provnote      │
+│   (this repo)     │    │    (Runtime)      │    │    (Editor)      │
+│                   │    │                   │    │                  │
+│ Build & deploy    │───►│ AI agent runtime  │◄───│ Block-based note │
+│ MCP servers from  │    │ connects LLM to   │    │ editor with      │
+│ GitHub URLs       │    │ MCP tools         │    │ PROV-DM tracking │
+└──────────────────┘    └──────────────────┘    └──────────────────┘
+   MCP server pool        tool discovery          POST /agent/run
+```
+
+| Repository | Role | Link |
+|------------|------|------|
+| **Crucible** (Registry) | MCP server build, deploy & management | *(this repo)* |
+| **Crucible Agent** | AI agent runtime with MCP tool support | [kumagallium/crucible-agent](https://github.com/kumagallium/crucible-agent) |
+| **provnote** | PROV-DM provenance tracking editor | [kumagallium/provnote](https://github.com/kumagallium/provnote) |
+
+Each project works independently. Together, they form a complete pipeline: Registry manages MCP servers → Agent connects them to LLMs → provnote provides a UI with provenance tracking.
+
 ## License
 
 [MIT License](LICENSE)
