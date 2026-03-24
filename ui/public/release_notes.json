@@ -1,8 +1,118 @@
 [
   {
-    "sha": "f72995c",
+    "sha": "2e122cd",
+    "message": "[docs] Add Japanese related projects section and upgrade to mermaid diagrams",
+    "date": "2026-03-25"
+  },
+  {
+    "sha": "8461b34",
     "message": "[docs] Add related projects section with ecosystem diagram",
     "date": "2026-03-25"
+  },
+  {
+    "sha": "27b7c55",
+    "message": "[docs] Add testing documentation",
+    "date": "2026-03-18"
+  },
+  {
+    "sha": "928baa9",
+    "message": "[fix] Fix CI install commands and add test badge to README",
+    "date": "2026-03-18"
+  },
+  {
+    "sha": "1935616",
+    "message": "[feat] Add comprehensive test suite and CI pipeline",
+    "date": "2026-03-18"
+  },
+  {
+    "sha": "b71a8f7",
+    "message": "[feat] Add setup scripts and separate Dify dependency for easier onboarding",
+    "date": "2026-03-18"
+  },
+  {
+    "sha": "f1f3329",
+    "message": "Merge branch 'refactor/reposition-sandbox-messaging'",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "47f519e",
+    "message": "[fix] Remove max-width from about-text and quickstart-code sections",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "c5d8920",
+    "message": "Merge pull request #6 from kumagallium/refactor/reposition-sandbox-messaging",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "9645bb3",
+    "message": "[feat] Update guide to support both SSE and Streamable HTTP transports",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "ce7c3d6",
+    "message": "[feat] Store and display detected endpoint path (/sse or /mcp) in UI",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "dc528fb",
+    "message": "[fix] Use CRUCIBLE_HOST:port for transport probe in Dify registration",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "928f0c6",
+    "message": "[fix] Use CRUCIBLE_HOST instead of localhost for health check",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "d66e7bc",
+    "message": "[fix] Health check waits for HTTP response, not just container running",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "f528eea",
+    "message": "Merge pull request #5 from kumagallium/refactor/reposition-sandbox-messaging",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "8abcebc",
+    "message": "[refactor] Shift positioning from \"sandbox\" to \"deployment platform\"",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "12ec2d6",
+    "message": "[fix] Reverse transport detection order: check /mcp before /sse",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "256c3b9",
+    "message": "Merge pull request #4 from kumagallium/refactor/reposition-sandbox-messaging",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "017b96e",
+    "message": "[refactor] Remove \"registry\" wording from user-facing text",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "b79eab3",
+    "message": "[fix] Auto-patch FastMCP enabled= parameter before Docker build",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "f5035f3",
+    "message": "[fix] Support Streamable HTTP (/mcp) transport in Dify registration",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "8a00b04",
+    "message": "Merge pull request #3 from kumagallium/refactor/reposition-sandbox-messaging",
+    "date": "2026-03-16"
+  },
+  {
+    "sha": "ae79ab2",
+    "message": "[refactor] Reposition Crucible from \"registry\" to \"development sandbox\"",
+    "date": "2026-03-16"
   },
   {
     "sha": "3748dac",

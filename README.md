@@ -180,16 +180,18 @@ Set `DIFY_EMAIL` and `DIFY_PASSWORD` in your `.env` to enable.
 
 Crucible is part of a broader ecosystem:
 
-```
-┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-│    Crucible       │    │ Crucible Agent    │    │    provnote      │
-│   (this repo)     │    │    (Runtime)      │    │    (Editor)      │
-│                   │    │                   │    │                  │
-│ Build & deploy    │───►│ AI agent runtime  │◄───│ Block-based note │
-│ MCP servers from  │    │ connects LLM to   │    │ editor with      │
-│ GitHub URLs       │    │ MCP tools         │    │ PROV-DM tracking │
-└──────────────────┘    └──────────────────┘    └──────────────────┘
-   MCP server pool        tool discovery          POST /agent/run
+```mermaid
+graph LR
+    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>Build & deploy<br/>MCP servers</i>"]
+    Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI agent<br/>runtime</i>"]
+    provnote["📝 <b>provnote</b><br/><i>Provenance<br/>tracking editor</i>"]
+
+    Registry -- "tool discovery" --> Agent
+    Agent -- "POST /agent/run" --> provnote
+
+    style Registry fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
+    style Agent fill:#1e293b,stroke:#8b5cf6,color:#e2e8f0
+    style provnote fill:#1e293b,stroke:#10b981,color:#e2e8f0
 ```
 
 | Repository | Role | Link |

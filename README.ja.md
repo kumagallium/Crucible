@@ -176,6 +176,32 @@ Crucible はデプロイした MCP サーバーを Dify にツールとして自
 
 - [ウェブサイト（詳細なユースケース）](https://kumagallium.github.io/Crucible/)
 
+## 関連プロジェクト
+
+Crucible はエコシステムの一部として機能します：
+
+```mermaid
+graph LR
+    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>MCP サーバーの<br/>ビルド & デプロイ</i>"]
+    Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI エージェント<br/>ランタイム</i>"]
+    provnote["📝 <b>provnote</b><br/><i>プロヴェナンス<br/>追跡エディタ</i>"]
+
+    Registry -- "ツール自動検出" --> Agent
+    Agent -- "POST /agent/run" --> provnote
+
+    style Registry fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
+    style Agent fill:#1e293b,stroke:#8b5cf6,color:#e2e8f0
+    style provnote fill:#1e293b,stroke:#10b981,color:#e2e8f0
+```
+
+| リポジトリ | 役割 | リンク |
+|-----------|------|--------|
+| **Crucible** (Registry) | MCP サーバーのビルド・デプロイ・管理 | *(このリポジトリ)* |
+| **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/crucible-agent](https://github.com/kumagallium/crucible-agent) |
+| **provnote** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/provnote](https://github.com/kumagallium/provnote) |
+
+各プロジェクトは単体でも使えます。組み合わせると、Registry が MCP サーバーを管理 → Agent が LLM と接続 → provnote がプロヴェナンス付きの UI を提供、というパイプラインになります。
+
 ## ライセンス
 
 [MIT License](LICENSE)
