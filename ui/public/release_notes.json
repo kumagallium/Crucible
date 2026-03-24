@@ -1,6 +1,11 @@
 [
   {
-    "sha": "2e122cd",
+    "sha": "2a753f2",
+    "message": "[docs] Replace all ASCII diagrams with themed mermaid graphs",
+    "date": "2026-03-25"
+  },
+  {
+    "sha": "8e5d3ec",
     "message": "[docs] Add Japanese related projects section and upgrade to mermaid diagrams",
     "date": "2026-03-25"
   },

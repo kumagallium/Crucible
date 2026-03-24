@@ -28,26 +28,31 @@
 
 ## Architecture
 
-```
-┌─────────────────────────────────────┐
-│            Crucible                  │
-│  ┌─────────┐      ┌──────────────┐  │
-│  │   UI    │◄────►│   API        │  │
-│  │ Next.js │      │  FastAPI     │  │
-│  └─────────┘      └──────┬───────┘  │
-│                          │          │
-│              ┌───────────▼────────┐ │
-│              │  Socket Proxy      │ │
-│              │  (Docker ops)      │ │
-│              └───────────┬────────┘ │
-│                          │          │
-│  ┌──────┐ ┌──────┐ ┌──────┐       │
-│  │MCP-A │ │MCP-B │ │MCP-C │ ...   │
-│  └──────┘ └──────┘ └──────┘       │
-└─────────────────────────────────────┘
-```
+```mermaid
+graph TB
+    subgraph Crucible [" "]
+        UI["🖥️ UI<br/><i>Next.js</i>"]
+        API["⚡ API<br/><i>FastAPI</i>"]
+        Proxy["🔒 Socket Proxy<br/><i>Docker ops</i>"]
+        MCP_A["MCP-A"]
+        MCP_B["MCP-B"]
+        MCP_C["MCP-C"]
+    end
 
-<!-- TODO: Add demo GIF showing: paste GitHub URL → auto build → deploy → connect from Claude Code via SSE -->
+    UI <--> API
+    API --> Proxy
+    Proxy --> MCP_A
+    Proxy --> MCP_B
+    Proxy --> MCP_C
+
+    style Crucible fill:transparent,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
+    style UI fill:#e8f0f8,stroke:#5b8fb9,color:#2d4a6e
+    style API fill:#edf5ee,stroke:#4B7A52,color:#2d4a32
+    style Proxy fill:#f5f0e8,stroke:#c08b3e,color:#6b5a2e
+    style MCP_A fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
+    style MCP_B fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
+    style MCP_C fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
+```
 
 ## Quick Start
 
@@ -189,9 +194,9 @@ graph LR
     Registry -- "tool discovery" --> Agent
     Agent -- "POST /agent/run" --> provnote
 
-    style Registry fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
-    style Agent fill:#1e293b,stroke:#8b5cf6,color:#e2e8f0
-    style provnote fill:#1e293b,stroke:#10b981,color:#e2e8f0
+    style Registry fill:#edf5ee,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
+    style Agent fill:#ede8f5,stroke:#8b7ab5,stroke-width:2px,color:#4a3d6e
+    style provnote fill:#e8f0f8,stroke:#5b8fb9,stroke-width:2px,color:#2d4a6e
 ```
 
 | Repository | Role | Link |
