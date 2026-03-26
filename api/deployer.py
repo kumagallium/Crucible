@@ -495,10 +495,13 @@ def _register_dify(
     import requests as req_lib
 
     # ログイン — requests で行う (レスポンスのクッキーを読むだけなので問題なし)
+    # Dify はパスワードを Base64 エンコードして受け取る
+    import base64 as _b64
+    encoded_password = _b64.b64encode(DIFY_PASSWORD.encode()).decode()
     try:
         login_resp = req_lib.post(
             f"{DIFY_API_BASE}/login",
-            json={"email": DIFY_EMAIL, "password": DIFY_PASSWORD},
+            json={"email": DIFY_EMAIL, "password": encoded_password},
             timeout=15,
         )
         result = login_resp.json()
