@@ -14,6 +14,7 @@
 - **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys it automatically. Skip the publish-to-npm step and go straight from source to running server.
 - **Private repository support** — Works with private GitHub repositories. Develop your MCP servers behind closed doors and deploy them without ever making them public.
 - **Instant iteration** — Made a change? Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
+- **Auto-update** — Enable `auto_update` on a server and Crucible will periodically check its GitHub repository for new commits and redeploy automatically. No manual intervention needed.
 - **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints, so you can test them from any MCP client, local or remote.
 - **Management UI** — See all your servers in one dashboard. Start, stop, remove — keep your environment clean.
 - **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges. Nothing leaves your network.
@@ -127,6 +128,7 @@ SSH_PORT=<your-port> sudo bash setup-server.sh
 | `CRUCIBLE_CORS_ORIGINS` | *(localhost)* | Allowed CORS origins (comma-separated) |
 | `REGISTRY_API_KEY` | *(none)* | API authentication key |
 | `TOKEN_ENCRYPTION_KEY` | *(none)* | Encryption key for GitHub tokens |
+| `AUTO_UPDATE_INTERVAL` | `3600` | Auto-update check interval in seconds (0 to disable) |
 
 See [.env.example](.env.example) for details.
 

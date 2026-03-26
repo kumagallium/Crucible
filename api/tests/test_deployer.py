@@ -645,3 +645,187 @@ class TestRefreshStatuses:
     def test_skips_when_docker_not_found(self, mock_run, mock_reg):
         deployer.refresh_statuses()
         mock_reg.get_all.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# _get_local_head
+# ---------------------------------------------------------------------------
+
+class TestGetLocalHead:
+    @patch("subprocess.run")
+    def test_returns_hash(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="abc123def\n")
+        result = deployer._get_local_head(Path("/tmp/repo"))
+        assert result == "abc123def"
+
+    @patch("subprocess.run")
+    def test_returns_empty_on_failure(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=1, stdout="")
+        result = deployer._get_local_head(Path("/tmp/repo"))
+        assert result == ""
+
+
+# ---------------------------------------------------------------------------
+# _get_remote_head
+# ---------------------------------------------------------------------------
+
+class TestGetRemoteHead:
+    @patch("subprocess.run")
+    def test_returns_hash(self, mock_run):
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="abc123def456\trefs/heads/main\n",
+        )
+        result = deployer._get_remote_head("https://github.com/owner/repo", "main")
+        assert result == "abc123def456"
+
+    @patch("subprocess.run")
+    def test_with_token(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="abc\trefs/heads/main\n")
+        deployer._get_remote_head("https://github.com/owner/repo", "main", token="ghp_tok")
+        cmd = mock_run.call_args[0][0]
+        assert "https://ghp_tok@github.com/owner/repo" in cmd
+
+    @patch("subprocess.run")
+    def test_returns_empty_on_failure(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=128, stdout="")
+        result = deployer._get_remote_head("https://github.com/owner/repo", "main")
+        assert result == ""
+
+    @patch("subprocess.run")
+    def test_git_terminal_prompt_disabled(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="abc\trefs/heads/main\n")
+        deployer._get_remote_head("https://github.com/owner/repo", "main")
+        call_kwargs = mock_run.call_args[1]
+        assert call_kwargs.get("env", {}).get("GIT_TERMINAL_PROMPT") == "0"
+
+
+# ---------------------------------------------------------------------------
+# update
+# ---------------------------------------------------------------------------
+
+class TestUpdate:
+    def _make_record(self, **overrides):
+        defaults = dict(
+            name="test-server",
+            display_name="Test Server",
+            description="A test MCP server",
+            icon="🔧",
+            github_url="https://github.com/owner/repo",
+            branch="main",
+            subdir="",
+            group="user",
+            port=8100,
+            static_ip="172.20.0.101",
+            status="running",
+            dify_registered=True,
+            endpoint_path="/sse",
+            github_token_enc="enc123",
+            auto_update=True,
+            last_commit_hash="old_hash_123",
+        )
+        defaults.update(overrides)
+        return ServerRecord(**defaults)
+
+    @patch("deployer.decrypt_token", return_value="ghp_tok")
+    @patch("deployer._get_remote_head", return_value="old_hash_123")
+    @patch("deployer.registry")
+    def test_skip_when_no_change(self, mock_reg, mock_remote, mock_decrypt):
+        record = self._make_record()
+        mock_reg.get.return_value = record
+        result = deployer.update("test-server", _log)
+        assert result.last_commit_hash == "old_hash_123"
+
+    @patch("deployer.decrypt_token", return_value="ghp_tok")
+    @patch("deployer._get_remote_head", return_value="")
+    @patch("deployer.registry")
+    def test_raises_when_remote_head_unavailable(self, mock_reg, mock_remote, mock_decrypt):
+        record = self._make_record()
+        mock_reg.get.return_value = record
+        with pytest.raises(RuntimeError, match="HEAD を取得できません"):
+            deployer.update("test-server", _log)
+
+    @patch("deployer.registry")
+    def test_raises_when_server_not_found(self, mock_reg):
+        mock_reg.get.return_value = None
+        with pytest.raises(RuntimeError, match="サーバーが見つかりません"):
+            deployer.update("nonexistent", _log)
+
+    @patch("deployer.decrypt_token", return_value="ghp_tok")
+    @patch("deployer._get_remote_head", return_value="new_hash_456")
+    @patch("deployer._register_dify", return_value=(True, "/mcp"))
+    @patch("deployer._health_check")
+    @patch("deployer._start_container")
+    @patch("deployer._build_image")
+    @patch("deployer._detect_transport", return_value="sse")
+    @patch("deployer._clone_repo")
+    @patch("deployer._get_local_head", return_value="new_hash_456")
+    @patch("subprocess.run")
+    @patch("tempfile.mkdtemp")
+    @patch("shutil.rmtree")
+    @patch("deployer.registry")
+    def test_full_update_flow(self, mock_reg, mock_rmtree, mock_mkdtemp,
+                               mock_subproc, mock_local_head, mock_clone,
+                               mock_detect, mock_build, mock_start,
+                               mock_health, mock_dify, mock_remote, mock_decrypt,
+                               tmp_path):
+        mock_mkdtemp.return_value = str(tmp_path)
+        record = self._make_record()
+        mock_reg.get.return_value = record
+        # docker inspect で環境変数を返す
+        mock_subproc.return_value = MagicMock(
+            returncode=0, stdout='["FOO=bar","PATH=/usr/bin"]', stderr=""
+        )
+
+        result = deployer.update("test-server", _log)
+        assert result.last_commit_hash == "new_hash_456"
+        assert result.status == "running"
+        mock_build.assert_called_once()
+        mock_start.assert_called_once()
+        mock_health.assert_called_once()
+        mock_dify.assert_called_once()
+        mock_reg.upsert.assert_called()
+
+
+# ---------------------------------------------------------------------------
+# check_and_update_all
+# ---------------------------------------------------------------------------
+
+class TestCheckAndUpdateAll:
+    @patch("deployer.registry")
+    def test_no_auto_update_servers(self, mock_reg):
+        mock_reg.get_all.return_value = []
+        result = deployer.check_and_update_all(_log)
+        assert result == []
+
+    @patch("deployer.decrypt_token", return_value="")
+    @patch("deployer._get_remote_head", return_value="same_hash")
+    @patch("deployer.registry")
+    def test_no_changes(self, mock_reg, mock_remote, mock_decrypt):
+        record = MagicMock(
+            name="srv", auto_update=True, status="running",
+            github_url="https://github.com/o/r", branch="main",
+            last_commit_hash="same_hash", github_token_enc="",
+        )
+        mock_reg.get_all.return_value = [record]
+        with patch.object(deployer, "GITHUB_TOKEN", ""):
+            result = deployer.check_and_update_all(_log)
+        assert result == []
+
+    @patch("deployer.update")
+    @patch("deployer.decrypt_token", return_value="")
+    @patch("deployer._get_remote_head", return_value="new_hash")
+    @patch("deployer.registry")
+    def test_updates_when_changed(self, mock_reg, mock_remote, mock_decrypt, mock_update):
+        record = MagicMock(
+            auto_update=True, status="running",
+            github_url="https://github.com/o/r", branch="main",
+            last_commit_hash="old_hash", github_token_enc="",
+        )
+        # MagicMock の name は特殊属性なので configure_mock で設定
+        record.configure_mock(name="srv")
+        mock_reg.get_all.return_value = [record]
+        with patch.object(deployer, "GITHUB_TOKEN", ""):
+            result = deployer.check_and_update_all(_log)
+        assert result == ["srv"]
+        mock_update.assert_called_once_with("srv", _log)

@@ -14,6 +14,7 @@
 - **GitHub URL からビルド** — リポジトリ URL を貼るだけで自動ビルド＆デプロイ。npm への公開ステップを飛ばして、ソースコードから直接サーバーを起動
 - **プライベートリポジトリ対応** — プライベート GitHub リポジトリに対応。非公開のまま MCP サーバーを開発・デプロイ可能
 - **即座にイテレーション** — コードを修正したら GitHub に push して再デプロイするだけ。コードから動作確認までのフィードバックループが最短に
+- **自動更新** — サーバーの `auto_update` を有効にすると、GitHub リポジトリの新しいコミットを定期的にチェックし、自動で再デプロイ。手動操作は不要
 - **stdio → SSE 自動変換** — stdio サーバーも自動的に SSE エンドポイントとして公開。ローカルでもリモートでも、あらゆる MCP クライアントからテスト可能
 - **管理 UI** — デプロイ済みサーバーをダッシュボードで一覧管理。起動・停止・削除で環境を整理
 - **セキュア＆セルフホスト** — すべてあなたのインフラ上で動作。Docker Socket Proxy で Docker 操作を最小権限に制限。データが外部に出ることはない
@@ -127,6 +128,7 @@ SSH_PORT=<your-port> sudo bash setup-server.sh
 | `CRUCIBLE_CORS_ORIGINS` | *(localhost)* | CORS 許可オリジン（カンマ区切り） |
 | `REGISTRY_API_KEY` | *(なし)* | API 認証キー |
 | `TOKEN_ENCRYPTION_KEY` | *(なし)* | GitHub Token 暗号化キー |
+| `AUTO_UPDATE_INTERVAL` | `3600` | 自動更新チェック間隔（秒、0 で無効化） |
 
 詳細は [.env.example](.env.example) を参照してください。
 

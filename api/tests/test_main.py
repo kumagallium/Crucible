@@ -299,6 +299,77 @@ class TestRestartServer:
 
 
 # ============================================================
+# POST /api/servers/{name}/update
+# ============================================================
+
+class TestUpdateServer:
+    @patch("main.deployer")
+    @patch("main.registry")
+    def test_returns_202(self, mock_registry, mock_deployer, api_client):
+        mock_registry.exists.return_value = True
+        mock_deployer.update.return_value = None
+        resp = api_client.post("/api/servers/test-server/update")
+        assert resp.status_code == 202
+        assert resp.json()["server_name"] == "test-server"
+
+    @patch("main.registry")
+    def test_not_found_returns_404(self, mock_registry, api_client):
+        mock_registry.exists.return_value = False
+        resp = api_client.post("/api/servers/nonexistent/update")
+        assert resp.status_code == 404
+
+    @patch("main.deployer")
+    @patch("main.registry")
+    def test_update_thread_runs_to_success(self, mock_registry, mock_deployer, api_client):
+        mock_registry.exists.return_value = True
+        event = threading.Event()
+
+        def fake_update(name, log_fn):
+            log_fn("updating...")
+            event.set()
+
+        mock_deployer.update.side_effect = fake_update
+        resp = api_client.post("/api/servers/test-server/update")
+        job_id = resp.json()["job_id"]
+        event.wait(timeout=2)
+        time.sleep(0.2)
+
+        job_resp = api_client.get(f"/api/jobs/{job_id}")
+        assert job_resp.json()["status"] == "success"
+
+
+# ============================================================
+# POST /api/servers/update-check
+# ============================================================
+
+class TestUpdateCheckAll:
+    @patch("main.deployer")
+    def test_returns_202(self, mock_deployer, api_client):
+        mock_deployer.check_and_update_all.return_value = []
+        resp = api_client.post("/api/servers/update-check")
+        assert resp.status_code == 202
+        assert resp.json()["server_name"] == "(update-check)"
+
+    @patch("main.deployer")
+    def test_check_thread_runs_to_success(self, mock_deployer, api_client):
+        event = threading.Event()
+
+        def fake_check(log_fn):
+            log_fn("checking...")
+            event.set()
+            return ["srv1"]
+
+        mock_deployer.check_and_update_all.side_effect = fake_check
+        resp = api_client.post("/api/servers/update-check")
+        job_id = resp.json()["job_id"]
+        event.wait(timeout=2)
+        time.sleep(0.2)
+
+        job_resp = api_client.get(f"/api/jobs/{job_id}")
+        assert job_resp.json()["status"] == "success"
+
+
+# ============================================================
 # GET /api/jobs/{job_id}
 # ============================================================
 

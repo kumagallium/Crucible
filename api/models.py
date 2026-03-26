@@ -33,6 +33,9 @@ class RegisterRequest(BaseModel):
         description="MCP トランスポート (auto=自動検出 / sse=HTTP SSE / stdio=標準入出力→supergateway で SSE 化)",
     )
     dify_auto_register: bool = Field(True, description="Dify へ自動登録するか")
+    auto_update: bool = Field(
+        False, description="GitHub リポジトリ更新時に自動で再デプロイするか"
+    )
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="コンテナに渡す環境変数"
     )
@@ -105,6 +108,12 @@ class ServerRecord(BaseModel):
     )
     github_token_enc: str = Field(
         "", description="暗号化済み GitHub Token (AES-256-GCM + base64url)"
+    )
+    auto_update: bool = Field(
+        False, description="GitHub リポジトリ更新時に自動で再デプロイするか"
+    )
+    last_commit_hash: str = Field(
+        "", description="最後にデプロイしたコミットハッシュ"
     )
 
 
