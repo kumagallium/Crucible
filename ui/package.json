@@ -34,6 +34,7 @@
   "devDependencies": {
     "@storybook/addon-a11y": "^10.2.19",
     "@storybook/addon-docs": "^10.2.19",
+    "@storybook/nextjs": "^10.3.3",
     "@storybook/react-vite": "^10.2.19",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^22.15.0",

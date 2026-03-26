@@ -1,4 +1,4 @@
-import type { StorybookConfig } from "@storybook/react-vite";
+import type { StorybookConfig } from "@storybook/nextjs";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -12,21 +12,7 @@ const config: StorybookConfig = {
     "@storybook/addon-docs",
     "@storybook/addon-a11y",
   ],
-  framework: "@storybook/react-vite",
+  framework: "@storybook/nextjs",
   staticDirs: ["../public"],
-  // Vite 設定: パスエイリアス + JSX 自動インポート
-  async viteFinal(config) {
-    config.resolve = config.resolve || {};
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@": resolve(__dirname, "../src"),
-    };
-    // Next.js と同じく React の自動インポートを有効化
-    config.esbuild = {
-      ...config.esbuild,
-      jsx: "automatic",
-    };
-    return config;
-  },
 };
 export default config;
