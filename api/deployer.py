@@ -746,12 +746,14 @@ def _unregister_dify(name: str, log: LogFn) -> None:
     DB (tool_mcp_providers) から直接削除する。失敗しても削除処理はブロックしない。
     """
     try:
+        # name は models.py のバリデータで [a-z0-9-] のみ許可済みだが、
+        # 防御的にシングルクォートをエスケープして SQL インジェクションを防ぐ
+        safe_name = name.replace("'", "''")
         result = subprocess.run(
             [
                 "docker", "exec", DIFY_DB_CONTAINER,
                 "psql", "-U", DIFY_DB_USER, "-d", DIFY_DB_NAME,
-                "-v", f"target_name={name}",
-                "-c", "DELETE FROM tool_mcp_providers WHERE name = :'target_name';",
+                "-c", f"DELETE FROM tool_mcp_providers WHERE name = '{safe_name}';",
             ],
             capture_output=True,
             text=True,
