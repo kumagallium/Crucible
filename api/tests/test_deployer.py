@@ -427,7 +427,7 @@ class TestRegisterDify:
             mock_requests.post.return_value = mock_resp
             with patch.dict("sys.modules", {"requests": mock_requests}):
                 result = deployer._register_dify("srv", "1.2.3.4", 8100, "🔧", "Srv", _log)
-                assert result is False
+                assert result == (False, "/sse")
 
     def test_success_with_mcp_transport(self):
         with patch.object(deployer, "DIFY_EMAIL", "a@b.c"), patch.object(deployer, "DIFY_PASSWORD", "pw"):

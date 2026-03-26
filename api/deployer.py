@@ -504,17 +504,17 @@ def _register_dify(
         result = login_resp.json()
         if result.get("result") != "success":
             log(f"Dify ログイン失敗: {result}")
-            return False
+            return False, detected_path
     except Exception as e:
         log(f"Dify ログイン失敗: {e}")
-        return False
+        return False, detected_path
 
     # Set-Cookie から直接トークン取得
     access_token = login_resp.cookies.get("access_token", "")
     csrf_token   = login_resp.cookies.get("csrf_token", "")
     if not access_token:
         log("Dify ログイン失敗: access_token クッキーが見つかりません")
-        return False
+        return False, detected_path
 
     # エンドポイント URL の決定: トランスポート自動検出
     # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後

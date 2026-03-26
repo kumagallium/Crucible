@@ -15,9 +15,9 @@ from typing import Optional
 from models import ServerRecord
 
 # レジストリファイルのパス (環境変数で上書き可)
-REGISTRY_PATH = Path(
-    os.environ.get("REGISTRY_FILE", "/var/lib/crucible-registry/servers.json")
-)
+# デフォルトはプロジェクト直下の data/ — Docker では REGISTRY_FILE 環境変数で上書き
+_DEFAULT_REGISTRY = str(Path(__file__).resolve().parent / "data" / "servers.json")
+REGISTRY_PATH = Path(os.environ.get("REGISTRY_FILE", _DEFAULT_REGISTRY))
 
 # ポート・IP 割り当て範囲
 # 公式 (group=default):    port 8001-8099 / IP 172.20.0.11-99
