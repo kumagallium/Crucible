@@ -85,7 +85,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
   }
 
   return (
-    <div className="group rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30 overflow-hidden">
+    <div className="group flex flex-col rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30 overflow-hidden">
       <div
         className={`relative flex items-end h-13 px-3.5 pb-2 ${bannerStyles[server.status] || bannerStyles.stopped}`}
       >
@@ -99,7 +99,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
         </div>
       </div>
 
-      <div className="px-4 pt-2.5 pb-2.5">
+      <div className="flex-1 px-4 pt-2.5 pb-2.5">
         <h3 className="text-sm font-semibold text-foreground truncate">
           {server.display_name}
         </h3>
