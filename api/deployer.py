@@ -185,6 +185,40 @@ def _clone_repo(req: RegisterRequest, dest: Path, log: LogFn, stored_token_enc: 
     )
 
 
+def _get_local_head(clone_dir: Path) -> str:
+    """クローン済みリポジトリの HEAD コミットハッシュを取得する。"""
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=str(clone_dir),
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def _get_remote_head(github_url: str, branch: str, token: str = "") -> str:
+    """リモートリポジトリの最新コミットハッシュを git ls-remote で取得する。"""
+    url = github_url
+    if token and url.startswith("https://github.com/"):
+        url = url.replace("https://github.com/", f"https://{token}@github.com/")
+
+    env = os.environ.copy()
+    env["GIT_TERMINAL_PROMPT"] = "0"
+
+    result = subprocess.run(
+        ["git", "ls-remote", url, f"refs/heads/{branch}"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env=env,
+    )
+    if result.returncode != 0:
+        return ""
+    # 出力形式: "<hash>\trefs/heads/<branch>"
+    parts = result.stdout.strip().split()
+    return parts[0] if parts else ""
+
+
 def _patch_fastmcp_enabled(src_dir: Path, log: LogFn) -> None:
     """FastMCP 3.x 互換パッチ: @mcp.tool(enabled=...) を除去する。
 
@@ -575,6 +609,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         _step(2, TOTAL, f"GitHub クローン: {req.github_url} ({req.branch})", log)
         clone_dir = work_dir / (req.name or "repo")
         _clone_repo(req, clone_dir, log, stored_token_enc=existing_token_enc)
+        commit_hash = _get_local_head(clone_dir)
 
         # サブディレクトリの決定 (モノリポ対応)
         build_dir = clone_dir / req.subdir if req.subdir else clone_dir
@@ -692,6 +727,8 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         endpoint_path=endpoint_path,
         error_message=None,
         github_token_enc=token_enc,
+        auto_update=req.auto_update,
+        last_commit_hash=commit_hash,
     )
     registry.upsert(record)
 
@@ -765,3 +802,161 @@ def refresh_statuses() -> None:
         if record.status != new_status:
             record.status = new_status
             registry.upsert(record)
+
+
+def _resolve_token(record: ServerRecord) -> str:
+    """ServerRecord から復号済み GitHub Token を取得する。"""
+    if record.github_token_enc:
+        return decrypt_token(record.github_token_enc)
+    return GITHUB_TOKEN
+
+
+def update(name: str, log: LogFn) -> ServerRecord:
+    """登録済み MCP サーバーを最新のコミットで再ビルド・再起動する。
+
+    既存のポート・IP・設定を維持したまま、コンテナのみ更新する。
+    """
+    record = registry.get(name)
+    if not record:
+        raise RuntimeError(f"サーバーが見つかりません: {name}")
+
+    log(f"=== MCP サーバー更新開始: {name} ===")
+
+    token = _resolve_token(record)
+
+    # リモートの最新コミットを確認
+    remote_head = _get_remote_head(record.github_url, record.branch, token)
+    if not remote_head:
+        raise RuntimeError(
+            f"リモートリポジトリの HEAD を取得できません: {record.github_url} ({record.branch})"
+        )
+
+    if remote_head == record.last_commit_hash:
+        log(f"変更なし ({remote_head[:7]}) — 更新をスキップ")
+        return record
+
+    log(f"更新検出: {record.last_commit_hash[:7] if record.last_commit_hash else '(不明)'} → {remote_head[:7]}")
+
+    TOTAL = 5
+    work_dir = Path(tempfile.mkdtemp(prefix=f"crucible-update-{name}-"))
+    try:
+        # クローン
+        _step(1, TOTAL, f"GitHub クローン: {record.github_url} ({record.branch})", log)
+        clone_dir = work_dir / name
+        clone_req = RegisterRequest(
+            name=name,
+            github_url=record.github_url,
+            branch=record.branch,
+            subdir=record.subdir,
+        )
+        _clone_repo(clone_req, clone_dir, log, stored_token_enc=record.github_token_enc)
+        commit_hash = _get_local_head(clone_dir)
+
+        build_dir = clone_dir / record.subdir if record.subdir else clone_dir
+
+        # トランスポート検出
+        transport = _detect_transport(build_dir, "auto")
+
+        # ビルド
+        _step(2, TOTAL, "Docker イメージをビルド中...", log)
+        _build_image(
+            name, build_dir, log,
+            context_dir=clone_dir if record.subdir else None,
+        )
+
+        # stdio の場合は mcp-proxy でラップ
+        if transport == "stdio":
+            _wrap_with_mcp_proxy(name, log)
+
+        # コンテナ再起動（既存コンテナを停止→削除→起動）
+        _step(3, TOTAL, "コンテナを再起動中...", log)
+
+        # 既存のコンテナから環境変数を取得
+        env_json = subprocess.run(
+            ["docker", "inspect", "--format", "{{json .Config.Env}}", name],
+            capture_output=True, text=True,
+        )
+        env_vars: dict[str, str] = {}
+        if env_json.returncode == 0:
+            import json as _json
+            for entry in _json.loads(env_json.stdout.strip()):
+                k, _, v = entry.partition("=")
+                # Docker 内部の環境変数（PATH 等）は除外
+                if k not in ("PATH", "HOME", "HOSTNAME", "LANG", "TERM"):
+                    env_vars[k] = v
+
+        _start_container(name, record.port, record.static_ip, env_vars, log)
+
+        # ヘルスチェック
+        _step(4, TOTAL, "ヘルスチェック...", log)
+        _health_check(name, record.port, log)
+
+        # Dify 再登録（既に登録済みの場合のみ）
+        _step(5, TOTAL, "Dify への登録確認...", log)
+        if record.dify_registered:
+            dify_ok, endpoint_path = _register_dify(
+                name, record.static_ip, record.port,
+                record.icon, record.display_name, log,
+            )
+            record.dify_registered = dify_ok
+            record.endpoint_path = endpoint_path
+        else:
+            log("  Dify 未登録のためスキップ")
+
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    # レジストリ更新
+    record.status = "running"
+    record.error_message = None
+    record.last_commit_hash = commit_hash
+    registry.upsert(record)
+
+    log(f"=== 更新完了: {name} ({commit_hash[:7]}) ===")
+    return record
+
+
+def check_and_update_all(log: LogFn) -> list[str]:
+    """auto_update が有効な全サーバーの更新をチェックし、更新があれば再デプロイする。
+
+    Returns:
+        更新されたサーバー名のリスト
+    """
+    updated: list[str] = []
+    servers = registry.get_all()
+    auto_update_servers = [s for s in servers if s.auto_update and s.status == "running"]
+
+    if not auto_update_servers:
+        log("自動更新対象のサーバーはありません")
+        return updated
+
+    log(f"自動更新チェック: {len(auto_update_servers)} サーバー")
+
+    for record in auto_update_servers:
+        try:
+            token = _resolve_token(record)
+            remote_head = _get_remote_head(record.github_url, record.branch, token)
+
+            if not remote_head:
+                log(f"  {record.name}: リモート HEAD 取得失敗 — スキップ")
+                continue
+
+            if remote_head == record.last_commit_hash:
+                log(f"  {record.name}: 変更なし ({remote_head[:7]})")
+                continue
+
+            log(f"  {record.name}: 更新あり ({record.last_commit_hash[:7] if record.last_commit_hash else '?'} → {remote_head[:7]})")
+            update(record.name, log)
+            updated.append(record.name)
+
+        except Exception as e:
+            log(f"  {record.name}: 更新失敗 — {e}")
+            # エラーでも他のサーバーの更新は続ける
+            rec = registry.get(record.name)
+            if rec:
+                rec.status = "error"
+                rec.error_message = f"自動更新失敗: {e}"
+                registry.upsert(rec)
+
+    log(f"自動更新完了: {len(updated)} サーバーを更新")
+    return updated

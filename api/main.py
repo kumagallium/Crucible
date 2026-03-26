@@ -7,6 +7,8 @@ MCP Registry API — FastAPI バックエンド
   GET    /api/servers/{name}            — サーバー詳細
   DELETE /api/servers/{name}            — サーバー削除
   POST   /api/servers/{name}/restart    — サーバー再起動
+  POST   /api/servers/{name}/update     — サーバー更新 (GitHub の最新コミットで再ビルド)
+  POST   /api/servers/update-check      — 全サーバーの自動更新チェック
   GET    /api/jobs/{job_id}             — ジョブ状態取得
   GET    /api/jobs/{job_id}/logs        — ログポーリング (offset パラメータ付き)
 """
@@ -15,7 +17,9 @@ from __future__ import annotations
 import logging
 import os
 import threading
+import time
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
@@ -54,6 +58,36 @@ async def _verify_api_key(key: str = Security(_api_key_header)) -> None:
 
 
 # ==============================================================================
+# 自動更新スケジューラ
+# ==============================================================================
+# 環境変数で更新チェック間隔を設定 (秒、デフォルト: 3600 = 1時間)
+_AUTO_UPDATE_INTERVAL = int(os.environ.get("AUTO_UPDATE_INTERVAL", "3600"))
+
+_update_scheduler_stop = threading.Event()
+
+
+def _auto_update_loop() -> None:
+    """バックグラウンドで定期的に auto_update 有効サーバーの更新をチェックする。"""
+    while not _update_scheduler_stop.wait(timeout=_AUTO_UPDATE_INTERVAL):
+        try:
+            deployer.check_and_update_all(lambda msg: logger.info(f"[auto-update] {msg}"))
+        except Exception:
+            logger.exception("[auto-update] 更新チェック中にエラーが発生しました")
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    # 起動時: スケジューラスレッドを開始
+    if _AUTO_UPDATE_INTERVAL > 0:
+        thread = threading.Thread(target=_auto_update_loop, daemon=True)
+        thread.start()
+        logger.info(f"自動更新スケジューラを開始しました (間隔: {_AUTO_UPDATE_INTERVAL}秒)")
+    yield
+    # シャットダウン時: スケジューラを停止
+    _update_scheduler_stop.set()
+
+
+# ==============================================================================
 # アプリ初期化
 # ==============================================================================
 app = FastAPI(
@@ -61,6 +95,7 @@ app = FastAPI(
     description="Crucible — MCP サーバーの登録・管理 API",
     version="1.0.0",
     dependencies=[Depends(_verify_api_key)],
+    lifespan=_lifespan,
 )
 
 # CORS 設定: 環境変数 CRUCIBLE_CORS_ORIGINS でカスタマイズ可能
@@ -244,6 +279,67 @@ def restart_server(name: str) -> DeployJob:
             _set_job_status(job_id, "error", str(e))
 
     threading.Thread(target=_run_restart, daemon=True).start()
+
+    with _jobs_lock:
+        return _jobs[job_id]
+
+
+# ==============================================================================
+# サーバー更新 (GitHub の最新コミットで再ビルド)
+# ==============================================================================
+@app.post("/api/servers/{name}/update", status_code=202)
+def update_server(name: str) -> DeployJob:
+    """指定サーバーを GitHub の最新コミットで再ビルド・再起動する。"""
+    if not registry.exists(name):
+        raise HTTPException(status_code=404, detail=f"サーバーが見つかりません: {name}")
+
+    job_id = str(uuid.uuid4())
+    job = DeployJob(job_id=job_id, server_name=name, status="pending")
+    with _jobs_lock:
+        _jobs[job_id] = job
+
+    def _run_update() -> None:
+        _set_job_status(job_id, "running")
+        log_fn = lambda msg: _append_log(job_id, msg)
+        try:
+            deployer.update(name, log_fn)
+            _set_job_status(job_id, "success")
+        except Exception as e:
+            rec = registry.get(name)
+            if rec:
+                rec.status = "error"
+                rec.error_message = f"更新失敗: {e}"
+                registry.upsert(rec)
+            _set_job_status(job_id, "error", str(e))
+
+    threading.Thread(target=_run_update, daemon=True).start()
+
+    with _jobs_lock:
+        return _jobs[job_id]
+
+
+# ==============================================================================
+# 全サーバーの自動更新チェック
+# ==============================================================================
+@app.post("/api/servers/update-check", status_code=202)
+def update_check_all() -> DeployJob:
+    """auto_update が有効な全サーバーの更新をチェックし、更新があれば再デプロイする。"""
+    job_id = str(uuid.uuid4())
+    job = DeployJob(job_id=job_id, server_name="(update-check)", status="pending")
+    with _jobs_lock:
+        _jobs[job_id] = job
+
+    def _run_check() -> None:
+        _set_job_status(job_id, "running")
+        log_fn = lambda msg: _append_log(job_id, msg)
+        try:
+            updated = deployer.check_and_update_all(log_fn)
+            log_fn(f"更新されたサーバー: {updated}" if updated else "更新なし")
+            _set_job_status(job_id, "success")
+        except Exception as e:
+            _set_job_status(job_id, "error", str(e))
+
+    threading.Thread(target=_run_check, daemon=True).start()
 
     with _jobs_lock:
         return _jobs[job_id]
