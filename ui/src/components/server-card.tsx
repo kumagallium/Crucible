@@ -18,17 +18,17 @@ import { restartServer, deleteServer, fetchJobLogs } from "@/lib/api";
 import { useI18n } from "@/i18n";
 
 const bannerStyles: Record<string, string> = {
-  running: "bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9]",
-  stopped: "bg-gradient-to-br from-stone-100 to-stone-200",
-  error: "bg-gradient-to-br from-red-100 to-red-200",
-  deploying: "bg-gradient-to-br from-sky-100 to-sky-200",
+  running: "bg-gradient-to-br from-status-running-bg to-status-running-bg-deep",
+  stopped: "bg-gradient-to-br from-status-stopped-bg to-status-stopped-bg-deep",
+  error: "bg-gradient-to-br from-status-error-bg to-status-error-bg-deep",
+  deploying: "bg-gradient-to-br from-status-deploying-bg to-status-deploying-bg-deep",
 };
 
 const iconBg: Record<string, string> = {
-  running: "bg-[#c8e6c9]",
-  stopped: "bg-stone-100",
-  error: "bg-red-100",
-  deploying: "bg-sky-100",
+  running: "bg-status-running-bg-deep",
+  stopped: "bg-status-stopped-bg",
+  error: "bg-status-error-bg",
+  deploying: "bg-status-deploying-bg",
 };
 
 interface ServerCardProps {
@@ -111,7 +111,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
         </p>
 
         {server.status === "error" && server.error_message && (
-          <p className="text-xs text-red-600 mb-1.5">
+          <p className="text-xs text-status-error mb-1.5">
             {server.error_message}
           </p>
         )}
@@ -147,7 +147,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
               setTimeout(() => setCopied(false), 2000);
             }}
           >
-            {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+            {copied ? <Check className="h-3 w-3 text-status-running" /> : <Copy className="h-3 w-3" />}
           </Button>
         </div>
 
@@ -185,7 +185,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-muted-foreground hover:text-red-500 hover:bg-red-50"
+              className="h-7 text-xs text-muted-foreground hover:text-destructive hover:bg-status-error-bg"
               disabled={loading}
             >
               <Trash2 className="h-3 w-3" />

@@ -142,15 +142,15 @@ export function ServersTab() {
 function statusDotColor(status: string): string {
   switch (status) {
     case "running":
-      return "bg-[#4B7A52]";
+      return "bg-status-running";
     case "stopped":
-      return "bg-stone-400";
+      return "bg-status-stopped";
     case "error":
-      return "bg-red-500";
+      return "bg-status-error";
     case "deploying":
-      return "bg-sky-500";
+      return "bg-status-deploying";
     default:
-      return "bg-stone-400";
+      return "bg-status-stopped";
   }
 }
 

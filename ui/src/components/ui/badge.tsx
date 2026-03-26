@@ -14,28 +14,28 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground",
         outline: "text-foreground",
-        // ステータス用（明るいグリーン）
+        // ステータス用
         running:
-          "border-[#a5d6a7] bg-[#e8f5e9] text-[#2e7d32]",
+          "border-status-running-border bg-status-running-bg text-status-running",
         stopped:
-          "border-stone-200 bg-stone-100 text-stone-500",
+          "border-status-stopped-border bg-status-stopped-bg text-status-stopped",
         error:
-          "border-red-200 bg-red-50 text-red-600",
+          "border-status-error-border bg-status-error-bg text-status-error",
         deploying:
-          "border-sky-200 bg-sky-50 text-sky-700",
+          "border-status-deploying-border bg-status-deploying-bg text-status-deploying",
         // グループ用
         official:
-          "border-[#a5d6a7] bg-[#e8f5e9] text-[#2e7d32]",
+          "border-success-border bg-success-bg text-success",
         community:
-          "border-amber-200 bg-amber-50 text-amber-700",
+          "border-warning-border bg-warning-bg text-warning",
         // Dify 用
         difyOk:
-          "border-[#a5d6a7] bg-[#e8f5e9] text-[#2e7d32]",
+          "border-success-border bg-success-bg text-success",
         difyNg:
-          "border-stone-200 bg-stone-100 text-stone-400",
+          "border-status-stopped-border bg-status-stopped-bg text-status-stopped",
         // ポート用
         port:
-          "border-stone-200 bg-stone-100 text-stone-500 font-mono",
+          "border-status-stopped-border bg-status-stopped-bg text-status-stopped font-mono",
       },
     },
     defaultVariants: {

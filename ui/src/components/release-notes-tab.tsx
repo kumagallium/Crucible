@@ -19,11 +19,11 @@ const TAG_LABELS: Record<string, string> = {
 };
 
 const TAG_COLORS: Record<string, string> = {
-  feat: "bg-[#e8f5e9] text-[#2e7d32] border-[#a5d6a7]",
-  fix: "bg-amber-50 text-amber-700 border-amber-200",
+  feat: "bg-success-bg text-success border-success-border",
+  fix: "bg-warning-bg text-warning border-warning-border",
   mcp: "bg-violet-50 text-violet-700 border-violet-200",
-  infra: "bg-sky-50 text-sky-700 border-sky-200",
-  docs: "bg-stone-100 text-stone-600 border-stone-200",
+  infra: "bg-info-bg text-info border-info-border",
+  docs: "bg-status-stopped-bg text-status-stopped border-status-stopped-border",
 };
 
 interface ParsedCommit {
@@ -107,14 +107,14 @@ export function ReleaseNotesTab() {
 
       {featItems.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-[#2e7d32]" />{t("releaseNotes.highlights")}</h3>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-status-running" />{t("releaseNotes.highlights")}</h3>
           <div className="space-y-2">
             {featItems.map((item) => (
               <div
                 key={item.sha}
-                className="flex items-center gap-3 p-3 rounded-xl bg-[#e8f5e9] border border-[#a5d6a7]"
+                className="flex items-center gap-3 p-3 rounded-xl bg-success-bg border border-success-border"
               >
-                <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#c8e6c9] text-[#2e7d32] border border-[#a5d6a7]">
+                <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-status-running-bg-deep text-status-running border border-success-border">
                   {item.tag}
                 </span>
                 <span className="text-sm font-semibold text-foreground flex-1">

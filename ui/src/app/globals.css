@@ -31,10 +31,52 @@
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
+  /* ── 破壊的（テキスト） ── */
+  --color-destructive-text: #dc2626;
+
   /* ── ボーダー・入力 ── */
   --color-border: #d5e0d7;
   --color-input: #d5e0d7;
   --color-ring: #4B7A52;
+
+  /* ── ステータス: Running ── */
+  --color-status-running: #2e7d32;
+  --color-status-running-bg: #e8f5e9;
+  --color-status-running-bg-deep: #c8e6c9;
+  --color-status-running-border: #a5d6a7;
+
+  /* ── ステータス: Stopped ── */
+  --color-status-stopped: oklch(0.553 0.013 58.071);
+  --color-status-stopped-bg: oklch(0.97 0.001 106.424);
+  --color-status-stopped-bg-deep: oklch(0.923 0.003 48.717);
+  --color-status-stopped-border: oklch(0.909 0.005 56.366);
+
+  /* ── ステータス: Error ── */
+  --color-status-error: #dc2626;
+  --color-status-error-bg: oklch(0.971 0.013 17.38);
+  --color-status-error-bg-deep: oklch(0.936 0.032 17.717);
+  --color-status-error-border: oklch(0.908 0.046 15.045);
+
+  /* ── ステータス: Deploying ── */
+  --color-status-deploying: oklch(0.488 0.091 242.943);
+  --color-status-deploying-bg: oklch(0.95 0.022 236.824);
+  --color-status-deploying-bg-deep: oklch(0.916 0.043 240.112);
+  --color-status-deploying-border: oklch(0.882 0.059 241.6);
+
+  /* ── セマンティック: Success ── */
+  --color-success: #2d4a32;
+  --color-success-bg: #edf5ee;
+  --color-success-border: #b8d4bb;
+
+  /* ── セマンティック: Warning ── */
+  --color-warning: oklch(0.555 0.107 74.532);
+  --color-warning-bg: oklch(0.962 0.042 95.277);
+  --color-warning-border: oklch(0.882 0.059 84.429);
+
+  /* ── セマンティック: Info ── */
+  --color-info: oklch(0.488 0.091 242.943);
+  --color-info-bg: oklch(0.95 0.022 236.824);
+  --color-info-border: oklch(0.882 0.059 241.6);
 
   --radius: 0.75rem;
 
