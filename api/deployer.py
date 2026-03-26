@@ -749,8 +749,9 @@ def _unregister_dify(name: str, log: LogFn) -> None:
         result = subprocess.run(
             [
                 "docker", "exec", DIFY_DB_CONTAINER,
-                "psql", "-U", DIFY_DB_USER, "-d", DIFY_DB_NAME, "-c",
-                f"DELETE FROM tool_mcp_providers WHERE name = '{name}';",
+                "psql", "-U", DIFY_DB_USER, "-d", DIFY_DB_NAME,
+                "-v", f"target_name={name}",
+                "-c", "DELETE FROM tool_mcp_providers WHERE name = :'target_name';",
             ],
             capture_output=True,
             text=True,
