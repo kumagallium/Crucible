@@ -114,19 +114,19 @@ export function RegisterTab() {
         </p>
 
         {isSuccess ? (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-[#e8f5e9] border border-[#a5d6a7] mb-6">
-            <CheckCircle2 className="h-6 w-6 text-[#2e7d32] shrink-0" />
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-success-bg border border-success-border mb-6">
+            <CheckCircle2 className="h-6 w-6 text-status-running shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-[#1b5e20]">{t("register.deploySuccess")}</p>
-              <p className="text-xs text-[#2e7d32]">{t("register.deploySuccessHint")}</p>
+              <p className="text-sm font-semibold text-success">{t("register.deploySuccess")}</p>
+              <p className="text-xs text-status-running">{t("register.deploySuccessHint")}</p>
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 mb-6">
-            <XCircle className="h-6 w-6 text-red-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-status-error-bg border border-status-error-border mb-6">
+            <XCircle className="h-6 w-6 text-status-error shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-red-800">{t("register.deployFailed")}</p>
-              <p className="text-xs text-red-600">{t("register.deployFailedHint")}</p>
+              <p className="text-sm font-semibold text-status-error">{t("register.deployFailed")}</p>
+              <p className="text-xs text-destructive-text">{t("register.deployFailedHint")}</p>
             </div>
           </div>
         )}

@@ -30,7 +30,7 @@ function CopyBlock({ code }: { code: string }) {
         className="absolute top-2 right-2 p-1 rounded-md bg-background border text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground"
       >
         {copied ? (
-          <Check className="h-3.5 w-3.5 text-green-600" />
+          <Check className="h-3.5 w-3.5 text-status-running" />
         ) : (
           <Copy className="h-3.5 w-3.5" />
         )}
@@ -104,11 +104,11 @@ export function GuideTab() {
               {t("guide.claudeDesktopDesc")}
             </p>
 
-            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 mb-3">
-              <p className="text-xs text-amber-800 leading-relaxed">
+            <div className="rounded-lg bg-warning-bg border border-warning-border px-3 py-2 mb-3">
+              <p className="text-xs text-warning leading-relaxed">
                 <span className="font-semibold">{t("guide.prerequisite")}</span>{" "}
                 {t("guide.prerequisiteDesc")}{" "}
-                <code className="font-mono bg-amber-100 px-1 rounded">npm install -g mcp-remote</code>{" "}
+                <code className="font-mono bg-warning-bg/80 px-1 rounded">npm install -g mcp-remote</code>{" "}
                 {t("guide.prerequisiteDesc2")}
               </p>
             </div>
