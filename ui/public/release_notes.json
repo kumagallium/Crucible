@@ -1,6 +1,11 @@
 [
   {
-    "sha": "883d1a2",
+    "sha": "951041a",
+    "message": "[fix] Sync ui/package-lock.json with package.json",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "93f4d83",
     "message": "[fix] Fix UI Dockerfile npm compatibility and add fail-fast: false",
     "date": "2026-03-31"
   },
@@ -242,11 +247,6 @@
   {
     "sha": "240020d",
     "message": "[fix] ヘッダーロゴのサイズを本体 UI と統一 (140px幅)",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "d8008bd",
-    "message": "[feat] LP にロゴ適用 + ライトモード化 + デザインガイド準拠",
     "date": "2026-03-15"
   }
 ]
