@@ -18,6 +18,7 @@ jobs:
     name: Build & Push ${{ matrix.component }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - component: api

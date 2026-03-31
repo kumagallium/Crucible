@@ -1,8 +1,98 @@
 [
   {
-    "sha": "e323353",
+    "sha": "883d1a2",
+    "message": "[fix] Fix UI Dockerfile npm compatibility and add fail-fast: false",
+    "date": "2026-03-31"
+  },
+  {
+    "sha": "fe1299d",
     "message": "[infra] Add GitHub Actions workflow for Docker image publishing",
     "date": "2026-03-31"
+  },
+  {
+    "sha": "5c0ff50",
+    "message": "Merge pull request #9 from kumagallium/fix/deprecation-and-jobs-cleanup",
+    "date": "2026-03-31"
+  },
+  {
+    "sha": "3c77b5a",
+    "message": "[fix] Replace deprecated datetime.utcnow() and add jobs cleanup",
+    "date": "2026-03-31"
+  },
+  {
+    "sha": "480bdc9",
+    "message": "[chore] Track uv.lock for reproducible builds",
+    "date": "2026-03-27"
+  },
+  {
+    "sha": "773898d",
+    "message": "[fix] Use quote escaping instead of psql variable substitution",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "6af0210",
+    "message": "[fix] Prevent SQL injection in Dify unregister query",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "f1833f4",
+    "message": "[fix] Base64-encode password for Dify login API",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "5174759",
+    "message": "[docs] Make Dify integration optional in .env.example",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "223c5da",
+    "message": "[fix] Use local-friendly default registry path and fix _register_dify return type",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "cc57722",
+    "message": "[fix] Update npm in Docker to v11 for lock file compatibility",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "344926c",
+    "message": "[fix] Sync package-lock.json to resolve missing @swc/helpers",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "b350346",
+    "message": "[fix] Prevent extra whitespace in server cards with varying content height",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "6e54e65",
+    "message": "Merge pull request #8 from kumagallium/refactor/design-system",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "05b0f79",
+    "message": "[fix] Switch Storybook to @storybook/nextjs framework",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "fa969db",
+    "message": "[refactor] Introduce design system and unify design tokens",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "fd5a5fd",
+    "message": "Merge pull request #7 from kumagallium/feat/auto-update-mcp-servers",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "6fae897",
+    "message": "[docs] Add auto-update feature to README",
+    "date": "2026-03-26"
+  },
+  {
+    "sha": "98cdb62",
+    "message": "[feat] Auto-update MCP servers when GitHub repos are updated",
+    "date": "2026-03-26"
   },
   {
     "sha": "ae6f0d6",
@@ -158,40 +248,5 @@
     "sha": "d8008bd",
     "message": "[feat] LP にロゴ適用 + ライトモード化 + デザインガイド準拠",
     "date": "2026-03-15"
-  },
-  {
-    "sha": "b769d08",
-    "message": "[feat] README 英語化・日本語版分離 + GitHub Pages LP を作成",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "ce7e785",
-    "message": "[chore] .gitignore に .claude を追加",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "4189c89",
-    "message": "[fix] post-commit hook のパスをルート構成に修正 + リリースノート再生成",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "29285b2",
-    "message": "[fix] VPN 前提の記述を削除し localhost ベースに修正",
-    "date": "2026-03-14"
-  },
-  {
-    "sha": "faf0ec9",
-    "message": "[fix] リリースノートを公開リポジトリの履歴に修正",
-    "date": "2026-03-14"
-  },
-  {
-    "sha": "db61ef5",
-    "message": "[fix] ServerCard Storybook に baseUrl prop を追加",
-    "date": "2026-03-14"
-  },
-  {
-    "sha": "17f95bd",
-    "message": "[feat] Crucible Registry の初期リリース",
-    "date": "2026-03-14"
   }
 ]

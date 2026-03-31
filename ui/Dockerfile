@@ -1,5 +1,4 @@
 FROM node:22-alpine AS base
-RUN npm install -g npm@11
 
 # 依存関係インストール
 FROM base AS deps
