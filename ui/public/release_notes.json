@@ -1,6 +1,11 @@
 [
   {
-    "sha": "2a753f2",
+    "sha": "e323353",
+    "message": "[infra] Add GitHub Actions workflow for Docker image publishing",
+    "date": "2026-03-31"
+  },
+  {
+    "sha": "ae6f0d6",
     "message": "[docs] Replace all ASCII diagrams with themed mermaid graphs",
     "date": "2026-03-25"
   },
