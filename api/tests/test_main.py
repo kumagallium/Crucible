@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import time
 import threading
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -473,3 +474,70 @@ class TestGetJobLogs:
     def test_logs_not_found(self, api_client):
         resp = api_client.get("/api/jobs/00000000-0000-0000-0000-000000000000/logs")
         assert resp.status_code == 404
+
+
+# ============================================================
+# _cleanup_old_jobs
+# ============================================================
+
+class TestCleanupOldJobs:
+    def test_removes_expired_jobs(self, api_client, monkeypatch):
+        import main
+        from models import DeployJob
+
+        expired_time = (
+            (datetime.now(UTC) - timedelta(seconds=7200))
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
+        old_job = DeployJob(
+            job_id="old-job",
+            server_name="old-server",
+            status="success",
+            finished_at=expired_time,
+        )
+        with main._jobs_lock:
+            main._jobs["old-job"] = old_job
+
+        main._cleanup_old_jobs()
+
+        with main._jobs_lock:
+            assert "old-job" not in main._jobs
+
+    def test_keeps_recent_jobs(self, api_client, monkeypatch):
+        import main
+        from models import DeployJob
+
+        recent_time = (
+            datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        )
+        recent_job = DeployJob(
+            job_id="recent-job",
+            server_name="recent-server",
+            status="success",
+            finished_at=recent_time,
+        )
+        with main._jobs_lock:
+            main._jobs["recent-job"] = recent_job
+
+        main._cleanup_old_jobs()
+
+        with main._jobs_lock:
+            assert "recent-job" in main._jobs
+
+    def test_keeps_running_jobs(self, api_client, monkeypatch):
+        import main
+        from models import DeployJob
+
+        running_job = DeployJob(
+            job_id="running-job",
+            server_name="running-server",
+            status="running",
+        )
+        with main._jobs_lock:
+            main._jobs["running-job"] = running_job
+
+        main._cleanup_old_jobs()
+
+        with main._jobs_lock:
+            assert "running-job" in main._jobs
