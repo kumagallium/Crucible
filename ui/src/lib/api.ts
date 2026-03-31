@@ -1,4 +1,4 @@
-import type { Server, RegisterRequest, JobResponse, LogsResponse } from "./types";
+import type { Server, RegisterRequest, JobResponse, LogsResponse, CatalogEntry, CatalogCategory } from "./types";
 
 // サーバーサイド: 環境変数から取得、クライアントサイド: /api プロキシ経由
 const API_BASE =
@@ -87,5 +87,16 @@ export async function deleteServer(name: string): Promise<JobResponse> {
 export async function fetchJobLogs(jobId: string, offset = 0): Promise<LogsResponse> {
   const res = await fetch(`/api/jobs/${jobId}/logs?offset=${offset}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+// --- e4m MCP カタログ ---
+
+export async function fetchCatalog(): Promise<{
+  servers: CatalogEntry[];
+  categories: CatalogCategory[];
+}> {
+  const res = await fetch("/api/catalog");
+  if (!res.ok) throw new Error(`Catalog API error: ${res.status}`);
   return res.json();
 }

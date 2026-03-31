@@ -56,7 +56,21 @@
     "envVars": "Environment Variables (KEY=VALUE, one per line)",
     "deploying": "Deploying...",
     "deployStart": "Start Deploy",
-    "error": "Error: "
+    "error": "Error: ",
+    "modeCatalog": "From Catalog",
+    "modeManual": "GitHub URL",
+    "catalogSelected": "\"{name}\" selected",
+    "catalogSelectedHint": "Review and edit the details, then deploy.",
+    "catalogChange": "Change"
+  },
+  "catalog": {
+    "loading": "Loading catalog...",
+    "error": "Failed to load catalog",
+    "searchPlaceholder": "Search by name, description, or tags...",
+    "filterAll": "All",
+    "noResults": "No matching servers found",
+    "requiresEnvVars": "Env vars required",
+    "viewFullCatalog": "View full catalog on e4m.jp"
   },
   "guide": {
     "title": "Guide",

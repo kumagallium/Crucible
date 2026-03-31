@@ -54,3 +54,41 @@ export interface ReleaseNote {
 
 export type ServerStatus = Server["status"];
 export type ServerGroup = Server["group"];
+
+// --- e4m MCP カタログ ---
+
+export interface CatalogTool {
+  name: string;
+  description: string;
+  example?: string;
+}
+
+export interface CatalogEnvVar {
+  name: string;
+  description: string;
+  required: boolean;
+}
+
+export interface CatalogEntry {
+  id: number;
+  name: string;
+  description: string;
+  author: string;
+  repo: string;
+  category_slug: string;
+  category_label: string;
+  tags: string[];
+  install_command: string;
+  tool_count: number;
+  tools_json: CatalogTool[];
+  env_vars_json: CatalogEnvVar[];
+  config_json: Record<string, unknown>;
+  trust_level: "e4m" | "official" | "verified" | "community";
+  featured: boolean;
+}
+
+export interface CatalogCategory {
+  id: number;
+  slug: string;
+  label: string;
+}

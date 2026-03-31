@@ -28,6 +28,13 @@ const badgeVariants = cva(
           "border-success-border bg-success-bg text-success",
         community:
           "border-warning-border bg-warning-bg text-warning",
+        // カタログ trust_level 用
+        e4m:
+          "border-info-border bg-info-bg text-info",
+        verified:
+          "border-success-border bg-success-bg text-success",
+        featured:
+          "border-warning-border bg-warning-bg text-warning",
         // Dify 用
         difyOk:
           "border-success-border bg-success-bg text-success",
