@@ -20,7 +20,7 @@ import threading
 import time
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Security
@@ -117,11 +117,30 @@ app.add_middleware(
 # ジョブストア (メモリ内; 再起動で消える)
 _jobs: dict[str, DeployJob] = {}
 _jobs_lock = threading.Lock()
+_JOBS_TTL_SECONDS = int(os.environ.get("JOBS_TTL_SECONDS", "3600"))
 
 
 # ==============================================================================
 # ユーティリティ
 # ==============================================================================
+def _cleanup_old_jobs() -> None:
+    """完了済みジョブで TTL を超えたものを削除する。"""
+    now = datetime.now(UTC)
+    with _jobs_lock:
+        expired = [
+            jid
+            for jid, job in _jobs.items()
+            if job.status in ("success", "error")
+            and job.finished_at
+            and (
+                now - datetime.fromisoformat(job.finished_at.replace("Z", "+00:00"))
+            ).total_seconds()
+            > _JOBS_TTL_SECONDS
+        ]
+        for jid in expired:
+            del _jobs[jid]
+
+
 def _get_job(job_id: str) -> DeployJob:
     with _jobs_lock:
         if job_id not in _jobs:
@@ -130,7 +149,7 @@ def _get_job(job_id: str) -> DeployJob:
 
 
 def _append_log(job_id: str, message: str) -> None:
-    ts = datetime.utcnow().strftime("%H:%M:%S")
+    ts = datetime.now(UTC).strftime("%H:%M:%S")
     line = f"[{ts}] {message}"
     with _jobs_lock:
         if job_id in _jobs:
@@ -145,7 +164,7 @@ def _set_job_status(
     with _jobs_lock:
         if job_id in _jobs:
             _jobs[job_id].status = status  # type: ignore[assignment]
-            _jobs[job_id].finished_at = datetime.utcnow().isoformat() + "Z"
+            _jobs[job_id].finished_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
             if error_message:
                 _jobs[job_id].logs.append(f"[ERROR] {error_message}")
 
@@ -187,7 +206,8 @@ def register_server(req: RegisterRequest) -> DeployJob:
                 status_code=409, detail=f"サーバー名 '{req.name}' は既に登録されています"
             )
 
-    # ジョブ作成（名前が未解決の場合は仮置き）
+    # 古いジョブをクリーンアップしてから新規作成
+    _cleanup_old_jobs()
     job_id = str(uuid.uuid4())
     job = DeployJob(
         job_id=job_id,
@@ -235,6 +255,7 @@ def delete_server(name: str) -> DeployJob:
     if not registry.exists(name):
         raise HTTPException(status_code=404, detail=f"サーバーが見つかりません: {name}")
 
+    _cleanup_old_jobs()
     job_id = str(uuid.uuid4())
     job = DeployJob(job_id=job_id, server_name=name, status="pending")
     with _jobs_lock:
@@ -264,6 +285,7 @@ def restart_server(name: str) -> DeployJob:
     if not registry.exists(name):
         raise HTTPException(status_code=404, detail=f"サーバーが見つかりません: {name}")
 
+    _cleanup_old_jobs()
     job_id = str(uuid.uuid4())
     job = DeployJob(job_id=job_id, server_name=name, status="pending")
     with _jobs_lock:
@@ -293,6 +315,7 @@ def update_server(name: str) -> DeployJob:
     if not registry.exists(name):
         raise HTTPException(status_code=404, detail=f"サーバーが見つかりません: {name}")
 
+    _cleanup_old_jobs()
     job_id = str(uuid.uuid4())
     job = DeployJob(job_id=job_id, server_name=name, status="pending")
     with _jobs_lock:
@@ -324,6 +347,7 @@ def update_server(name: str) -> DeployJob:
 @app.post("/api/servers/update-check", status_code=202)
 def update_check_all() -> DeployJob:
     """auto_update が有効な全サーバーの更新をチェックし、更新があれば再デプロイする。"""
+    _cleanup_old_jobs()
     job_id = str(uuid.uuid4())
     job = DeployJob(job_id=job_id, server_name="(update-check)", status="pending")
     with _jobs_lock:

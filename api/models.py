@@ -3,7 +3,7 @@ MCP Registry API — Pydantic モデル定義
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
@@ -96,10 +96,10 @@ class ServerRecord(BaseModel):
     static_ip: str
     status: Literal["running", "stopped", "error", "deploying"] = "deploying"
     created_at: str = Field(
-        default_factory=lambda: datetime.utcnow().isoformat() + "Z"
+        default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z")
     )
     updated_at: str = Field(
-        default_factory=lambda: datetime.utcnow().isoformat() + "Z"
+        default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z")
     )
     error_message: Optional[str] = None
     dify_registered: bool = False
@@ -125,7 +125,7 @@ class DeployJob(BaseModel):
     status: Literal["pending", "running", "success", "error"] = "pending"
     logs: list[str] = Field(default_factory=list)
     created_at: str = Field(
-        default_factory=lambda: datetime.utcnow().isoformat() + "Z"
+        default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z")
     )
     finished_at: Optional[str] = None
 

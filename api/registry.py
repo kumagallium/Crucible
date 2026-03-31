@@ -68,11 +68,11 @@ def get(name: str) -> Optional[ServerRecord]:
 
 def upsert(record: ServerRecord) -> None:
     """サーバーレコードを作成または更新する。"""
-    from datetime import datetime
+    from datetime import UTC, datetime
 
     data = load()
     rec_dict = record.model_dump()
-    rec_dict["updated_at"] = datetime.utcnow().isoformat() + "Z"
+    rec_dict["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     data[record.name] = rec_dict
     save(data)
 
