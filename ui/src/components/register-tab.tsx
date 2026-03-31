@@ -14,17 +14,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Rocket, ChevronDown, ChevronRight, CheckCircle2, XCircle, Plus } from "lucide-react";
+import { Rocket, ChevronDown, ChevronRight, CheckCircle2, XCircle, Plus, BookOpen, GitBranch } from "lucide-react";
 import { registerServer, fetchJobLogs } from "@/lib/api";
-import type { RegisterRequest } from "@/lib/types";
+import type { RegisterRequest, CatalogEntry } from "@/lib/types";
 import { useI18n } from "@/i18n";
+import { CatalogImport } from "./catalog-import";
+
+type Mode = "catalog" | "manual";
 
 export function RegisterTab() {
   const { t } = useI18n();
+  const [mode, setMode] = useState<Mode>("catalog");
   const [deploying, setDeploying] = useState(false);
   const [deployStatus, setDeployStatus] = useState<"success" | "error" | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<CatalogEntry | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -33,7 +38,22 @@ export function RegisterTab() {
     setLogs([]);
     setDeploying(false);
     setShowAdvanced(false);
+    setSelectedEntry(null);
     formRef.current?.reset();
+  }
+
+  function handleCatalogSelect(entry: CatalogEntry) {
+    setSelectedEntry(entry);
+    setShowAdvanced(true);
+    // モードを手動に切り替え、フォームにカタログデータを流し込む
+    setMode("manual");
+  }
+
+  // カタログエントリから環境変数テンプレートを生成
+  function buildEnvTemplate(entry: CatalogEntry): string {
+    return entry.env_vars_json
+      .map((v) => `${v.name}=`)
+      .join("\n");
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -104,6 +124,7 @@ export function RegisterTab() {
     }
   }
 
+  // --- デプロイ結果画面 ---
   if (deployStatus !== null) {
     const isSuccess = deployStatus === "success";
     return (
@@ -151,6 +172,7 @@ export function RegisterTab() {
     );
   }
 
+  // --- メイン登録画面 ---
   return (
     <div>
       <h2 className="text-lg font-semibold mb-1">{t("register.title")}</h2>
@@ -158,158 +180,236 @@ export function RegisterTab() {
         {t("register.description")}
       </p>
 
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <h3 className="text-sm font-medium mb-3">{t("register.githubRepo")}</h3>
-          <div className="grid grid-cols-4 gap-3">
-            <div className="col-span-3">
-              <Label htmlFor="github_url">{t("register.githubUrl")}</Label>
-              <Input
-                id="github_url"
-                name="github_url"
-                placeholder="https://github.com/your-org/your-mcp-server"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="branch">{t("register.branch")}</Label>
-              <Input id="branch" name="branch" defaultValue="main" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            <div>
-              <Label htmlFor="subdir">{t("register.subdir")}</Label>
-              <Input
-                id="subdir"
-                name="subdir"
-                placeholder={t("register.subdirPlaceholder")}
-              />
-            </div>
-            <div>
-              <Label htmlFor="github_token">{t("register.githubToken")}</Label>
-              <Input
-                id="github_token"
-                name="github_token"
-                type="password"
-                placeholder={t("register.githubTokenPlaceholder")}
-              />
-            </div>
-          </div>
-        </div>
+      {/* モード切替タブ */}
+      <div className="flex gap-1 p-1 rounded-lg bg-muted mb-6">
+        <button
+          onClick={() => { setMode("catalog"); setSelectedEntry(null); }}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            mode === "catalog"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <BookOpen className="h-4 w-4" />
+          {t("register.modeCatalog")}
+        </button>
+        <button
+          onClick={() => setMode("manual")}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            mode === "manual"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <GitBranch className="h-4 w-4" />
+          {t("register.modeManual")}
+        </button>
+      </div>
 
-        <Separator />
+      {/* カタログモード */}
+      {mode === "catalog" && (
+        <CatalogImport onSelect={handleCatalogSelect} />
+      )}
 
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {showAdvanced ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-            {t("register.advancedToggle")}
-          </button>
-
-          {showAdvanced && (
-            <div className="mt-3 space-y-3 pl-1">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="name">{t("register.serverName")}</Label>
-                  <Input id="name" name="name" placeholder="my-server" pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]" />
-                  <p className="text-xs text-muted-foreground mt-1">{t("register.serverNameHint")}</p>
-                </div>
-                <div>
-                  <Label htmlFor="display_name">{t("register.displayName")}</Label>
-                  <Input
-                    id="display_name"
-                    name="display_name"
-                    placeholder="My MCP Server"
-                  />
-                </div>
+      {/* 手動モード（カタログ選択後も含む） */}
+      {mode === "manual" && (
+        <>
+          {/* カタログから選択された場合のバナー — MASTER.md 8.5 Info アラート */}
+          {selectedEntry && (
+            <div className="flex items-center gap-3 p-4 rounded-xl border bg-info-bg border-info-border mb-6">
+              <BookOpen className="h-4 w-4 text-info shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-info">
+                  {t("register.catalogSelected", { name: selectedEntry.name })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("register.catalogSelectedHint")}
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="icon">{t("register.icon")}</Label>
+              <button
+                onClick={() => { setSelectedEntry(null); setMode("catalog"); }}
+                className="text-xs text-info hover:underline shrink-0"
+              >
+                {t("register.catalogChange")}
+              </button>
+            </div>
+          )}
+
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium mb-3">{t("register.githubRepo")}</h3>
+              <div className="grid grid-cols-4 gap-3">
+                <div className="col-span-3">
+                  <Label htmlFor="github_url">{t("register.githubUrl")}</Label>
                   <Input
-                    id="icon"
-                    name="icon"
-                    placeholder="🔧"
-                    maxLength={4}
+                    id="github_url"
+                    name="github_url"
+                    placeholder="https://github.com/your-org/your-mcp-server"
+                    defaultValue={selectedEntry?.repo ?? ""}
+                    required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="group">{t("register.group")}</Label>
-                  <Select name="group" defaultValue="user">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">
-                        {t("register.groupCommunity")}
-                      </SelectItem>
-                      <SelectItem value="default">
-                        {t("register.groupOfficial")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="branch">{t("register.branch")}</Label>
+                  <Input id="branch" name="branch" defaultValue="main" />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="description">{t("register.descriptionLabel")}</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder={t("register.descriptionPlaceholder")}
-                  rows={2}
-                />
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div>
+                  <Label htmlFor="subdir">{t("register.subdir")}</Label>
+                  <Input
+                    id="subdir"
+                    name="subdir"
+                    placeholder={t("register.subdirPlaceholder")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="github_token">{t("register.githubToken")}</Label>
+                  <Input
+                    id="github_token"
+                    name="github_token"
+                    type="password"
+                    placeholder={t("register.githubTokenPlaceholder")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showAdvanced ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                {t("register.advancedToggle")}
+              </button>
+
+              {showAdvanced && (
+                <div className="mt-3 space-y-3 pl-1">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="name">{t("register.serverName")}</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        placeholder="my-server"
+                        defaultValue={selectedEntry ? selectedEntry.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") : ""}
+                        pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">{t("register.serverNameHint")}</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="display_name">{t("register.displayName")}</Label>
+                      <Input
+                        id="display_name"
+                        name="display_name"
+                        placeholder="My MCP Server"
+                        defaultValue={selectedEntry?.name ?? ""}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="icon">{t("register.icon")}</Label>
+                      <Input
+                        id="icon"
+                        name="icon"
+                        placeholder="🔧"
+                        maxLength={4}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="group">{t("register.group")}</Label>
+                      <Select name="group" defaultValue={selectedEntry?.trust_level === "e4m" || selectedEntry?.trust_level === "official" ? "default" : "user"}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">
+                            {t("register.groupCommunity")}
+                          </SelectItem>
+                          <SelectItem value="default">
+                            {t("register.groupOfficial")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="description">{t("register.descriptionLabel")}</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      placeholder={t("register.descriptionPlaceholder")}
+                      defaultValue={selectedEntry?.description ?? ""}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center gap-2">
+              <Checkbox id="dify_auto" name="dify_auto" defaultChecked />
+              <Label htmlFor="dify_auto" className="cursor-pointer">
+                {t("register.difyAutoRegister")}
+              </Label>
+            </div>
+
+            <div>
+              <Label htmlFor="env_vars">{t("register.envVars")}</Label>
+              <Textarea
+                id="env_vars"
+                name="env_vars"
+                placeholder="MP_API_KEY=your_key"
+                defaultValue={selectedEntry ? buildEnvTemplate(selectedEntry) : ""}
+                rows={3}
+              />
+              {selectedEntry && selectedEntry.env_vars_json.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {selectedEntry.env_vars_json.map((v) => (
+                    <p key={v.name} className="text-xs text-muted-foreground">
+                      <span className="font-mono font-medium">{v.name}</span>
+                      {v.required && <span className="text-amber-600 dark:text-amber-400 ml-1">*</span>}
+                      {" — "}{v.description}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={deploying}
+            >
+              <Rocket className="h-4 w-4" />
+              {deploying ? t("register.deploying") : t("register.deployStart")}
+            </Button>
+          </form>
+
+          {deploying && logs.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-medium mb-2">{t("register.deployLog")}</h3>
+              <div
+                ref={logRef}
+                className="h-56 overflow-y-auto rounded-lg border bg-stone-900 text-stone-400 font-mono text-xs leading-relaxed p-3 whitespace-pre-wrap break-all"
+              >
+                {logs.join("\n")}
               </div>
             </div>
           )}
-        </div>
-
-        <Separator />
-
-        <div className="flex items-center gap-2">
-          <Checkbox id="dify_auto" name="dify_auto" defaultChecked />
-          <Label htmlFor="dify_auto" className="cursor-pointer">
-            {t("register.difyAutoRegister")}
-          </Label>
-        </div>
-
-        <div>
-          <Label htmlFor="env_vars">{t("register.envVars")}</Label>
-          <Textarea
-            id="env_vars"
-            name="env_vars"
-            placeholder="MP_API_KEY=your_key"
-            rows={3}
-          />
-        </div>
-
-        <Button
-          type="submit"
-          className="w-full"
-          size="lg"
-          disabled={deploying}
-        >
-          <Rocket className="h-4 w-4" />
-          {deploying ? t("register.deploying") : t("register.deployStart")}
-        </Button>
-      </form>
-
-      {deploying && logs.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium mb-2">{t("register.deployLog")}</h3>
-          <div
-            ref={logRef}
-            className="h-56 overflow-y-auto rounded-lg border bg-stone-900 text-stone-400 font-mono text-xs leading-relaxed p-3 whitespace-pre-wrap break-all"
-          >
-            {logs.join("\n")}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -80,6 +80,21 @@ export const Port: Story = {
   args: { variant: "port", children: ":8001" },
 };
 
+/** E4M（カタログ trust_level） */
+export const E4M: Story = {
+  args: { variant: "e4m", children: "e4m" },
+};
+
+/** Verified（カタログ trust_level） */
+export const Verified: Story = {
+  args: { variant: "verified", children: "verified" },
+};
+
+/** Featured（カタログ） */
+export const Featured: Story = {
+  args: { variant: "featured", children: "featured" },
+};
+
 /**
  * 全 variant を一覧表示するストーリー
  */
@@ -99,6 +114,9 @@ export const AllVariants: Story = {
       <Badge variant="difyOk">✓ Dify</Badge>
       <Badge variant="difyNg">Dify</Badge>
       <Badge variant="port">:8001</Badge>
+      <Badge variant="e4m">e4m</Badge>
+      <Badge variant="verified">verified</Badge>
+      <Badge variant="featured">featured</Badge>
     </div>
   ),
 };

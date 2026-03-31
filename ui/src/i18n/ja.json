@@ -56,7 +56,21 @@
     "envVars": "環境変数 (KEY=VALUE、1行1変数)",
     "deploying": "デプロイ中...",
     "deployStart": "デプロイ開始",
-    "error": "エラー: "
+    "error": "エラー: ",
+    "modeCatalog": "カタログから選択",
+    "modeManual": "GitHub URL を入力",
+    "catalogSelected": "「{name}」を選択しました",
+    "catalogSelectedHint": "内容を確認・編集してデプロイしてください。",
+    "catalogChange": "変更"
+  },
+  "catalog": {
+    "loading": "カタログを読み込み中...",
+    "error": "カタログの取得に失敗しました",
+    "searchPlaceholder": "サーバー名・説明・タグで検索...",
+    "filterAll": "すべて",
+    "noResults": "該当するサーバーがありません",
+    "requiresEnvVars": "環境変数が必要",
+    "viewFullCatalog": "e4m.jp でカタログ全体を見る"
   },
   "guide": {
     "title": "Guide",
