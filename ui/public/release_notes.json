@@ -1,6 +1,11 @@
 [
   {
-    "sha": "951041a",
+    "sha": "94b455e",
+    "message": "[fix] Use npm install instead of npm ci for cross-version compatibility",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "ed23892",
     "message": "[fix] Sync ui/package-lock.json with package.json",
     "date": "2026-04-01"
   },
@@ -242,11 +247,6 @@
   {
     "sha": "141ed52",
     "message": "Merge pull request #1 from kumagallium/feat/readme-and-lp",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "240020d",
-    "message": "[fix] ヘッダーロゴのサイズを本体 UI と統一 (140px幅)",
     "date": "2026-03-15"
   }
 ]
