@@ -19,7 +19,10 @@
     "noServersHint": "「Register」タブから追加してください"
   },
   "serverCard": {
+    "stop": "停止",
     "restart": "再起動",
+    "retry": "リトライ",
+    "difyConnect": "Dify 接続",
     "delete": "削除",
     "deleteTitle": "サーバーを削除",
     "deleteConfirm": "「{name}」を削除しますか？この操作は取り消せません。",

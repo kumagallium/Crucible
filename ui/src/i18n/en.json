@@ -19,7 +19,10 @@
     "noServersHint": "Add one from the \"Register\" tab"
   },
   "serverCard": {
+    "stop": "Stop",
     "restart": "Restart",
+    "retry": "Retry",
+    "difyConnect": "Connect Dify",
     "delete": "Delete",
     "deleteTitle": "Delete Server",
     "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
