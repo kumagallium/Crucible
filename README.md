@@ -204,7 +204,7 @@ graph LR
 | Repository | Role | Link |
 |------------|------|------|
 | **Crucible** (Registry) | MCP server build, deploy & management | *(this repo)* |
-| **Crucible Agent** | AI agent runtime with MCP tool support | [kumagallium/crucible-agent](https://github.com/kumagallium/crucible-agent) |
+| **Crucible Agent** | AI agent runtime with MCP tool support | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **provnote** | PROV-DM provenance tracking editor | [kumagallium/provnote](https://github.com/kumagallium/provnote) |
 
 Each project works independently. Together, they form a complete pipeline: Registry manages MCP servers → Agent connects them to LLMs → provnote provides a UI with provenance tracking.

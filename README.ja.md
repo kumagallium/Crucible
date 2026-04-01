@@ -204,7 +204,7 @@ graph LR
 | リポジトリ | 役割 | リンク |
 |-----------|------|--------|
 | **Crucible** (Registry) | MCP サーバーのビルド・デプロイ・管理 | *(このリポジトリ)* |
-| **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/crucible-agent](https://github.com/kumagallium/crucible-agent) |
+| **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **provnote** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/provnote](https://github.com/kumagallium/provnote) |
 
 各プロジェクトは単体でも使えます。組み合わせると、Registry が MCP サーバーを管理 → Agent が LLM と接続 → provnote がプロヴェナンス付きの UI を提供、というパイプラインになります。
