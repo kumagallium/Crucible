@@ -191,23 +191,23 @@ Crucible はエコシステムの一部として機能します：
 graph LR
     Registry["🔧 Crucible<br/><b>Registry</b><br/><i>MCP サーバーの<br/>ビルド & デプロイ</i>"]
     Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI エージェント<br/>ランタイム</i>"]
-    provnote["📝 <b>provnote</b><br/><i>プロヴェナンス<br/>追跡エディタ</i>"]
+    Graphium["📝 <b>Graphium</b><br/><i>プロヴェナンス<br/>追跡エディタ</i>"]
 
     Registry -- "ツール自動検出" --> Agent
-    Agent -- "POST /agent/run" --> provnote
+    Agent -- "POST /agent/run" --> Graphium
 
     style Registry fill:#edf5ee,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
     style Agent fill:#ede8f5,stroke:#8b7ab5,stroke-width:2px,color:#4a3d6e
-    style provnote fill:#e8f0f8,stroke:#5b8fb9,stroke-width:2px,color:#2d4a6e
+    style Graphium fill:#e8f0f8,stroke:#5b8fb9,stroke-width:2px,color:#2d4a6e
 ```
 
 | リポジトリ | 役割 | リンク |
 |-----------|------|--------|
 | **Crucible** | MCP サーバーのビルド・デプロイ・管理 | *(このリポジトリ)* |
 | **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
-| **provnote** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/provnote](https://github.com/kumagallium/provnote) |
+| **Graphium** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-各プロジェクトは単体でも使えます。組み合わせると、Registry が MCP サーバーを管理 → Agent が LLM と接続 → provnote がプロヴェナンス付きの UI を提供、というパイプラインになります。
+各プロジェクトは単体でも使えます。組み合わせると、Registry が MCP サーバーを管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
 
 ## ライセンス
 
