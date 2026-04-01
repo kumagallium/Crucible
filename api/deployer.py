@@ -39,6 +39,9 @@ DIFY_DB_NAME      = os.environ.get("DIFY_DB_NAME", "dify")
 
 # ポートバインド先 IP（MCP サーバーコンテナを公開する先の IP）
 CRUCIBLE_HOST     = os.environ.get("CRUCIBLE_HOST", "127.0.0.1")
+# ヘルスチェック用アクセス先（Docker Compose 等でコンテナ内から
+# CRUCIBLE_HOST に到達できない場合に別の値を指定する）
+HEALTH_CHECK_HOST = os.environ.get("CRUCIBLE_HEALTH_HOST", "") or CRUCIBLE_HOST
 
 # ヘルスチェック設定
 HEALTH_CHECK_RETRIES = 24
@@ -450,11 +453,12 @@ def _health_check(name: str, port: int, log: LogFn) -> None:
             continue
 
         # HTTP 応答を確認（/mcp または /sse に接続を試行）
-        # CRUCIBLE_HOST にバインドされているため localhost ではなく CRUCIBLE_HOST を使用
+        # HEALTH_CHECK_HOST を使用（Docker Compose ではコンテナ内から
+        # CRUCIBLE_HOST に到達できないため別の値を使う場合がある）
         # 404 でもサーバーが応答していれば OK
         for path in ("/mcp", "/sse"):
             try:
-                resp = req_lib.get(f"http://{CRUCIBLE_HOST}:{port}{path}", timeout=2)
+                resp = req_lib.get(f"http://{HEALTH_CHECK_HOST}:{port}{path}", timeout=2)
                 log(f"  ヘルスチェック OK — HTTP 応答確認 ({path} → {resp.status_code}) ({i}/{HEALTH_CHECK_RETRIES})")
                 return
             except req_lib.exceptions.Timeout:
@@ -521,10 +525,10 @@ def _register_dify(
 
     # エンドポイント URL の決定: トランスポート自動検出
     # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後
-    # ヘルスチェック同様、CRUCIBLE_HOST:port でプローブし、
+    # ヘルスチェック同様、HEALTH_CHECK_HOST:port でプローブし、
     # Dify 登録用の URL は static_ip:8000 で構築する
     dify_base_url = f"http://{static_ip}:8000"
-    probe_base_url = f"http://{CRUCIBLE_HOST}:{port}"
+    probe_base_url = f"http://{HEALTH_CHECK_HOST}:{port}"
     server_url = f"{dify_base_url}/sse"  # デフォルトは SSE
     try:
         # /mcp を確認（Streamable HTTP: 即座にレスポンスが返る）

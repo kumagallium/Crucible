@@ -1,6 +1,11 @@
 [
   {
-    "sha": "94b455e",
+    "sha": "75fa34d",
+    "message": "[feat] Add CRUCIBLE_HEALTH_HOST for Docker Compose health checks",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "156bcd4",
     "message": "[fix] Use npm install instead of npm ci for cross-version compatibility",
     "date": "2026-04-01"
   },
@@ -242,11 +247,6 @@
   {
     "sha": "cefb264",
     "message": "[feat] Add i18n support with JA/EN language switching",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "141ed52",
-    "message": "Merge pull request #1 from kumagallium/feat/readme-and-lp",
     "date": "2026-03-15"
   }
 ]
