@@ -49,6 +49,12 @@ export function RegisterTab() {
     setMode("manual");
   }
 
+  // install_command からサブディレクトリを抽出（例: "cd e4m-data && uv sync" → "e4m-data"）
+  function extractSubdir(entry: CatalogEntry): string {
+    const match = entry.install_command?.match(/^cd\s+([^\s&|;]+)/);
+    return match ? match[1] : "";
+  }
+
   // カタログエントリから環境変数テンプレートを生成
   function buildEnvTemplate(entry: CatalogEntry): string {
     return entry.env_vars_json
@@ -261,6 +267,7 @@ export function RegisterTab() {
                     id="subdir"
                     name="subdir"
                     placeholder={t("register.subdirPlaceholder")}
+                    defaultValue={selectedEntry ? extractSubdir(selectedEntry) : ""}
                   />
                 </div>
                 <div>

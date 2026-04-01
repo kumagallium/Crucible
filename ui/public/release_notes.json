@@ -1,6 +1,16 @@
 [
   {
-    "sha": "0456b47",
+    "sha": "ae32cf0",
+    "message": "[fix] Auto-fill subdir field from catalog install_command",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "92dc63b",
+    "message": "Merge pull request #11 from kumagallium/feat/server-lifecycle-management",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "608e008",
     "message": "[feat] Add server stop, Dify reconnect, and status-aware action buttons",
     "date": "2026-04-01"
   },
@@ -238,15 +248,5 @@
     "sha": "8a00b04",
     "message": "Merge pull request #3 from kumagallium/refactor/reposition-sandbox-messaging",
     "date": "2026-03-16"
-  },
-  {
-    "sha": "ae79ab2",
-    "message": "[refactor] Reposition Crucible from \"registry\" to \"development sandbox\"",
-    "date": "2026-03-16"
-  },
-  {
-    "sha": "3748dac",
-    "message": "[fix] Regenerate package-lock.json with Node 22 for Docker compatibility",
-    "date": "2026-03-15"
   }
 ]
