@@ -25,11 +25,13 @@ temp/
 __pycache__/
 *.py[cod]
 *.pyo
+*.egg-info/
 
 # Node.js
 node_modules/
 .next/
 ui/.next/
+ui/tsconfig.tsbuildinfo
 
 # テスト・カバレッジ成果物
 .coverage
