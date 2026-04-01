@@ -1,7 +1,22 @@
 [
   {
-    "sha": "75fa34d",
+    "sha": "0456b47",
+    "message": "[feat] Add server stop, Dify reconnect, and status-aware action buttons",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "1c13a94",
     "message": "[feat] Add CRUCIBLE_HEALTH_HOST for Docker Compose health checks",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "ee5531d",
+    "message": "Merge pull request #10 from kumagallium/feat/e4m-catalog-import",
+    "date": "2026-04-01"
+  },
+  {
+    "sha": "9760484",
+    "message": "[feat] Add e4m MCP Catalog import to Register page",
     "date": "2026-04-01"
   },
   {
@@ -232,21 +247,6 @@
   {
     "sha": "3748dac",
     "message": "[fix] Regenerate package-lock.json with Node 22 for Docker compatibility",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "027f2f4",
-    "message": "Merge pull request #2 from kumagallium/feat/i18n-support",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "6b13e5f",
-    "message": "Merge branch 'main' into feat/i18n-support",
-    "date": "2026-03-15"
-  },
-  {
-    "sha": "cefb264",
-    "message": "[feat] Add i18n support with JA/EN language switching",
     "date": "2026-03-15"
   }
 ]

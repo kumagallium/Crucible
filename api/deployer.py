@@ -781,6 +781,19 @@ def remove(name: str, log: LogFn) -> None:
     log(f"削除完了: {name}")
 
 
+def stop(name: str, log: LogFn) -> None:
+    """コンテナを停止する（レジストリのレコードは保持）。"""
+    log(f"コンテナ停止: {name}")
+    subprocess.run(["docker", "stop", name], capture_output=True)
+
+    record = registry.get(name)
+    if record:
+        record.status = "stopped"
+        record.error_message = None
+        registry.upsert(record)
+    log(f"停止完了: {name}")
+
+
 def restart(name: str, log: LogFn) -> None:
     """コンテナを再起動する。"""
     log(f"コンテナ再起動: {name}")
@@ -793,6 +806,28 @@ def restart(name: str, log: LogFn) -> None:
         record.error_message = None
         registry.upsert(record)
     log(f"再起動完了: {name}")
+
+
+def dify_connect(name: str, log: LogFn) -> None:
+    """既存サーバーを Dify に登録（または再登録）する。"""
+    record = registry.get(name)
+    if not record:
+        raise RuntimeError(f"サーバーが見つかりません: {name}")
+    if record.status != "running":
+        raise RuntimeError(f"サーバーが running 状態ではありません (現在: {record.status})")
+
+    log(f"=== Dify 接続: {name} ===")
+    dify_ok, endpoint_path = _register_dify(
+        name, record.static_ip, record.port,
+        record.icon, record.display_name, log,
+    )
+    if not dify_ok:
+        raise RuntimeError("Dify への登録に失敗しました")
+
+    record.dify_registered = dify_ok
+    record.endpoint_path = endpoint_path
+    registry.upsert(record)
+    log(f"=== Dify 接続完了: {name} ===")
 
 
 def refresh_statuses() -> None:
@@ -808,6 +843,11 @@ def refresh_statuses() -> None:
         return
 
     for record in registry.get_all():
+        # deploying / error はステータス同期をスキップ
+        # deploying: バックグラウンドで処理中
+        # error: ユーザーが明示的に操作（リトライ/削除）するまで保持
+        if record.status in ("deploying", "error"):
+            continue
         new_status = "running" if record.name in running else "stopped"
         if record.status != new_status:
             record.status = new_status

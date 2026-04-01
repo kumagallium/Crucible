@@ -13,8 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RotateCw, Trash2, ExternalLink, Copy, Check } from "lucide-react";
-import { restartServer, deleteServer, fetchJobLogs } from "@/lib/api";
+import { RotateCw, Square, RefreshCw, Link, Trash2, ExternalLink, Copy, Check } from "lucide-react";
+import { stopServer, restartServer, difyConnectServer, deleteServer, fetchJobLogs } from "@/lib/api";
 import { useI18n } from "@/i18n";
 
 const bannerStyles: Record<string, string> = {
@@ -57,10 +57,36 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
     return poll();
   }
 
+  async function handleStop() {
+    setLoading(true);
+    try {
+      const result = await stopServer(server.name);
+      await waitForJob(result.job_id);
+      onAction();
+    } catch {
+      // silently handle
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleRestart() {
     setLoading(true);
     try {
       const result = await restartServer(server.name);
+      await waitForJob(result.job_id);
+      onAction();
+    } catch {
+      // silently handle
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDifyConnect() {
+    setLoading(true);
+    try {
+      const result = await difyConnectServer(server.name);
       await waitForJob(result.job_id);
       onAction();
     } catch {
@@ -169,16 +195,61 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
       </div>
 
       <div className="flex justify-end gap-1 px-3.5 py-2 border-t bg-muted/50">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 text-xs text-muted-foreground"
-          onClick={handleRestart}
-          disabled={loading}
-        >
-          <RotateCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-          {t("serverCard.restart")}
-        </Button>
+        {/* 停止ボタン: running 時のみ */}
+        {server.status === "running" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            onClick={handleStop}
+            disabled={loading}
+          >
+            <Square className="h-3 w-3" />
+            {t("serverCard.stop")}
+          </Button>
+        )}
+
+        {/* 再起動ボタン: running / stopped 時 */}
+        {(server.status === "running" || server.status === "stopped") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            onClick={handleRestart}
+            disabled={loading}
+          >
+            <RotateCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            {t("serverCard.restart")}
+          </Button>
+        )}
+
+        {/* リトライボタン: error 時 */}
+        {server.status === "error" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            onClick={handleRestart}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
+            {t("serverCard.retry")}
+          </Button>
+        )}
+
+        {/* Dify 接続ボタン: running かつ Dify 未登録時 */}
+        {server.status === "running" && !server.dify_registered && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            onClick={handleDifyConnect}
+            disabled={loading}
+          >
+            <Link className="h-3 w-3" />
+            {t("serverCard.difyConnect")}
+          </Button>
+        )}
 
         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
           <DialogTrigger asChild>

@@ -2,15 +2,17 @@
 MCP Registry API — FastAPI バックエンド
 
 エンドポイント一覧:
-  GET    /api/servers                   — サーバー一覧
-  POST   /api/servers                   — 新規登録 (デプロイジョブ起動)
-  GET    /api/servers/{name}            — サーバー詳細
-  DELETE /api/servers/{name}            — サーバー削除
-  POST   /api/servers/{name}/restart    — サーバー再起動
-  POST   /api/servers/{name}/update     — サーバー更新 (GitHub の最新コミットで再ビルド)
-  POST   /api/servers/update-check      — 全サーバーの自動更新チェック
-  GET    /api/jobs/{job_id}             — ジョブ状態取得
-  GET    /api/jobs/{job_id}/logs        — ログポーリング (offset パラメータ付き)
+  GET    /api/servers                      — サーバー一覧
+  POST   /api/servers                      — 新規登録 (デプロイジョブ起動)
+  GET    /api/servers/{name}               — サーバー詳細
+  DELETE /api/servers/{name}               — サーバー削除
+  POST   /api/servers/{name}/stop          — サーバー停止
+  POST   /api/servers/{name}/restart       — サーバー再起動
+  POST   /api/servers/{name}/update        — サーバー更新 (GitHub の最新コミットで再ビルド)
+  POST   /api/servers/{name}/dify-connect  — Dify 接続・再接続
+  POST   /api/servers/update-check         — 全サーバーの自動更新チェック
+  GET    /api/jobs/{job_id}                — ジョブ状態取得
+  GET    /api/jobs/{job_id}/logs            — ログポーリング (offset パラメータ付き)
 """
 from __future__ import annotations
 
@@ -277,6 +279,36 @@ def delete_server(name: str) -> DeployJob:
 
 
 # ==============================================================================
+# サーバー停止
+# ==============================================================================
+@app.post("/api/servers/{name}/stop", status_code=202)
+def stop_server(name: str) -> DeployJob:
+    """指定サーバーを停止する（レコードは保持）。"""
+    if not registry.exists(name):
+        raise HTTPException(status_code=404, detail=f"サーバーが見つかりません: {name}")
+
+    _cleanup_old_jobs()
+    job_id = str(uuid.uuid4())
+    job = DeployJob(job_id=job_id, server_name=name, status="pending")
+    with _jobs_lock:
+        _jobs[job_id] = job
+
+    def _run_stop() -> None:
+        _set_job_status(job_id, "running")
+        log_fn = lambda msg: _append_log(job_id, msg)
+        try:
+            deployer.stop(name, log_fn)
+            _set_job_status(job_id, "success")
+        except Exception as e:
+            _set_job_status(job_id, "error", str(e))
+
+    threading.Thread(target=_run_stop, daemon=True).start()
+
+    with _jobs_lock:
+        return _jobs[job_id]
+
+
+# ==============================================================================
 # サーバー再起動
 # ==============================================================================
 @app.post("/api/servers/{name}/restart", status_code=202)
@@ -336,6 +368,36 @@ def update_server(name: str) -> DeployJob:
             _set_job_status(job_id, "error", str(e))
 
     threading.Thread(target=_run_update, daemon=True).start()
+
+    with _jobs_lock:
+        return _jobs[job_id]
+
+
+# ==============================================================================
+# Dify 接続・再接続
+# ==============================================================================
+@app.post("/api/servers/{name}/dify-connect", status_code=202)
+def dify_connect_server(name: str) -> DeployJob:
+    """指定サーバーを Dify に登録（または再登録）する。"""
+    if not registry.exists(name):
+        raise HTTPException(status_code=404, detail=f"サーバーが見つかりません: {name}")
+
+    _cleanup_old_jobs()
+    job_id = str(uuid.uuid4())
+    job = DeployJob(job_id=job_id, server_name=name, status="pending")
+    with _jobs_lock:
+        _jobs[job_id] = job
+
+    def _run_dify_connect() -> None:
+        _set_job_status(job_id, "running")
+        log_fn = lambda msg: _append_log(job_id, msg)
+        try:
+            deployer.dify_connect(name, log_fn)
+            _set_job_status(job_id, "success")
+        except Exception as e:
+            _set_job_status(job_id, "error", str(e))
+
+    threading.Thread(target=_run_dify_connect, daemon=True).start()
 
     with _jobs_lock:
         return _jobs[job_id]
