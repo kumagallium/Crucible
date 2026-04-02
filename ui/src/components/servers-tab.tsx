@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Server, ServerStatus } from "@/lib/types";
+import type { Server, ServerStatus, ToolType } from "@/lib/types";
 import { ServerCard } from "./server-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ export function ServersTab() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterValue>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | ToolType>("all");
   const [baseUrl, setBaseUrl] = useState("http://127.0.0.1");
 
   const FILTERS: { value: FilterValue; label: string }[] = [
@@ -25,6 +26,13 @@ export function ServersTab() {
     { value: "stopped", label: "Stopped" },
     { value: "error", label: "Error" },
     { value: "deploying", label: "Deploying" },
+  ];
+
+  const TYPE_FILTERS: { value: "all" | ToolType; label: string }[] = [
+    { value: "all", label: t("servers.filterAll") },
+    { value: "mcp_server", label: "MCP Server" },
+    { value: "cli_library", label: "CLI / Library" },
+    { value: "skill", label: "Skill" },
   ];
 
   const load = useCallback(async () => {
@@ -66,6 +74,9 @@ export function ServersTab() {
   if (filter !== "all") {
     filtered = filtered.filter((s) => s.status === filter);
   }
+  if (typeFilter !== "all") {
+    filtered = filtered.filter((s) => (s.tool_type || "mcp_server") === typeFilter);
+  }
 
   return (
     <div>
@@ -103,7 +114,7 @@ export function ServersTab() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-6">
+      <div className="flex flex-wrap gap-1.5 mb-3">
         {FILTERS.map((f) => (
           <button
             key={f.value}
@@ -121,6 +132,22 @@ export function ServersTab() {
                 }`}
               />
             )}
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-1.5 mb-6">
+        {TYPE_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setTypeFilter(f.value)}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium border transition-all duration-200 ${
+              typeFilter === f.value
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-secondary text-muted-foreground border-border hover:bg-accent hover:text-foreground"
+            }`}
+          >
             {f.label}
           </button>
         ))}

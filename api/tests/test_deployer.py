@@ -193,6 +193,31 @@ class TestCloneRepo:
 # ---------------------------------------------------------------------------
 # _detect_transport
 # ---------------------------------------------------------------------------
+# _detect_tool_type
+# ---------------------------------------------------------------------------
+
+class TestDetectToolType:
+    def test_with_dockerfile(self, tmp_path):
+        """Dockerfile あり → mcp_server"""
+        (tmp_path / "Dockerfile").write_text("FROM python:3.12-slim\n")
+        assert deployer._detect_tool_type(tmp_path) == "mcp_server"
+
+    def test_pyproject_no_dockerfile(self, tmp_path):
+        """pyproject.toml あり・Dockerfile なし → cli_library"""
+        (tmp_path / "pyproject.toml").write_text('[project]\nname = "test"\n')
+        assert deployer._detect_tool_type(tmp_path) == "cli_library"
+
+    def test_package_json_no_dockerfile(self, tmp_path):
+        """package.json あり・Dockerfile なし → cli_library"""
+        (tmp_path / "package.json").write_text('{"name": "test"}')
+        assert deployer._detect_tool_type(tmp_path) == "cli_library"
+
+    def test_empty_dir(self, tmp_path):
+        """何もない → mcp_server（デフォルト）"""
+        assert deployer._detect_tool_type(tmp_path) == "mcp_server"
+
+
+# ---------------------------------------------------------------------------
 
 class TestDetectTransport:
     def test_auto_with_expose(self, tmp_path):

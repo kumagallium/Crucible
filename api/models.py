@@ -10,6 +10,9 @@ from pydantic import BaseModel, Field, field_validator
 import re
 
 
+ToolType = Literal["mcp_server", "cli_library", "skill"]
+
+
 class RegisterRequest(BaseModel):
     """新規 MCP サーバー登録リクエスト"""
 
@@ -19,6 +22,10 @@ class RegisterRequest(BaseModel):
     icon: str = Field("🔧", description="絵文字アイコン")
     github_url: str = Field(..., description="GitHub リポジトリ URL")
     branch: str = Field("main", description="ブランチ名")
+    tool_type: ToolType = Field(
+        "mcp_server",
+        description="ツール種別 (mcp_server / cli_library / skill)",
+    )
     group: Literal["default", "user"] = Field(
         "user", description="グループ (default=公式 / user=ユーザー投稿)"
     )
@@ -91,6 +98,7 @@ class ServerRecord(BaseModel):
     github_url: str
     branch: str
     subdir: str = ""
+    tool_type: ToolType = "mcp_server"
     group: str
     port: int
     static_ip: str

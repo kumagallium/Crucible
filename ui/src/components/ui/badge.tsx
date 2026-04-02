@@ -35,6 +35,13 @@ const badgeVariants = cva(
           "border-success-border bg-success-bg text-success",
         featured:
           "border-warning-border bg-warning-bg text-warning",
+        // ツール種別用
+        mcpServer:
+          "border-info-border bg-info-bg text-info",
+        cliLibrary:
+          "border-warning-border bg-warning-bg text-warning",
+        skill:
+          "border-success-border bg-success-bg text-success",
         // Dify 用
         difyOk:
           "border-success-border bg-success-bg text-success",
