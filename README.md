@@ -4,10 +4,10 @@
 
 # Crucible
 
-> **The self-hosted registry for AI tools — MCP servers, CLI libraries, and skills.**
-> Register, deploy, and manage all your team's AI tools in one place.
+> **Your team's AI tool shelf — deploy MCP servers, register CLI libraries and skills.**
+> Build, deploy, and manage all your AI tools in one place.
 
-**Crucible** is a self-hosted registry that manages three types of AI tools:
+**Crucible** is a self-hosted platform that manages three types of AI tools:
 
 - **MCP Servers** — Build and deploy from GitHub URLs. Automatically containerized with Docker and exposed as SSE endpoints.
 - **CLI / Libraries** — Register pip/npm packages without Docker. Track install commands and metadata alongside your MCP servers.
@@ -17,7 +17,7 @@ Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-
 
 ## Key Features
 
-- **Three-layer tool model** — Manage MCP servers, CLI libraries, and skills in a unified registry with type-aware filtering and display.
+- **Three-layer tool model** — Manage MCP servers, CLI libraries, and skills in one place with type-aware filtering and display.
 - **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys MCP servers automatically. Dockerfile auto-generated if missing.
 - **Lightweight registration** — CLI libraries and skills are registered instantly without Docker deployment. Just metadata and install commands.
 - **Private repository support** — Works with private GitHub repositories. Develop behind closed doors and deploy without ever making them public.
@@ -206,7 +206,7 @@ Crucible is part of a broader ecosystem:
 
 ```mermaid
 graph LR
-    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>AI tool registry<br/>& deployment</i>"]
+    Registry["🔧 <b>Crucible</b><br/><i>AI tool management<br/>& deployment</i>"]
     Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI agent<br/>runtime</i>"]
     Graphium["📝 <b>Graphium</b><br/><i>Provenance<br/>tracking editor</i>"]
 
@@ -220,11 +220,11 @@ graph LR
 
 | Repository | Role | Link |
 |------------|------|------|
-| **Crucible** | AI tool registry & deployment (MCP servers, CLI/Lib, Skills) | *(this repo)* |
+| **Crucible** | AI tool management & deployment (MCP servers, CLI/Lib, Skills) | *(this repo)* |
 | **Crucible Agent** | AI agent runtime with MCP tool support | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **Graphium** | PROV-DM provenance tracking editor | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-Each project works independently. Together, they form a complete pipeline: Registry manages AI tools (MCP servers, CLI libraries, skills) → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
+Each project works independently. Together, they form a complete pipeline: Crucible manages AI tools (MCP servers, CLI libraries, skills) → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
 
 ## License
 

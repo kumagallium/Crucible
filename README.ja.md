@@ -4,10 +4,10 @@
 
 # Crucible
 
-> **AI ツールのためのセルフホスト型レジストリ — MCP サーバー、CLI ライブラリ、スキルを一元管理。**
-> 登録、デプロイ、管理をチームの道具棚として。
+> **チームの AI ツール棚 — MCP サーバーをデプロイ、CLI ライブラリやスキルを登録・管理。**
+> ビルド、デプロイ、管理をすべて一箇所で。
 
-**Crucible** は 3 種類の AI ツールを管理するセルフホスト型レジストリです：
+**Crucible** は 3 種類の AI ツールを管理するセルフホスト型プラットフォームです：
 
 - **MCP Servers** — GitHub URL からビルド・デプロイ。Docker で自動コンテナ化し、SSE エンドポイントとして公開
 - **CLI / Libraries** — pip/npm パッケージを Docker なしで登録。インストールコマンドとメタデータを MCP サーバーと一緒に管理
@@ -17,7 +17,7 @@
 
 ## 特徴
 
-- **3 層ツールモデル** — MCP サーバー、CLI ライブラリ、スキルを統一レジストリで管理。種別ごとのフィルタリングと表示
+- **3 層ツールモデル** — MCP サーバー、CLI ライブラリ、スキルを一箇所で管理。種別ごとのフィルタリングと表示
 - **GitHub URL からビルド** — リポジトリ URL を貼るだけで MCP サーバーを自動ビルド＆デプロイ。Dockerfile がなくても自動生成
 - **軽量登録** — CLI ライブラリとスキルは Docker デプロイなしで即座に登録。メタデータとインストールコマンドのみ
 - **プライベートリポジトリ対応** — プライベート GitHub リポジトリに対応。非公開のまま開発・デプロイ可能
@@ -206,7 +206,7 @@ Crucible はエコシステムの一部として機能します：
 
 ```mermaid
 graph LR
-    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>AI ツール<br/>レジストリ & デプロイ</i>"]
+    Registry["🔧 <b>Crucible</b><br/><i>AI ツール管理<br/>& デプロイ</i>"]
     Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI エージェント<br/>ランタイム</i>"]
     Graphium["📝 <b>Graphium</b><br/><i>プロヴェナンス<br/>追跡エディタ</i>"]
 
@@ -220,11 +220,11 @@ graph LR
 
 | リポジトリ | 役割 | リンク |
 |-----------|------|--------|
-| **Crucible** | AI ツールレジストリ & デプロイ（MCP サーバー、CLI/Lib、Skills） | *(このリポジトリ)* |
+| **Crucible** | AI ツール管理 & デプロイ（MCP サーバー、CLI/Lib、Skills） | *(このリポジトリ)* |
 | **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **Graphium** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-各プロジェクトは単体でも使えます。組み合わせると、Registry が AI ツール（MCP サーバー、CLI ライブラリ、スキル）を管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
+各プロジェクトは単体でも使えます。組み合わせると、Crucible が AI ツール（MCP サーバー、CLI ライブラリ、スキル）を管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
 
 ## ライセンス
 
