@@ -352,20 +352,120 @@ def _wrap_with_mcp_proxy(name: str, log: LogFn) -> None:
         shutil.rmtree(wrapper_dir, ignore_errors=True)
 
 
+def _detect_python_entrypoint(src_dir: Path) -> str | None:
+    """pyproject.toml の [project.scripts] からエントリポイントを検出する。"""
+    pyproject = src_dir / "pyproject.toml"
+    if not pyproject.exists():
+        return None
+    content = pyproject.read_text(encoding="utf-8")
+    # [project.scripts] セクションから最初のコマンド名を取得
+    in_scripts = False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped == "[project.scripts]":
+            in_scripts = True
+            continue
+        if in_scripts:
+            if stripped.startswith("["):
+                break
+            m = re.match(r'^(\S+)\s*=', stripped)
+            if m:
+                return m.group(1)
+    return None
+
+
+def _generate_dockerfile(src_dir: Path, log: LogFn) -> None:
+    """Dockerfile がないリポジトリに対して、プロジェクト構成から自動生成する。
+
+    対応パターン:
+      1. pyproject.toml + uv.lock → uv ベース
+      2. pyproject.toml のみ      → pip install . ベース
+      3. requirements.txt のみ    → pip install -r ベース
+      4. package.json             → Node.js ベース
+    """
+    dockerfile = src_dir / "Dockerfile"
+    has_pyproject = (src_dir / "pyproject.toml").exists()
+    has_uv_lock = (src_dir / "uv.lock").exists()
+    has_requirements = (src_dir / "requirements.txt").exists()
+    has_package_json = (src_dir / "package.json").exists()
+
+    entrypoint = _detect_python_entrypoint(src_dir) if has_pyproject else None
+
+    if has_pyproject and has_uv_lock:
+        # uv ベース: uv sync でインストール、uv run で実行
+        cmd_line = f'CMD ["uv", "run", "{entrypoint}"]' if entrypoint else 'CMD ["uv", "run", "python", "-m", "server"]'
+        content = (
+            "FROM python:3.12-slim\n"
+            "WORKDIR /app\n"
+            "RUN pip install --no-cache-dir uv\n"
+            "COPY . .\n"
+            "RUN uv sync --frozen --no-dev\n"
+            f"{cmd_line}\n"
+        )
+        log("  Dockerfile を自動生成しました（uv ベース）")
+
+    elif has_pyproject:
+        # pip install . ベース
+        cmd_line = f'CMD ["{entrypoint}"]' if entrypoint else 'CMD ["python", "-m", "server"]'
+        content = (
+            "FROM python:3.12-slim\n"
+            "WORKDIR /app\n"
+            "COPY . .\n"
+            "RUN pip install --no-cache-dir .\n"
+            f"{cmd_line}\n"
+        )
+        log("  Dockerfile を自動生成しました（pip install . ベース）")
+
+    elif has_requirements:
+        # requirements.txt ベース
+        content = (
+            "FROM python:3.12-slim\n"
+            "WORKDIR /app\n"
+            "COPY . .\n"
+            "RUN pip install --no-cache-dir -r requirements.txt\n"
+            'CMD ["python", "-m", "server"]\n'
+        )
+        log("  Dockerfile を自動生成しました（requirements.txt ベース）")
+
+    elif has_package_json:
+        # Node.js ベース
+        content = (
+            "FROM node:20-slim\n"
+            "WORKDIR /app\n"
+            "COPY . .\n"
+            "RUN npm install --production\n"
+            'CMD ["node", "index.js"]\n'
+        )
+        log("  Dockerfile を自動生成しました（Node.js ベース）")
+
+    else:
+        raise RuntimeError(
+            "Dockerfile が見つからず、自動生成もできません。"
+            "pyproject.toml / requirements.txt / package.json のいずれかが必要です。"
+        )
+
+    dockerfile.write_text(content, encoding="utf-8")
+
+
 def _build_image(
     name: str, src_dir: Path, log: LogFn, context_dir: Path | None = None
 ) -> None:
     """Docker イメージをビルドする。
 
+    Dockerfile がない場合はプロジェクト構成から自動生成する。
     サブディレクトリ指定時はリポジトリルートをコンテキストにして Dockerfile を指定する
     (デファクトスタンダード: modelcontextprotocol/servers 等の COPY src/xxx /app 形式)。
     """
+    # Dockerfile がなければ自動生成
+    dockerfile = src_dir / "Dockerfile"
+    if not dockerfile.exists():
+        _generate_dockerfile(src_dir, log)
+
     # FastMCP 3.x 互換: enabled= パラメータを除去
     _patch_fastmcp_enabled(src_dir, log)
 
     # socket-proxy 環境では BuildKit（gRPC）が使えないため、レガシービルダーを使用
     # Dockerfile 内の --mount オプション（BuildKit 専用）を除去して互換性を確保
-    dockerfile = src_dir / "Dockerfile"
     _strip_mount_options(dockerfile, log)
 
     if context_dir is not None:

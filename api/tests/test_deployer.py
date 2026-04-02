@@ -257,24 +257,96 @@ class TestStripMountOptions:
 # _build_image
 # ---------------------------------------------------------------------------
 
+class TestGenerateDockerfile:
+    """Dockerfile がないリポジトリに対する自動生成テスト。"""
+
+    def test_uv_based(self, tmp_path):
+        """pyproject.toml + uv.lock → uv ベースの Dockerfile を生成する。"""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "test"\n[project.scripts]\nmy-tool = "pkg:main"\n'
+        )
+        (tmp_path / "uv.lock").write_text("")
+        deployer._generate_dockerfile(tmp_path, _log)
+        content = (tmp_path / "Dockerfile").read_text()
+        assert "uv sync" in content
+        assert '"uv", "run", "my-tool"' in content
+
+    def test_pip_based(self, tmp_path):
+        """pyproject.toml のみ → pip install . ベースの Dockerfile を生成する。"""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "test"\n[project.scripts]\nmy-cmd = "pkg:main"\n'
+        )
+        deployer._generate_dockerfile(tmp_path, _log)
+        content = (tmp_path / "Dockerfile").read_text()
+        assert "pip install" in content
+        assert '"my-cmd"' in content
+
+    def test_requirements_txt(self, tmp_path):
+        """requirements.txt のみ → pip install -r ベースの Dockerfile を生成する。"""
+        (tmp_path / "requirements.txt").write_text("mcp>=1.0\n")
+        deployer._generate_dockerfile(tmp_path, _log)
+        content = (tmp_path / "Dockerfile").read_text()
+        assert "-r requirements.txt" in content
+
+    def test_nodejs(self, tmp_path):
+        """package.json → Node.js ベースの Dockerfile を生成する。"""
+        (tmp_path / "package.json").write_text('{"name": "test"}')
+        deployer._generate_dockerfile(tmp_path, _log)
+        content = (tmp_path / "Dockerfile").read_text()
+        assert "node:" in content
+        assert "npm install" in content
+
+    def test_no_project_files_raises(self, tmp_path):
+        """プロジェクトファイルがない場合はエラーになる。"""
+        with pytest.raises(RuntimeError, match="自動生成もできません"):
+            deployer._generate_dockerfile(tmp_path, _log)
+
+    def test_entrypoint_detection(self, tmp_path):
+        """pyproject.toml の [project.scripts] からエントリポイントを検出する。"""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "arxiv-latex-mcp"\n\n'
+            '[project.scripts]\narxiv-latex-mcp = "arxiv_latex_mcp.__main__:main"\n'
+        )
+        result = deployer._detect_python_entrypoint(tmp_path)
+        assert result == "arxiv-latex-mcp"
+
+
 class TestBuildImage:
     @patch("deployer._strip_mount_options")
     @patch("deployer._patch_fastmcp_enabled")
     @patch("deployer._run_stream")
-    def test_default_context(self, mock_stream, mock_patch, mock_strip):
-        deployer._build_image("myimg", Path("/src"), _log)
+    def test_default_context(self, mock_stream, mock_patch, mock_strip, tmp_path):
+        (tmp_path / "Dockerfile").write_text("FROM python:3.12-slim\n")
+        deployer._build_image("myimg", tmp_path, _log)
         cmd = mock_stream.call_args[0][0]
         assert cmd == ["docker", "build", "-t", "myimg:latest", "."]
-        assert mock_stream.call_args[1].get("cwd") == "/src"
+        assert mock_stream.call_args[1].get("cwd") == str(tmp_path)
 
     @patch("deployer._strip_mount_options")
     @patch("deployer._patch_fastmcp_enabled")
     @patch("deployer._run_stream")
-    def test_with_subdir_context(self, mock_stream, mock_patch, mock_strip):
-        deployer._build_image("myimg", Path("/src/sub"), _log, context_dir=Path("/src"))
+    def test_with_subdir_context(self, mock_stream, mock_patch, mock_strip, tmp_path):
+        sub = tmp_path / "sub"
+        sub.mkdir()
+        (sub / "Dockerfile").write_text("FROM python:3.12-slim\n")
+        deployer._build_image("myimg", sub, _log, context_dir=tmp_path)
         cmd = mock_stream.call_args[0][0]
         assert "-f" in cmd
-        assert str(Path("/src/sub/Dockerfile")) in cmd
+        assert str(sub / "Dockerfile") in cmd
+
+    @patch("deployer._strip_mount_options")
+    @patch("deployer._patch_fastmcp_enabled")
+    @patch("deployer._run_stream")
+    def test_auto_generates_dockerfile(self, mock_stream, mock_patch, mock_strip, tmp_path):
+        """Dockerfile がない場合に自動生成してからビルドする。"""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "test"\n[project.scripts]\nmy-srv = "pkg:main"\n'
+        )
+        (tmp_path / "uv.lock").write_text("")
+        deployer._build_image("myimg", tmp_path, _log)
+        assert (tmp_path / "Dockerfile").exists()
+        cmd = mock_stream.call_args[0][0]
+        assert cmd == ["docker", "build", "-t", "myimg:latest", "."]
 
 
 # ---------------------------------------------------------------------------
