@@ -31,6 +31,12 @@ const iconBg: Record<string, string> = {
   deploying: "bg-status-deploying-bg",
 };
 
+const toolTypeBadge: Record<string, { variant: "mcpServer" | "cliLibrary" | "skill"; label: string }> = {
+  mcp_server: { variant: "mcpServer", label: "MCP" },
+  cli_library: { variant: "cliLibrary", label: "CLI/Lib" },
+  skill: { variant: "skill", label: "Skill" },
+};
+
 interface ServerCardProps {
   server: Server;
   baseUrl: string;
@@ -143,6 +149,9 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
         )}
 
         <div className="flex flex-wrap gap-1.5 mb-2">
+          <Badge variant={toolTypeBadge[server.tool_type || "mcp_server"]?.variant ?? "community"}>
+            {toolTypeBadge[server.tool_type || "mcp_server"]?.label ?? "MCP"}
+          </Badge>
           <Badge variant={server.group === "default" ? "official" : "community"}>
             {server.group === "default" ? "Official" : "Community"}
           </Badge>

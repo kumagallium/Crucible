@@ -1,5 +1,7 @@
 // API レスポンス型定義
 
+export type ToolType = "mcp_server" | "cli_library" | "skill";
+
 export interface Server {
   name: string;
   display_name: string;
@@ -8,6 +10,7 @@ export interface Server {
   github_url: string;
   branch: string;
   subdir: string;
+  tool_type?: ToolType;
   group: "default" | "user";
   port: number;
   static_ip: string;
@@ -27,6 +30,7 @@ export interface RegisterRequest {
   github_url: string;
   branch: string;
   subdir: string;
+  tool_type?: ToolType;
   github_token: string;
   group: "default" | "user";
   dify_auto_register: boolean;

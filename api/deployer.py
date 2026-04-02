@@ -261,6 +261,22 @@ def _strip_mount_options(dockerfile: Path, log: LogFn) -> None:
         log("  Dockerfile の --mount オプションを除去しました（レガシービルダー互換）")
 
 
+def _detect_tool_type(src_dir: Path) -> str:
+    """リポジトリ構成からツール種別を推定する。
+
+    - Dockerfile あり → mcp_server（専用サーバーとして構築されている）
+    - Dockerfile なし + pyproject.toml/requirements.txt/package.json → cli_library
+    """
+    if (src_dir / "Dockerfile").exists():
+        return "mcp_server"
+    if any(
+        (src_dir / f).exists()
+        for f in ("pyproject.toml", "requirements.txt", "package.json")
+    ):
+        return "cli_library"
+    return "mcp_server"
+
+
 def _detect_transport(src_dir: Path, transport: str) -> str:
     """MCP サーバーのトランスポート種別を検出する。
 
@@ -764,12 +780,20 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
             github_url=req.github_url,
             branch=req.branch,
             subdir=req.subdir,
+            tool_type=req.tool_type,
             group=req.group,
             port=0,
             static_ip="",
             status="deploying",
         )
         registry.upsert(provisional)
+
+        # ツール種別の自動検出（リクエストでデフォルトのまま & Dockerfile 自動生成前に判定）
+        if req.tool_type == "mcp_server":
+            detected_type = _detect_tool_type(build_dir)
+            if detected_type != "mcp_server":
+                req.tool_type = detected_type
+                log(f"  ツール種別を自動検出: {detected_type}")
 
         # トランスポート検出
         transport = _detect_transport(build_dir, req.transport)
@@ -826,6 +850,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         github_url=req.github_url,
         branch=req.branch,
         subdir=req.subdir,
+        tool_type=req.tool_type,
         group=req.group,
         port=port,
         static_ip=static_ip,
