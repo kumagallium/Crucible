@@ -225,7 +225,11 @@ def register_server(req: RegisterRequest) -> DeployJob:
         log_fn = lambda msg: _append_log(job_id, msg)
 
         try:
-            deployer.deploy(req, log_fn)
+            # CLI/Library・Skill は Docker デプロイなしの軽量登録
+            if req.tool_type in ("cli_library", "skill"):
+                deployer.register_simple(req, log_fn)
+            else:
+                deployer.deploy(req, log_fn)
             # 名前解決後にジョブの server_name を更新
             with _jobs_lock:
                 if job_id in _jobs:

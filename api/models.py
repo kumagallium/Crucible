@@ -43,6 +43,9 @@ class RegisterRequest(BaseModel):
     auto_update: bool = Field(
         False, description="GitHub リポジトリ更新時に自動で再デプロイするか"
     )
+    install_command: str = Field(
+        "", description="インストールコマンド (CLI/Library 用。例: pip install arxiv-latex-mcp)"
+    )
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="コンテナに渡す環境変数"
     )
@@ -100,9 +103,10 @@ class ServerRecord(BaseModel):
     subdir: str = ""
     tool_type: ToolType = "mcp_server"
     group: str
+    install_command: str = ""
     port: int
     static_ip: str
-    status: Literal["running", "stopped", "error", "deploying"] = "deploying"
+    status: Literal["running", "stopped", "error", "deploying", "registered"] = "deploying"
     created_at: str = Field(
         default_factory=lambda: datetime.now(UTC).isoformat().replace("+00:00", "Z")
     )

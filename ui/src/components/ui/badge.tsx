@@ -23,6 +23,8 @@ const badgeVariants = cva(
           "border-status-error-border bg-status-error-bg text-status-error",
         deploying:
           "border-status-deploying-border bg-status-deploying-bg text-status-deploying",
+        registered:
+          "border-info-border bg-info-bg text-info",
         // グループ用
         official:
           "border-success-border bg-success-bg text-success",
