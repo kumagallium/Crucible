@@ -731,6 +731,48 @@ def _register_dify(
         return False, detected_path
 
 
+def register_simple(req: RegisterRequest, log: LogFn) -> ServerRecord:
+    """CLI/Library・Skill の軽量登録（Docker デプロイなし）。
+
+    メタデータのみをレジストリに保存する。
+    """
+    if not req.name:
+        raise RuntimeError("CLI/Library・Skill の登録には name が必須です")
+
+    log(f"=== {req.tool_type} 登録: {req.name} ===")
+
+    # 重複チェック
+    existing = registry.get(req.name)
+    if existing:
+        if existing.status not in ("error", "registered"):
+            raise RuntimeError(f"名前 '{req.name}' は既に登録されています")
+        log(f"  既存レコード (status={existing.status}) を上書きします")
+
+    record = ServerRecord(
+        name=req.name,
+        display_name=req.display_name or req.name,
+        description=req.description,
+        icon=req.icon,
+        github_url=req.github_url,
+        branch=req.branch,
+        subdir=req.subdir,
+        tool_type=req.tool_type,
+        install_command=req.install_command,
+        group=req.group,
+        port=0,
+        static_ip="",
+        status="registered",
+        error_message=None,
+    )
+    registry.upsert(record)
+
+    log(f"  ツール種別: {req.tool_type}")
+    if req.install_command:
+        log(f"  インストール: {req.install_command}")
+    log(f"=== 登録完了: {req.name} ===")
+    return record
+
+
 def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
     """
     デプロイのフルフロー。

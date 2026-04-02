@@ -79,17 +79,21 @@ export function RegisterTab() {
       }
     }
 
+    const toolType = (fd.get("tool_type") as string) || "mcp_server";
+
     const data: RegisterRequest = {
       github_url: (fd.get("github_url") as string).trim(),
       branch: (fd.get("branch") as string).trim() || "main",
       subdir: (fd.get("subdir") as string).trim(),
+      tool_type: toolType as "mcp_server" | "cli_library" | "skill",
+      install_command: (fd.get("install_command") as string)?.trim() || "",
       github_token: (fd.get("github_token") as string).trim(),
       name: (fd.get("name") as string)?.trim() || null,
       display_name: (fd.get("display_name") as string)?.trim() || null,
       description: (fd.get("description") as string)?.trim() || "",
       icon: (fd.get("icon") as string)?.trim() || "🔧",
       group: (fd.get("group") as "default" | "user") || "user",
-      dify_auto_register: fd.get("dify_auto") === "on",
+      dify_auto_register: toolType === "mcp_server" && fd.get("dify_auto") === "on",
       env_vars: envVars,
     };
 
@@ -243,6 +247,18 @@ export function RegisterTab() {
 
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div>
+              <Label htmlFor="tool_type">Tool Type</Label>
+              <div className="flex gap-1.5 mt-1.5 mb-4">
+                {(["mcp_server", "cli_library", "skill"] as const).map((tt) => (
+                  <label key={tt} className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition-all duration-200 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary bg-secondary text-muted-foreground border-border hover:bg-accent hover:text-foreground">
+                    <input type="radio" name="tool_type" value={tt} defaultChecked={tt === "mcp_server"} className="sr-only" />
+                    {tt === "mcp_server" ? "MCP Server" : tt === "cli_library" ? "CLI / Library" : "Skill"}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
               <h3 className="text-sm font-medium mb-3">{t("register.githubRepo")}</h3>
               <div className="grid grid-cols-4 gap-3">
                 <div className="col-span-3">
@@ -279,6 +295,15 @@ export function RegisterTab() {
                     placeholder={t("register.githubTokenPlaceholder")}
                   />
                 </div>
+              </div>
+              <div className="mt-3">
+                <Label htmlFor="install_command">Install Command</Label>
+                <Input
+                  id="install_command"
+                  name="install_command"
+                  placeholder="pip install arxiv-latex-mcp"
+                  defaultValue={selectedEntry?.install_command ?? ""}
+                />
               </div>
             </div>
 

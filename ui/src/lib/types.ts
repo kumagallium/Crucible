@@ -14,7 +14,8 @@ export interface Server {
   group: "default" | "user";
   port: number;
   static_ip: string;
-  status: "running" | "stopped" | "error" | "deploying";
+  install_command?: string;
+  status: "running" | "stopped" | "error" | "deploying" | "registered";
   created_at: string;
   updated_at: string;
   error_message: string | null;
@@ -31,6 +32,7 @@ export interface RegisterRequest {
   branch: string;
   subdir: string;
   tool_type?: ToolType;
+  install_command?: string;
   github_token: string;
   group: "default" | "user";
   dify_auto_register: boolean;

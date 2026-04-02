@@ -26,6 +26,7 @@ export function ServersTab() {
     { value: "stopped", label: "Stopped" },
     { value: "error", label: "Error" },
     { value: "deploying", label: "Deploying" },
+    { value: "registered", label: "Registered" },
   ];
 
   const TYPE_FILTERS: { value: "all" | ToolType; label: string }[] = [

@@ -22,6 +22,7 @@ const bannerStyles: Record<string, string> = {
   stopped: "bg-gradient-to-br from-status-stopped-bg to-status-stopped-bg-deep",
   error: "bg-gradient-to-br from-status-error-bg to-status-error-bg-deep",
   deploying: "bg-gradient-to-br from-status-deploying-bg to-status-deploying-bg-deep",
+  registered: "bg-gradient-to-br from-info-bg to-info-bg",
 };
 
 const iconBg: Record<string, string> = {
@@ -29,6 +30,7 @@ const iconBg: Record<string, string> = {
   stopped: "bg-status-stopped-bg",
   error: "bg-status-error-bg",
   deploying: "bg-status-deploying-bg",
+  registered: "bg-info-bg",
 };
 
 const toolTypeBadge: Record<string, { variant: "mcpServer" | "cliLibrary" | "skill"; label: string }> = {
@@ -155,15 +157,21 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Badge variant={server.group === "default" ? "official" : "community"}>
             {server.group === "default" ? "Official" : "Community"}
           </Badge>
-          <Badge variant={server.dify_registered ? "difyOk" : "difyNg"}>
-            {server.dify_registered ? "✓ Dify" : "Dify"}
-          </Badge>
-          <Badge variant="port">:{server.port}</Badge>
+          {server.status !== "registered" && (
+            <>
+              <Badge variant={server.dify_registered ? "difyOk" : "difyNg"}>
+                {server.dify_registered ? "✓ Dify" : "Dify"}
+              </Badge>
+              <Badge variant="port">:{server.port}</Badge>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-1 mb-1.5">
           <div className="flex-1 text-xs font-mono text-muted-foreground bg-muted border rounded-lg px-2 py-1 truncate">
-            {endpoint}
+            {server.status === "registered"
+              ? server.install_command || server.github_url.replace("https://github.com/", "")
+              : endpoint}
           </div>
           <Button
             variant="ghost"
