@@ -264,16 +264,41 @@ def _strip_mount_options(dockerfile: Path, log: LogFn) -> None:
 def _detect_tool_type(src_dir: Path) -> str:
     """リポジトリ構成からツール種別を推定する。
 
-    - Dockerfile あり → mcp_server（専用サーバーとして構築されている）
-    - Dockerfile なし + pyproject.toml/requirements.txt/package.json → cli_library
+    判定基準（ツールの本質で判断）:
+      1. 依存やソースに MCP SDK が含まれる → mcp_server
+      2. それ以外のコードプロジェクト → cli_library
     """
+    # Python: pyproject.toml / requirements.txt の依存に mcp が含まれるか
+    for dep_file in ("pyproject.toml", "requirements.txt"):
+        path = src_dir / dep_file
+        if path.exists():
+            content = path.read_text(encoding="utf-8")
+            # "mcp" をパッケージ名として含むかチェック（"mcp[cli]", "mcp>=1.0" 等にマッチ）
+            if re.search(r'(?:^|\s|"|\'|,)mcp(?:\[|>=|<=|==|>|<|~=|!=|\s|"|\'|,|$)', content):
+                return "mcp_server"
+
+    # Node.js: package.json の dependencies に MCP SDK が含まれるか
+    pkg_json = src_dir / "package.json"
+    if pkg_json.exists():
+        try:
+            pkg = json.loads(pkg_json.read_text(encoding="utf-8"))
+            all_deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+            if any("modelcontextprotocol" in dep or dep == "mcp" for dep in all_deps):
+                return "mcp_server"
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    # Dockerfile あり（依存で判定できなかった場合）→ mcp_server と推定
     if (src_dir / "Dockerfile").exists():
         return "mcp_server"
+
+    # コードプロジェクトだが MCP 依存なし → cli_library
     if any(
         (src_dir / f).exists()
         for f in ("pyproject.toml", "requirements.txt", "package.json")
     ):
         return "cli_library"
+
     return "mcp_server"
 
 

@@ -202,14 +202,37 @@ class TestDetectToolType:
         (tmp_path / "Dockerfile").write_text("FROM python:3.12-slim\n")
         assert deployer._detect_tool_type(tmp_path) == "mcp_server"
 
-    def test_pyproject_no_dockerfile(self, tmp_path):
-        """pyproject.toml あり・Dockerfile なし → cli_library"""
-        (tmp_path / "pyproject.toml").write_text('[project]\nname = "test"\n')
+    def test_pyproject_with_mcp_dep(self, tmp_path):
+        """pyproject.toml に mcp 依存あり → mcp_server"""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "test"\ndependencies = [\n    "mcp[cli]>=1.6.0",\n]\n'
+        )
+        assert deployer._detect_tool_type(tmp_path) == "mcp_server"
+
+    def test_pyproject_without_mcp_dep(self, tmp_path):
+        """pyproject.toml に mcp 依存なし → cli_library"""
+        (tmp_path / "pyproject.toml").write_text(
+            '[project]\nname = "test"\ndependencies = [\n    "requests>=2.0",\n]\n'
+        )
         assert deployer._detect_tool_type(tmp_path) == "cli_library"
 
-    def test_package_json_no_dockerfile(self, tmp_path):
-        """package.json あり・Dockerfile なし → cli_library"""
-        (tmp_path / "package.json").write_text('{"name": "test"}')
+    def test_requirements_with_mcp(self, tmp_path):
+        """requirements.txt に mcp あり → mcp_server"""
+        (tmp_path / "requirements.txt").write_text("httpx\nmcp>=1.0\n")
+        assert deployer._detect_tool_type(tmp_path) == "mcp_server"
+
+    def test_package_json_with_mcp_sdk(self, tmp_path):
+        """package.json に @modelcontextprotocol/sdk あり → mcp_server"""
+        (tmp_path / "package.json").write_text(
+            '{"name": "test", "dependencies": {"@modelcontextprotocol/sdk": "^1.0"}}'
+        )
+        assert deployer._detect_tool_type(tmp_path) == "mcp_server"
+
+    def test_package_json_without_mcp(self, tmp_path):
+        """package.json に MCP 依存なし → cli_library"""
+        (tmp_path / "package.json").write_text(
+            '{"name": "test", "dependencies": {"express": "^4.0"}}'
+        )
         assert deployer._detect_tool_type(tmp_path) == "cli_library"
 
     def test_empty_dir(self, tmp_path):
