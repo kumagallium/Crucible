@@ -4,26 +4,35 @@
 
 # Crucible
 
-> **The self-hosted deployment platform for MCP servers.**
-> Paste a GitHub URL — build, deploy, and connect in minutes.
+> **The self-hosted registry for AI tools — MCP servers, CLI libraries, and skills.**
+> Register, deploy, and manage all your team's AI tools in one place.
 
-**Crucible** is a self-hosted platform that builds and deploys MCP servers directly from GitHub repositories — including private repos. Paste a URL and Crucible automatically builds, deploys, and exposes it as an SSE endpoint. No need to publish to npm or Docker Hub first. Use it as your team's shared infrastructure or as a personal sandbox to iterate fast.
+**Crucible** is a self-hosted registry that manages three types of AI tools:
+
+- **MCP Servers** — Build and deploy from GitHub URLs. Automatically containerized with Docker and exposed as SSE endpoints.
+- **CLI / Libraries** — Register pip/npm packages without Docker. Track install commands and metadata alongside your MCP servers.
+- **Skills** — Register markdown-based prompts and procedures. Lightweight entries that require no deployment.
+
+Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-detects whether a repository is an MCP server (by checking for MCP SDK dependencies) or a CLI library, and routes it to the appropriate registration path.
 
 ## Key Features
 
-- **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys it automatically. Skip the publish-to-npm step and go straight from source to running server.
-- **Private repository support** — Works with private GitHub repositories. Develop your MCP servers behind closed doors and deploy them without ever making them public.
-- **Instant iteration** — Made a change? Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
-- **Auto-update** — Enable `auto_update` on a server and Crucible will periodically check its GitHub repository for new commits and redeploy automatically. No manual intervention needed.
-- **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints, so you can test them from any MCP client, local or remote.
-- **Management UI** — See all your servers in one dashboard. Start, stop, remove — keep your environment clean.
-- **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges. Nothing leaves your network.
+- **Three-layer tool model** — Manage MCP servers, CLI libraries, and skills in a unified registry with type-aware filtering and display.
+- **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys MCP servers automatically. Dockerfile auto-generated if missing.
+- **Lightweight registration** — CLI libraries and skills are registered instantly without Docker deployment. Just metadata and install commands.
+- **Private repository support** — Works with private GitHub repositories. Develop behind closed doors and deploy without ever making them public.
+- **Auto-detect tool type** — Crucible inspects dependencies (e.g., `mcp` in pyproject.toml, `@modelcontextprotocol/sdk` in package.json) to classify tools automatically.
+- **Instant iteration** — Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
+- **Auto-update** — Enable `auto_update` on a server and Crucible will periodically check its GitHub repository for new commits and redeploy automatically.
+- **Automatic stdio → SSE** — stdio-only MCP servers are automatically exposed as SSE endpoints.
+- **Management UI** — See all your tools in one dashboard. Filter by status and type. Start, stop, remove — keep your environment clean.
+- **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges.
 
 ## Who is Crucible for?
 
-- **MCP server developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first. Use Crucible as your sandbox to iterate fast.
-- **Research teams and organizations** encouraging members to build domain-specific MCP servers — Crucible gives everyone a shared platform to deploy and experiment.
-- **Anyone exploring GitHub** for MCP servers that aren't on npm or Docker Hub yet — just paste the URL and try it.
+- **MCP server developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first.
+- **Research teams and organizations** building a shared library of AI tools — MCP servers for heavy automation, CLI tools for quick utilities, skills for reusable prompts.
+- **Anyone exploring GitHub** for AI tools — paste the URL and register it, whether it's an MCP server, a pip package, or something in between.
 
 > [See detailed use cases and scenarios on our website](https://kumagallium.github.io/Crucible/)
 
@@ -35,24 +44,32 @@ graph TB
         UI["🖥️ UI<br/><i>Next.js</i>"]
         API["⚡ API<br/><i>FastAPI</i>"]
         Proxy["🔒 Socket Proxy<br/><i>Docker ops</i>"]
-        MCP_A["MCP-A"]
-        MCP_B["MCP-B"]
-        MCP_C["MCP-C"]
+        subgraph MCP ["MCP Servers (Docker)"]
+            MCP_A["MCP-A"]
+            MCP_B["MCP-B"]
+        end
+        subgraph Light ["CLI/Lib & Skills (metadata only)"]
+            CLI_A["📦 CLI-A"]
+            Skill_A["📝 Skill-A"]
+        end
     end
 
     UI <--> API
     API --> Proxy
+    API --> Light
     Proxy --> MCP_A
     Proxy --> MCP_B
-    Proxy --> MCP_C
 
     style Crucible fill:transparent,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
     style UI fill:#e8f0f8,stroke:#5b8fb9,color:#2d4a6e
     style API fill:#edf5ee,stroke:#4B7A52,color:#2d4a32
     style Proxy fill:#f5f0e8,stroke:#c08b3e,color:#6b5a2e
+    style MCP fill:transparent,stroke:#b8d4bb,stroke-width:1px,color:#3d6844
+    style Light fill:transparent,stroke:#c4b8d4,stroke-width:1px,color:#5a4a6e
     style MCP_A fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
     style MCP_B fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
-    style MCP_C fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
+    style CLI_A fill:#f5f0e8,stroke:#c08b3e,color:#6b5a2e
+    style Skill_A fill:#ede8f5,stroke:#8b7ab5,color:#4a3d6e
 ```
 
 ## Quick Start
@@ -147,7 +164,7 @@ No configuration is needed for local-only use (default).
 
 ## Connecting from MCP Clients
 
-MCP servers deployed on Crucible are accessible via SSE endpoints.
+MCP servers deployed on Crucible are accessible via SSE endpoints. CLI/Library and Skill entries are metadata-only and don't expose endpoints.
 
 ### Claude Code
 
@@ -189,7 +206,7 @@ Crucible is part of a broader ecosystem:
 
 ```mermaid
 graph LR
-    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>Build & deploy<br/>MCP servers</i>"]
+    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>AI tool registry<br/>& deployment</i>"]
     Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI agent<br/>runtime</i>"]
     Graphium["📝 <b>Graphium</b><br/><i>Provenance<br/>tracking editor</i>"]
 
@@ -203,11 +220,11 @@ graph LR
 
 | Repository | Role | Link |
 |------------|------|------|
-| **Crucible** | MCP server build, deploy & management | *(this repo)* |
+| **Crucible** | AI tool registry & deployment (MCP servers, CLI/Lib, Skills) | *(this repo)* |
 | **Crucible Agent** | AI agent runtime with MCP tool support | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **Graphium** | PROV-DM provenance tracking editor | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-Each project works independently. Together, they form a complete pipeline: Registry manages MCP servers → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
+Each project works independently. Together, they form a complete pipeline: Registry manages AI tools (MCP servers, CLI libraries, skills) → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
 
 ## License
 

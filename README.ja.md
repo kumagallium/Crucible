@@ -4,26 +4,35 @@
 
 # Crucible
 
-> **MCP サーバーのためのセルフホスト型デプロイメントプラットフォーム。**
-> GitHub URL を貼るだけ。ビルド、デプロイ、接続 — 数分で完了。
+> **AI ツールのためのセルフホスト型レジストリ — MCP サーバー、CLI ライブラリ、スキルを一元管理。**
+> 登録、デプロイ、管理をチームの道具棚として。
 
-**Crucible** は GitHub リポジトリから MCP サーバーを直接ビルド・デプロイするセルフホスト型プラットフォームです。プライベートリポジトリにも対応。URL を貼るだけで自動ビルド・デプロイし、SSE エンドポイントとして公開します。npm や Docker Hub への公開は不要。チームの共有インフラとしても、個人の実験用サンドボックスとしても使えます。
+**Crucible** は 3 種類の AI ツールを管理するセルフホスト型レジストリです：
+
+- **MCP Servers** — GitHub URL からビルド・デプロイ。Docker で自動コンテナ化し、SSE エンドポイントとして公開
+- **CLI / Libraries** — pip/npm パッケージを Docker なしで登録。インストールコマンドとメタデータを MCP サーバーと一緒に管理
+- **Skills** — マークダウンベースの手順書やプロンプトテンプレートを登録。デプロイ不要の軽量エントリ
+
+チームの共有ツール棚としても、個人のサンドボックスとしても使えます。Crucible はリポジトリの依存関係（pyproject.toml の `mcp` や package.json の `@modelcontextprotocol/sdk`）を自動検査し、MCP サーバーか CLI ライブラリかを判別して適切な登録パスに振り分けます。
 
 ## 特徴
 
-- **GitHub URL からビルド** — リポジトリ URL を貼るだけで自動ビルド＆デプロイ。npm への公開ステップを飛ばして、ソースコードから直接サーバーを起動
-- **プライベートリポジトリ対応** — プライベート GitHub リポジトリに対応。非公開のまま MCP サーバーを開発・デプロイ可能
-- **即座にイテレーション** — コードを修正したら GitHub に push して再デプロイするだけ。コードから動作確認までのフィードバックループが最短に
-- **自動更新** — サーバーの `auto_update` を有効にすると、GitHub リポジトリの新しいコミットを定期的にチェックし、自動で再デプロイ。手動操作は不要
-- **stdio → SSE 自動変換** — stdio サーバーも自動的に SSE エンドポイントとして公開。ローカルでもリモートでも、あらゆる MCP クライアントからテスト可能
-- **管理 UI** — デプロイ済みサーバーをダッシュボードで一覧管理。起動・停止・削除で環境を整理
-- **セキュア＆セルフホスト** — すべてあなたのインフラ上で動作。Docker Socket Proxy で Docker 操作を最小権限に制限。データが外部に出ることはない
+- **3 層ツールモデル** — MCP サーバー、CLI ライブラリ、スキルを統一レジストリで管理。種別ごとのフィルタリングと表示
+- **GitHub URL からビルド** — リポジトリ URL を貼るだけで MCP サーバーを自動ビルド＆デプロイ。Dockerfile がなくても自動生成
+- **軽量登録** — CLI ライブラリとスキルは Docker デプロイなしで即座に登録。メタデータとインストールコマンドのみ
+- **プライベートリポジトリ対応** — プライベート GitHub リポジトリに対応。非公開のまま開発・デプロイ可能
+- **ツール種別の自動検出** — 依存関係を検査して MCP サーバーか CLI ライブラリかを自動分類
+- **即座にイテレーション** — GitHub に push して再デプロイするだけ。コードから動作確認までのフィードバックループが最短に
+- **自動更新** — `auto_update` を有効にすると、GitHub の新しいコミットを定期チェックして自動再デプロイ
+- **stdio → SSE 自動変換** — stdio MCP サーバーも自動的に SSE エンドポイントとして公開
+- **管理 UI** — 全ツールをダッシュボードで一覧管理。ステータス・種別でフィルタリング
+- **セキュア＆セルフホスト** — すべてあなたのインフラ上で動作。Docker Socket Proxy で最小権限に制限
 
 ## こんな方に
 
-- **MCP サーバー開発者** — `git push` から数秒でサーバーを動かしたい方。パッケージ公開や Dockerfile 作成は不要。個人のサンドボックスとして高速にイテレーション
-- **研究チーム・組織** — メンバーに専門領域の MCP サーバーを開発してもらいたい環境に。共有プラットフォームで全員がデプロイ・実験可能
-- **GitHub で MCP サーバーを探している方** — npm や Docker Hub に未公開のサーバーも、URL を貼るだけで試せる
+- **MCP サーバー開発者** — `git push` から数秒でサーバーを動かしたい方。パッケージ公開や Dockerfile 作成は不要
+- **研究チーム・組織** — AI ツールの共有ライブラリを構築したい環境に。MCP サーバーで重い自動化、CLI ツールで軽いユーティリティ、スキルで再利用可能なプロンプトを管理
+- **GitHub で AI ツールを探している方** — MCP サーバーでも pip パッケージでも、URL を貼るだけで登録・管理できる
 
 > [詳しいユースケースとシナリオはウェブサイトをご覧ください](https://kumagallium.github.io/Crucible/)
 
@@ -35,24 +44,32 @@ graph TB
         UI["🖥️ UI<br/><i>Next.js</i>"]
         API["⚡ API<br/><i>FastAPI</i>"]
         Proxy["🔒 Socket Proxy<br/><i>Docker 操作</i>"]
-        MCP_A["MCP-A"]
-        MCP_B["MCP-B"]
-        MCP_C["MCP-C"]
+        subgraph MCP ["MCP Servers (Docker)"]
+            MCP_A["MCP-A"]
+            MCP_B["MCP-B"]
+        end
+        subgraph Light ["CLI/Lib & Skills (メタデータのみ)"]
+            CLI_A["📦 CLI-A"]
+            Skill_A["📝 Skill-A"]
+        end
     end
 
     UI <--> API
     API --> Proxy
+    API --> Light
     Proxy --> MCP_A
     Proxy --> MCP_B
-    Proxy --> MCP_C
 
     style Crucible fill:transparent,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
     style UI fill:#e8f0f8,stroke:#5b8fb9,color:#2d4a6e
     style API fill:#edf5ee,stroke:#4B7A52,color:#2d4a32
     style Proxy fill:#f5f0e8,stroke:#c08b3e,color:#6b5a2e
+    style MCP fill:transparent,stroke:#b8d4bb,stroke-width:1px,color:#3d6844
+    style Light fill:transparent,stroke:#c4b8d4,stroke-width:1px,color:#5a4a6e
     style MCP_A fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
     style MCP_B fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
-    style MCP_C fill:#f0f5ef,stroke:#b8d4bb,color:#3d6844
+    style CLI_A fill:#f5f0e8,stroke:#c08b3e,color:#6b5a2e
+    style Skill_A fill:#ede8f5,stroke:#8b7ab5,color:#4a3d6e
 ```
 
 ## クイックスタート
@@ -147,7 +164,7 @@ CRUCIBLE_CORS_ORIGINS=http://10.0.0.1:8081,http://localhost:8081
 
 ## MCP クライアントからの接続
 
-Crucible にデプロイした MCP サーバーは SSE エンドポイント経由で接続できます。
+Crucible にデプロイした MCP サーバーは SSE エンドポイント経由で接続できます。CLI/Library と Skill はメタデータのみの登録で、エンドポイントは公開されません。
 
 ### Claude Code
 
@@ -189,7 +206,7 @@ Crucible はエコシステムの一部として機能します：
 
 ```mermaid
 graph LR
-    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>MCP サーバーの<br/>ビルド & デプロイ</i>"]
+    Registry["🔧 Crucible<br/><b>Registry</b><br/><i>AI ツール<br/>レジストリ & デプロイ</i>"]
     Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI エージェント<br/>ランタイム</i>"]
     Graphium["📝 <b>Graphium</b><br/><i>プロヴェナンス<br/>追跡エディタ</i>"]
 
@@ -203,11 +220,11 @@ graph LR
 
 | リポジトリ | 役割 | リンク |
 |-----------|------|--------|
-| **Crucible** | MCP サーバーのビルド・デプロイ・管理 | *(このリポジトリ)* |
+| **Crucible** | AI ツールレジストリ & デプロイ（MCP サーバー、CLI/Lib、Skills） | *(このリポジトリ)* |
 | **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **Graphium** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-各プロジェクトは単体でも使えます。組み合わせると、Registry が MCP サーバーを管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
+各プロジェクトは単体でも使えます。組み合わせると、Registry が AI ツール（MCP サーバー、CLI ライブラリ、スキル）を管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
 
 ## ライセンス
 
