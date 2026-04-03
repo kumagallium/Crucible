@@ -1035,10 +1035,11 @@ def refresh_statuses() -> None:
         return
 
     for record in registry.get_all():
-        # deploying / error はステータス同期をスキップ
+        # deploying / error / registered はステータス同期をスキップ
         # deploying: バックグラウンドで処理中
         # error: ユーザーが明示的に操作（リトライ/削除）するまで保持
-        if record.status in ("deploying", "error"):
+        # registered: CLI/Library・Skill はコンテナを持たない
+        if record.status in ("deploying", "error", "registered"):
             continue
         new_status = "running" if record.name in running else "stopped"
         if record.status != new_status:

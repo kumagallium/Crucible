@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Rocket, ChevronDown, ChevronRight, CheckCircle2, XCircle, Plus, BookOpen, GitBranch } from "lucide-react";
 import { registerServer, fetchJobLogs } from "@/lib/api";
-import type { RegisterRequest, CatalogEntry } from "@/lib/types";
+import type { RegisterRequest, CatalogEntry, ToolType } from "@/lib/types";
 import { useI18n } from "@/i18n";
 import { CatalogImport } from "./catalog-import";
 
@@ -30,6 +30,7 @@ export function RegisterTab() {
   const [logs, setLogs] = useState<string[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<CatalogEntry | null>(null);
+  const [toolType, setToolType] = useState<ToolType>("mcp_server");
   const logRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -251,7 +252,7 @@ export function RegisterTab() {
               <div className="flex gap-1.5 mt-1.5 mb-4">
                 {(["mcp_server", "cli_library", "skill"] as const).map((tt) => (
                   <label key={tt} className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition-all duration-200 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary bg-secondary text-muted-foreground border-border hover:bg-accent hover:text-foreground">
-                    <input type="radio" name="tool_type" value={tt} defaultChecked={tt === "mcp_server"} className="sr-only" />
+                    <input type="radio" name="tool_type" value={tt} checked={toolType === tt} onChange={() => setToolType(tt)} className="sr-only" />
                     {tt === "mcp_server" ? "MCP Server" : tt === "cli_library" ? "CLI / Library" : "Skill"}
                   </label>
                 ))}
@@ -277,15 +278,28 @@ export function RegisterTab() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 mt-3">
-                <div>
-                  <Label htmlFor="subdir">{t("register.subdir")}</Label>
-                  <Input
-                    id="subdir"
-                    name="subdir"
-                    placeholder={t("register.subdirPlaceholder")}
-                    defaultValue={selectedEntry ? extractSubdir(selectedEntry) : ""}
-                  />
-                </div>
+                {toolType === "mcp_server" && (
+                  <div>
+                    <Label htmlFor="subdir">{t("register.subdir")}</Label>
+                    <Input
+                      id="subdir"
+                      name="subdir"
+                      placeholder={t("register.subdirPlaceholder")}
+                      defaultValue={selectedEntry ? extractSubdir(selectedEntry) : ""}
+                    />
+                  </div>
+                )}
+                {toolType !== "mcp_server" && (
+                  <div>
+                    <Label htmlFor="install_command">Install Command</Label>
+                    <Input
+                      id="install_command"
+                      name="install_command"
+                      placeholder={toolType === "cli_library" ? "pip install package-name" : ""}
+                      defaultValue={selectedEntry?.install_command ?? ""}
+                    />
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="github_token">{t("register.githubToken")}</Label>
                   <Input
@@ -295,15 +309,6 @@ export function RegisterTab() {
                     placeholder={t("register.githubTokenPlaceholder")}
                   />
                 </div>
-              </div>
-              <div className="mt-3">
-                <Label htmlFor="install_command">Install Command</Label>
-                <Input
-                  id="install_command"
-                  name="install_command"
-                  placeholder="pip install arxiv-latex-mcp"
-                  defaultValue={selectedEntry?.install_command ?? ""}
-                />
               </div>
             </div>
 
@@ -390,17 +395,19 @@ export function RegisterTab() {
 
             <Separator />
 
-            <div className="flex items-center gap-2">
-              <Checkbox id="dify_auto" name="dify_auto" defaultChecked />
-              <Label htmlFor="dify_auto" className="cursor-pointer">
-                {t("register.difyAutoRegister")}
-              </Label>
-            </div>
+            {toolType === "mcp_server" && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="dify_auto" name="dify_auto" defaultChecked />
+                  <Label htmlFor="dify_auto" className="cursor-pointer">
+                    {t("register.difyAutoRegister")}
+                  </Label>
+                </div>
 
-            <div>
-              <Label htmlFor="env_vars">{t("register.envVars")}</Label>
-              <Textarea
-                id="env_vars"
+                <div>
+                  <Label htmlFor="env_vars">{t("register.envVars")}</Label>
+                  <Textarea
+                    id="env_vars"
                 name="env_vars"
                 placeholder="MP_API_KEY=your_key"
                 defaultValue={selectedEntry ? buildEnvTemplate(selectedEntry) : ""}
@@ -417,7 +424,9 @@ export function RegisterTab() {
                   ))}
                 </div>
               )}
-            </div>
+                </div>
+              </>
+            )}
 
             <Button
               type="submit"
