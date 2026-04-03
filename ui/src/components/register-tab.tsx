@@ -85,10 +85,10 @@ export function RegisterTab() {
     const data: RegisterRequest = {
       github_url: (fd.get("github_url") as string).trim(),
       branch: (fd.get("branch") as string).trim() || "main",
-      subdir: (fd.get("subdir") as string).trim(),
+      subdir: (fd.get("subdir") as string)?.trim() || "",
       tool_type: toolType as "mcp_server" | "cli_library" | "skill",
       install_command: (fd.get("install_command") as string)?.trim() || "",
-      github_token: (fd.get("github_token") as string).trim(),
+      github_token: (fd.get("github_token") as string)?.trim() || "",
       name: (fd.get("name") as string)?.trim() || null,
       display_name: (fd.get("display_name") as string)?.trim() || null,
       description: (fd.get("description") as string)?.trim() || "",
