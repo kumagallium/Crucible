@@ -135,9 +135,8 @@ export function RegisterTab() {
     }
   }
 
-  // --- デプロイ結果画面 ---
-  if (deployStatus !== null) {
-    const isSuccess = deployStatus === "success";
+  // --- デプロイ成功画面（成功時のみ画面切り替え） ---
+  if (deployStatus === "success") {
     return (
       <div>
         <h2 className="text-lg font-semibold mb-1">{t("register.title")}</h2>
@@ -145,23 +144,13 @@ export function RegisterTab() {
           {t("register.description")}
         </p>
 
-        {isSuccess ? (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-success-bg border border-success-border mb-6">
-            <CheckCircle2 className="h-6 w-6 text-status-running shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-success">{t("register.deploySuccess")}</p>
-              <p className="text-xs text-status-running">{t("register.deploySuccessHint")}</p>
-            </div>
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-success-bg border border-success-border mb-6">
+          <CheckCircle2 className="h-6 w-6 text-status-running shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-success">{t("register.deploySuccess")}</p>
+            <p className="text-xs text-status-running">{t("register.deploySuccessHint")}</p>
           </div>
-        ) : (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-status-error-bg border border-status-error-border mb-6">
-            <XCircle className="h-6 w-6 text-status-error shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-status-error">{t("register.deployFailed")}</p>
-              <p className="text-xs text-destructive-text">{t("register.deployFailedHint")}</p>
-            </div>
-          </div>
-        )}
+        </div>
 
         {logs.length > 0 && (
           <div className="mb-6">
@@ -243,6 +232,36 @@ export function RegisterTab() {
               >
                 {t("register.catalogChange")}
               </button>
+            </div>
+          )}
+
+          {/* デプロイエラー時のインラインバナー（フォームに留まる） */}
+          {deployStatus === "error" && (
+            <div className="mb-6 space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-status-error-bg border border-status-error-border">
+                <XCircle className="h-6 w-6 text-status-error shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-status-error">{t("register.deployFailed")}</p>
+                  <p className="text-xs text-destructive-text">{t("register.deployFailedHint")}</p>
+                </div>
+                <button
+                  onClick={() => { setDeployStatus(null); setLogs([]); }}
+                  className="text-xs text-muted-foreground hover:text-foreground shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+              {logs.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">{t("register.deployLog")}</h3>
+                  <div
+                    ref={logRef}
+                    className="h-56 overflow-y-auto rounded-lg border bg-stone-900 text-stone-400 font-mono text-xs leading-relaxed p-3 whitespace-pre-wrap break-all"
+                  >
+                    {logs.join("\n")}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
