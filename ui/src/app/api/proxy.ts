@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const API_BASE = process.env.API_BASE_URL || "http://api:8000";
 const API_KEY = process.env.REGISTRY_API_KEY || "";
+const TIMEOUT_MS = 5000;
 
 function proxyHeaders(): HeadersInit {
   const h: HeadersInit = { "Content-Type": "application/json" };
@@ -15,6 +16,7 @@ export async function proxyGet(path: string) {
     const res = await fetch(`${API_BASE}${path}`, {
       headers: proxyHeaders(),
       cache: "no-store",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
@@ -29,6 +31,7 @@ export async function proxyPost(path: string, body?: unknown) {
       method: "POST",
       headers: proxyHeaders(),
       body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
@@ -43,6 +46,7 @@ export async function proxyDelete(path: string) {
       method: "DELETE",
       headers: proxyHeaders(),
       cache: "no-store",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
