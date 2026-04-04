@@ -28,12 +28,13 @@ export interface RegisterRequest {
   display_name?: string | null;
   description: string;
   icon: string;
-  github_url: string;
-  branch: string;
-  subdir: string;
+  github_url?: string;
+  branch?: string;
+  subdir?: string;
   tool_type?: ToolType;
   install_command?: string;
-  github_token: string;
+  content?: string;
+  github_token?: string;
   group: "default" | "user";
   dify_auto_register: boolean;
   env_vars: Record<string, string>;

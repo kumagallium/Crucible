@@ -64,7 +64,14 @@
     "modeManual": "GitHub URL",
     "catalogSelected": "\"{name}\" selected",
     "catalogSelectedHint": "Review and edit the details, then deploy.",
-    "catalogChange": "Change"
+    "catalogChange": "Change",
+    "skillName": "Skill Name",
+    "skillContent": "Skill Definition (Markdown)",
+    "skillContentPlaceholder": "# Write your skill prompt here...\n\nUse markdown format.",
+    "skillUpload": "Upload .md",
+    "skillChars": "chars",
+    "skillRegister": "Register Skill",
+    "skillDescriptionPlaceholder": "Describe what this skill does"
   },
   "catalog": {
     "loading": "Loading catalog...",

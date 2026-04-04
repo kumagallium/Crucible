@@ -758,6 +758,7 @@ def register_simple(req: RegisterRequest, log: LogFn) -> ServerRecord:
         subdir=req.subdir,
         tool_type=req.tool_type,
         install_command=req.install_command,
+        content=req.content,
         group=req.group,
         port=0,
         static_ip="",
@@ -769,6 +770,8 @@ def register_simple(req: RegisterRequest, log: LogFn) -> ServerRecord:
     log(f"  ツール種別: {req.tool_type}")
     if req.install_command:
         log(f"  インストール: {req.install_command}")
+    if req.content:
+        log(f"  スキル本文: {len(req.content)} 文字")
     log(f"=== 登録完了: {req.name} ===")
     return record
 

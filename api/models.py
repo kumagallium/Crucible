@@ -6,7 +6,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import re
 
 
@@ -20,7 +20,7 @@ class RegisterRequest(BaseModel):
     display_name: Optional[str] = Field(None, description="表示名 (省略時は mcp.json から自動補完)")
     description: str = Field("", description="機能説明 (省略時は mcp.json から自動補完)")
     icon: str = Field("🔧", description="絵文字アイコン")
-    github_url: str = Field(..., description="GitHub リポジトリ URL")
+    github_url: str = Field("", description="GitHub リポジトリ URL (skill 以外は必須)")
     branch: str = Field("main", description="ブランチ名")
     tool_type: ToolType = Field(
         "mcp_server",
@@ -46,9 +46,27 @@ class RegisterRequest(BaseModel):
     install_command: str = Field(
         "", description="インストールコマンド (CLI/Library 用。例: pip install arxiv-latex-mcp)"
     )
+    content: str = Field(
+        "", description="スキル定義のマークダウン本文 (skill 専用)"
+    )
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="コンテナに渡す環境変数"
     )
+
+    @model_validator(mode="after")
+    def validate_by_tool_type(self) -> "RegisterRequest":
+        """tool_type に応じた必須フィールドを検証する。"""
+        if self.tool_type == "skill":
+            if not self.content.strip():
+                raise ValueError("skill の登録にはマークダウン本文 (content) が必須です")
+            if not self.name:
+                raise ValueError("skill の登録には name が必須です")
+        else:
+            if not self.github_url:
+                raise ValueError("github_url は必須です")
+            if not re.match(r"^https://github\.com/[\w./-]+$", self.github_url):
+                raise ValueError("github_url は https://github.com/... 形式で入力してください")
+        return self
 
     @field_validator("name")
     @classmethod
@@ -59,13 +77,6 @@ class RegisterRequest(BaseModel):
             raise ValueError(
                 "name は小文字英数字とハイフンのみ使用可 (3〜50 文字)"
             )
-        return v
-
-    @field_validator("github_url")
-    @classmethod
-    def validate_github_url(cls, v: str) -> str:
-        if not re.match(r"^https://github\.com/[\w./-]+$", v):
-            raise ValueError("github_url は https://github.com/... 形式で入力してください")
         return v
 
     @field_validator("branch")
@@ -104,6 +115,7 @@ class ServerRecord(BaseModel):
     tool_type: ToolType = "mcp_server"
     group: str
     install_command: str = ""
+    content: str = Field("", description="スキル定義のマークダウン本文 (skill 専用)")
     port: int
     static_ip: str
     status: Literal["running", "stopped", "error", "deploying", "registered"] = "deploying"

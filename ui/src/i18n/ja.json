@@ -64,7 +64,14 @@
     "modeManual": "GitHub URL を入力",
     "catalogSelected": "「{name}」を選択しました",
     "catalogSelectedHint": "内容を確認・編集してデプロイしてください。",
-    "catalogChange": "変更"
+    "catalogChange": "変更",
+    "skillName": "スキル名",
+    "skillContent": "スキル定義 (Markdown)",
+    "skillContentPlaceholder": "# スキルのプロンプトをここに記述...\n\nマークダウン形式で記述してください。",
+    "skillUpload": ".md をアップロード",
+    "skillChars": "文字",
+    "skillRegister": "スキルを登録",
+    "skillDescriptionPlaceholder": "このスキルの概要を入力してください"
   },
   "catalog": {
     "loading": "カタログを読み込み中...",
