@@ -87,6 +87,7 @@ export interface CatalogEntry {
   tags: string[];
   install_command: string;
   tool_count: number;
+  tool_types: ToolType[];
   tools_json: CatalogTool[];
   env_vars_json: CatalogEnvVar[];
   config_json: Record<string, unknown>;

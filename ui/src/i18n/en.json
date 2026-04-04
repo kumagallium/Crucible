@@ -62,6 +62,7 @@
     "error": "Error: ",
     "modeCatalog": "From Catalog",
     "modeManual": "GitHub URL",
+    "modeSkillManual": "Write directly",
     "catalogSelected": "\"{name}\" selected",
     "catalogSelectedHint": "Review and edit the details, then deploy.",
     "catalogChange": "Change",

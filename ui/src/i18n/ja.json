@@ -62,6 +62,7 @@
     "error": "エラー: ",
     "modeCatalog": "カタログから選択",
     "modeManual": "GitHub URL を入力",
+    "modeSkillManual": "直接入力",
     "catalogSelected": "「{name}」を選択しました",
     "catalogSelectedHint": "内容を確認・編集してデプロイしてください。",
     "catalogChange": "変更",

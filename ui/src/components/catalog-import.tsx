@@ -5,8 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Loader2, ExternalLink, ArrowRight, AlertCircle } from "lucide-react";
 import { fetchCatalog } from "@/lib/api";
-import type { CatalogEntry, CatalogCategory } from "@/lib/types";
+import type { CatalogEntry, CatalogCategory, ToolType } from "@/lib/types";
 import { useI18n } from "@/i18n";
+
+// tool_type → 短いラベル
+const toolTypeLabel: Record<ToolType, string> = {
+  mcp_server: "MCP",
+  cli_library: "CLI",
+  skill: "Skill",
+};
 
 // trust_level → Badge バリアントのマッピング
 const trustVariant: Record<string, "e4m" | "official" | "verified" | "community"> = {
@@ -18,9 +25,10 @@ const trustVariant: Record<string, "e4m" | "official" | "verified" | "community"
 
 interface CatalogImportProps {
   onSelect: (entry: CatalogEntry) => void;
+  toolType: ToolType;
 }
 
-export function CatalogImport({ onSelect }: CatalogImportProps) {
+export function CatalogImport({ onSelect, toolType }: CatalogImportProps) {
   const { t } = useI18n();
   const [entries, setEntries] = useState<CatalogEntry[]>([]);
   const [categories, setCategories] = useState<CatalogCategory[]>([]);
@@ -42,6 +50,9 @@ export function CatalogImport({ onSelect }: CatalogImportProps) {
   }, []);
 
   const filtered = entries.filter((e) => {
+    // tool_types が存在しないエントリは mcp_server として扱う（後方互換）
+    const types = e.tool_types?.length ? e.tool_types : ["mcp_server"];
+    const matchesToolType = types.includes(toolType);
     const matchesCategory = activeCategory === "all" || e.category_slug === activeCategory;
     const q = search.toLowerCase();
     const matchesSearch =
@@ -50,7 +61,7 @@ export function CatalogImport({ onSelect }: CatalogImportProps) {
       e.description.toLowerCase().includes(q) ||
       e.author.toLowerCase().includes(q) ||
       e.tags.some((tag) => tag.toLowerCase().includes(q));
-    return matchesCategory && matchesSearch;
+    return matchesToolType && matchesCategory && matchesSearch;
   });
 
   if (loading) {
@@ -135,6 +146,14 @@ export function CatalogImport({ onSelect }: CatalogImportProps) {
                     <Badge variant={trustVariant[entry.trust_level] || "community"}>
                       {entry.trust_level}
                     </Badge>
+                    {entry.tool_types?.length > 1 && entry.tool_types.map((tt) => (
+                      <span
+                        key={tt}
+                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground"
+                      >
+                        {toolTypeLabel[tt]}
+                      </span>
+                    ))}
                     {entry.featured && (
                       <Badge variant="featured">
                         featured
