@@ -193,7 +193,7 @@ export function CatalogImport({ onSelect, toolType }: CatalogImportProps) {
       {/* e4m リンク */}
       <div className="pt-2 border-t">
         <a
-          href="https://e4m.jp/mcp-catalog/"
+          href="https://e4m.jp/tool-catalog/"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"

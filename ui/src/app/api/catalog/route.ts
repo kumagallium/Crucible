@@ -1,4 +1,4 @@
-// e4m MCP カタログ API へのプロキシ
+// e4m ツールカタログ API へのプロキシ
 import { NextResponse } from "next/server";
 
 const E4M_API_BASE = process.env.E4M_API_BASE_URL || "https://e4m.jp/api";

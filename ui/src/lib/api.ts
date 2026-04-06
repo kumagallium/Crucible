@@ -117,7 +117,7 @@ export async function fetchJobLogs(jobId: string, offset = 0): Promise<LogsRespo
   return res.json();
 }
 
-// --- e4m MCP カタログ ---
+// --- e4m ツールカタログ ---
 
 export async function fetchCatalog(): Promise<{
   servers: CatalogEntry[];
