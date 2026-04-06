@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crucible — MCP サーバーのためのセルフホスト型デプロイメントプラットフォーム</title>
-  <meta name="description" content="GitHub URL を貼るだけで MCP サーバーを自動ビルド・デプロイ・接続。プライベートリポジトリ対応。">
+  <title>Crucible — セルフホスト型 AI ツール管理プラットフォーム</title>
+  <meta name="description" content="GitHub URL からサーバーをデプロイ、CLI ライブラリやスキルを登録・管理。プライベートリポジトリ対応。">
   <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
   <link rel="stylesheet" href="../style.css">
@@ -28,7 +28,7 @@
   <!-- Hero -->
   <section class="hero">
     <img src="../logo.png" alt="Crucible" class="hero-logo">
-    <p class="tagline">MCP サーバーのためのセルフホスト型デプロイメントプラットフォーム。</p>
+    <p class="tagline">チームの AI ツール棚 — セルフホスト型。</p>
     <p class="description">
       GitHub URL を貼るだけ。ビルド、デプロイ、接続 — 数分で完了。
     </p>
@@ -42,9 +42,9 @@
   <section class="section" id="about">
     <h2 class="section-title">Crucible とは？</h2>
     <p class="about-text">
-      Crucible は GitHub リポジトリから MCP サーバーを直接ビルド・デプロイする
-      セルフホスト型プラットフォームです。プライベートリポジトリにも対応。
-      URL を貼るだけで自動ビルド・デプロイし、SSE エンドポイントとして公開します。
+      Crucible は AI ツールを管理するセルフホスト型プラットフォームです。
+      GitHub リポジトリからサーバーをデプロイし、CLI ライブラリやスキルを登録。
+      URL を貼るだけで自動ビルド・デプロイし、エンドポイントとして公開します。
     </p>
     <br>
     <p class="about-text">
@@ -65,12 +65,12 @@
 
       <!-- シナリオ 1 -->
       <div class="scenario">
-        <div class="scenario-header">MCP サーバー開発者 — コードから動作確認までが遠い</div>
+        <div class="scenario-header">AI ツール開発者 — コードから動作確認までが遠い</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>MCP サーバーのコードを書いた</li>
+              <li>サーバーのコードを書いた</li>
               <li>動作確認するには、ローカルでビルドして、設定ファイルを書いて、クライアントに繋いで…</li>
               <li>ちょっとした修正のたびにこのサイクルを繰り返す</li>
               <li>他の人に試してもらうには npm や PyPI に公開する必要がある</li>
@@ -90,13 +90,13 @@
 
       <!-- シナリオ 2 -->
       <div class="scenario">
-        <div class="scenario-header">プロジェクトリーダー — メンバーに MCP サーバーを作ってもらいたい</div>
+        <div class="scenario-header">プロジェクトリーダー — メンバーに AI ツールを作ってもらいたい</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>プロジェクトの各メンバーに専門領域の MCP サーバーを開発してもらいたい</li>
-              <li>でも MCP サーバーの開発からデプロイまでの手順が人によってバラバラ</li>
+              <li>プロジェクトの各メンバーに専門領域の AI ツールを開発してもらいたい</li>
+              <li>でもツールの開発からデプロイまでの手順が人によってバラバラ</li>
               <li>「作ったけどどうやって共有すればいいの？」で止まる人が出る</li>
               <li>各自のローカル環境に閉じてしまい、他の人が試せない</li>
             </ul>
@@ -106,8 +106,8 @@
             <ul>
               <li>Crucible をプロジェクトの共有サーバーにデプロイ</li>
               <li>メンバーは GitHub にコードを push して、URL を Crucible に登録するだけ</li>
-              <li>全員の MCP サーバーが一箇所に集まり、誰でも試せる状態になる</li>
-              <li>まさに「るつぼ」— 多様な MCP サーバーが混ざり合い、新しい可能性が生まれる場</li>
+              <li>全員の AI ツールが一箇所に集まり、誰でも試せる状態になる</li>
+              <li>まさに「るつぼ」— 多様な AI ツールが混ざり合い、新しい可能性が生まれる場</li>
             </ul>
           </div>
         </div>
@@ -115,12 +115,12 @@
 
       <!-- シナリオ 3 -->
       <div class="scenario">
-        <div class="scenario-header">GitHub で見つけた MCP サーバーを試したい人</div>
+        <div class="scenario-header">GitHub で見つけた AI ツールを試したい人</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>GitHub で面白そうな MCP サーバーを見つけた</li>
+              <li>GitHub で面白そうな AI ツールを見つけた</li>
               <li>でも npm にも PyPI にも Docker Hub にも公開されていない</li>
               <li>README を読んでビルド手順を調べて、依存関係を入れて…</li>
               <li>「面倒だからいいや」でスルーしてしまう</li>
@@ -153,7 +153,7 @@
       <div class="feature-card">
         <div class="feature-icon">&#128274;</div>
         <h3>プライベートリポジトリ対応</h3>
-        <p>プライベート GitHub リポジトリに対応。非公開のまま MCP サーバーを開発・デプロイ可能。</p>
+        <p>プライベート GitHub リポジトリに対応。非公開のまま AI ツールを開発・デプロイ可能。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128260;</div>
@@ -186,7 +186,7 @@
       <div class="step">
         <div class="step-number">1</div>
         <h3>GitHub に push</h3>
-        <p>あなたの MCP サーバーリポジトリ — パブリック・プライベート両対応。</p>
+        <p>あなたのツールリポジトリ — パブリック・プライベート両対応。</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
@@ -201,7 +201,7 @@
       <div class="step">
         <div class="step-number">4</div>
         <h3>接続＆テスト</h3>
-        <p>あらゆる MCP クライアントから接続。修正したら再デプロイするだけ。</p>
+        <p>対応クライアントから接続。修正したら再デプロイするだけ。</p>
       </div>
     </div>
   </section>

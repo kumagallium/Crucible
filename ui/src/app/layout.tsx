@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Crucible",
-  description: "MCP Server Management Portal",
+  description: "AI Tool Management Portal",
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",

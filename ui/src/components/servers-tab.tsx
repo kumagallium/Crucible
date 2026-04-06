@@ -31,7 +31,7 @@ export function ServersTab() {
 
   const TYPE_FILTERS: { value: "all" | ToolType; label: string }[] = [
     { value: "all", label: t("servers.filterAll") },
-    { value: "mcp_server", label: "MCP Server" },
+    { value: "mcp_server", label: "Server" },
     { value: "cli_library", label: "CLI / Library" },
     { value: "skill", label: "Skill" },
   ];

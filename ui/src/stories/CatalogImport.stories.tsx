@@ -1,5 +1,5 @@
 // CatalogImport コンポーネントのストーリー
-// e4m MCP カタログからサーバーを検索・選択する UI
+// e4m カタログからツールを検索・選択する UI
 
 import type { Meta, StoryObj } from "@storybook/react";
 import { CatalogImport } from "@/components/catalog-import";
