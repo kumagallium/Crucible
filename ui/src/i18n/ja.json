@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "MCP サーバー管理ポータル"
+    "description": "AI ツール管理ポータル"
   },
   "nav": {
     "servers": "Servers",
@@ -31,7 +31,7 @@
     "deleteButton": "削除する"
   },
   "register": {
-    "title": "新規 MCP サーバーを登録",
+    "title": "新規ツールを登録",
     "description": "GitHub リポジトリ URL を入力するだけで clone → build → 起動 → Dify 登録まで自動化します。",
     "deploySuccess": "デプロイ完了",
     "deploySuccessHint": "「Servers」タブで確認できます。",
@@ -46,7 +46,7 @@
     "subdirPlaceholder": "sub-server (モノリポの場合)",
     "githubToken": "GitHub Token",
     "githubTokenPlaceholder": "プライベートリポジトリの場合のみ",
-    "advancedToggle": "基本情報を手動指定 (mcp.json がない場合)",
+    "advancedToggle": "基本情報を手動指定 (自動検出できない場合)",
     "serverName": "サーバー名",
     "serverNameHint": "小文字英数字とハイフンのみ（3〜50 文字）",
     "displayName": "表示名",
@@ -89,16 +89,16 @@
   },
   "guide": {
     "title": "Guide",
-    "description": "Crucible に登録された MCP サーバーへの接続方法を説明します。",
+    "description": "Crucible に登録されたサーバーへの接続方法を説明します。",
     "connectionFlow": "接続の流れ",
-    "connectionFlowDesc": "Crucible の MCP サーバーは SSE（Server-Sent Events）または Streamable HTTP エンドポイント経由で利用できます。MCP 対応の任意のクライアントから接続可能です。",
+    "connectionFlowDesc": "Crucible にデプロイしたサーバーは SSE（Server-Sent Events）または Streamable HTTP エンドポイント経由で利用できます。対応クライアントから接続可能です。",
     "step1Label": "1. エンドポイントを確認",
     "step2Label": "2. クライアントに登録",
     "step1Title": "Step 1 — エンドポイントを確認する",
     "step1Desc": "Servers ページで利用したいサーバーのエンドポイント URL を確認し、コピーボタンでコピーします。サーバーによって /sse（SSE）または /mcp（Streamable HTTP）のいずれかが表示されます。",
     "step2Title": "Step 2 — MCP クライアントに登録する",
     "step2Desc": "お使いの MCP 対応クライアントの設定に、コピーしたエンドポイント URL を追加します。以下に代表的なクライアントの設定例を示します。",
-    "claudeDesktopDesc": "Claude Desktop はリモート MCP サーバーへの直接接続に対応していないため、mcp-remote を使って stdio → HTTP 変換を行います。",
+    "claudeDesktopDesc": "Claude Desktop はリモートサーバーへの直接接続に対応していないため、mcp-remote を使って stdio → HTTP 変換を行います。",
     "prerequisite": "前提条件:",
     "prerequisiteDesc": "Node.js v20 以上が必要です。事前に",
     "prerequisiteDesc2": "を実行してください。",
@@ -107,7 +107,7 @@
     "warning": "注意:",
     "warningDesc": "npx mcp-remote ではなく、node と proxy.js のフルパスを直接指定してください。nvm 環境では npx が古い Node.js を使用し、エラーになる場合があります。また、HTTP 接続には --allow-http フラグが必須です。",
     "claudeCodeDesc": "SSE / Streamable HTTP に直接対応しているため、ワンコマンドで追加できます。",
-    "cursorDesc": "SSE / Streamable HTTP に直接対応しています。Settings → MCP Servers から追加してください。",
+    "cursorDesc": "SSE / Streamable HTTP に直接対応しています。Settings → Servers から追加してください。",
     "windsurfDesc": "SSE / Streamable HTTP に直接対応しています。設定画面からエンドポイント URL を追加してください。",
     "otherClients": "その他の MCP クライアント",
     "otherClientsDesc": "SSE または Streamable HTTP トランスポートに対応した MCP クライアントであれば、エンドポイント URL を指定するだけで接続できます。",
@@ -125,16 +125,16 @@
   },
   "about": {
     "title": "About Crucible",
-    "subtitle": "Crucible（るつぼ）— 多様な MCP サーバーが一つの場所に集まり、AI エージェントの力へと変わる器。",
+    "subtitle": "Crucible（るつぼ）— 多様な AI ツールが一つの場所に集まり、AI エージェントの力へと変わる器。",
     "originTitle": "名前の由来",
-    "originDesc1": "Crucible は「るつぼ」を意味する英語です。るつぼとは、様々な素材を一つの器に集め、新たな価値を生み出すための容器。MCP サーバーという多様なツール群を一箇所に集約し、AI エージェントが自在に活用できる環境を整える — そのコンセプトに「るつぼ」というイメージが重なりました。",
-    "originDesc2": "MCP エコシステムには Smithery（鍛冶場）のようなプラットフォームが存在しますが、Crucible もまた金属・鍛造にルーツを持つ名前です。鍛冶場で道具が打ち出される前に、素材がるつぼの中で一つになる — Crucible はその最初の一歩を担う場所です。",
+    "originDesc1": "Crucible は「るつぼ」を意味する英語です。るつぼとは、様々な素材を一つの器に集め、新たな価値を生み出すための容器。多様な AI ツールを一箇所に集約し、AI エージェントが自在に活用できる環境を整える — そのコンセプトに「るつぼ」というイメージが重なりました。",
+    "originDesc2": "AI ツールエコシステムには Smithery（鍛冶場）のようなプラットフォームが存在しますが、Crucible もまた金属・鍛造にルーツを持つ名前です。鍛冶場で道具が打ち出される前に、素材がるつぼの中で一つになる — Crucible はその最初の一歩を担う場所です。",
     "approachTitle": "Crucible のアプローチ",
     "approachDesc1": "Smithery や Tooluniverse のようなオープンプラットフォームとは異なり、Crucible は各ユーザーやグループが自分たちのるつぼをクローズドに立ち上げられることを目指しています。",
-    "approachDesc2": "大きな共有の炉ではなく、手元に置ける小さなるつぼ。自分たちのインフラの上で、自分たちの MCP サーバーを管理し、自分たちの AI エージェントに力を与える — そんなソブリンな MCP 基盤が Crucible です。",
+    "approachDesc2": "大きな共有の炉ではなく、手元に置ける小さなるつぼ。自分たちのインフラの上で、自分たちの AI ツールを管理し、自分たちの AI エージェントに力を与える — そんなソブリンな AI ツール基盤が Crucible です。",
     "approachHighlight": "自分たちのるつぼ",
     "logoTitle": "ロゴについて",
-    "logoDesc": "Crucible のロゴは、サーバーを U 字に曲げてるつぼの形を表現し、その中に MCP サーバーを示す丸が収められたデザインです。多様なサーバーが一つの器に集まる様子をシンボリックに表しています。"
+    "logoDesc": "Crucible のロゴは、サーバーを U 字に曲げてるつぼの形を表現し、その中に AI ツールを示す丸が収められたデザインです。多様なツールが一つの器に集まる様子をシンボリックに表しています。"
   },
   "releaseNotes": {
     "title": "リリースノート",

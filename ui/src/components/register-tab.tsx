@@ -309,7 +309,7 @@ export function RegisterTab() {
                   : "bg-secondary text-muted-foreground border-border hover:bg-accent hover:text-foreground"
               }`}
             >
-              {tt === "mcp_server" ? "MCP Server" : tt === "cli_library" ? "CLI / Library" : "Skill"}
+              {tt === "mcp_server" ? "Server" : tt === "cli_library" ? "CLI / Library" : "Skill"}
             </button>
           ))}
         </div>
@@ -534,7 +534,7 @@ export function RegisterTab() {
             </form>
           )}
 
-          {/* ===== MCP Server / CLI Library 登録フォーム ===== */}
+          {/* ===== Server / CLI Library 登録フォーム ===== */}
           {toolType !== "skill" && (
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               <input type="hidden" name="tool_type" value={toolType} />
@@ -627,7 +627,7 @@ export function RegisterTab() {
                         <Input
                           id="display_name"
                           name="display_name"
-                          placeholder="My MCP Server"
+                          placeholder="My Server"
                           defaultValue={defaults.displayName || selectedEntry?.name || ""}
                         />
                       </div>

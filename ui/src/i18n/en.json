@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "MCP Server Management Portal"
+    "description": "AI Tool Management Portal"
   },
   "nav": {
     "servers": "Servers",
@@ -31,7 +31,7 @@
     "deleteButton": "Delete"
   },
   "register": {
-    "title": "Register New MCP Server",
+    "title": "Register New Tool",
     "description": "Just enter a GitHub repository URL to automate clone → build → start → Dify registration.",
     "deploySuccess": "Deploy Complete",
     "deploySuccessHint": "Check the \"Servers\" tab to confirm.",
@@ -46,7 +46,7 @@
     "subdirPlaceholder": "sub-server (for monorepos)",
     "githubToken": "GitHub Token",
     "githubTokenPlaceholder": "Required for private repositories only",
-    "advancedToggle": "Manually specify details (when mcp.json is missing)",
+    "advancedToggle": "Manually specify details (when auto-detection is unavailable)",
     "serverName": "Server Name",
     "serverNameHint": "Lowercase alphanumeric and hyphens only (3-50 chars)",
     "displayName": "Display Name",
@@ -89,9 +89,9 @@
   },
   "guide": {
     "title": "Guide",
-    "description": "Learn how to connect to MCP servers registered in Crucible.",
+    "description": "Learn how to connect to servers registered in Crucible.",
     "connectionFlow": "Connection Flow",
-    "connectionFlowDesc": "Crucible's MCP servers are accessible via SSE (Server-Sent Events) or Streamable HTTP endpoints. You can connect from any MCP-compatible client.",
+    "connectionFlowDesc": "Servers deployed on Crucible are accessible via SSE (Server-Sent Events) or Streamable HTTP endpoints. You can connect from any compatible client.",
     "step1Label": "1. Check endpoint",
     "step2Label": "2. Register with client",
     "step1Title": "Step 1 — Check the endpoint",
@@ -107,7 +107,7 @@
     "warning": "Note:",
     "warningDesc": "Use the full paths for node and proxy.js instead of npx mcp-remote. In nvm environments, npx may use an older Node.js version causing errors. The --allow-http flag is required for HTTP connections.",
     "claudeCodeDesc": "Supports SSE / Streamable HTTP directly — add with a single command.",
-    "cursorDesc": "Supports SSE / Streamable HTTP directly. Add from Settings → MCP Servers.",
+    "cursorDesc": "Supports SSE / Streamable HTTP directly. Add from Settings → Servers.",
     "windsurfDesc": "Supports SSE / Streamable HTTP directly. Add the endpoint URL from the settings screen.",
     "otherClients": "Other MCP Clients",
     "otherClientsDesc": "Any MCP client that supports SSE or Streamable HTTP transport can connect by specifying the endpoint URL.",
@@ -125,16 +125,16 @@
   },
   "about": {
     "title": "About Crucible",
-    "subtitle": "Crucible — a place where diverse MCP servers come together, transforming into the power of AI agents.",
+    "subtitle": "Crucible — a place where diverse AI tools come together, transforming into the power of AI agents.",
     "originTitle": "Origin of the Name",
-    "originDesc1": "A crucible is a vessel for collecting various materials and creating new value. Like a crucible that gathers diverse materials, Crucible consolidates various MCP server tools into one place, creating an environment where AI agents can freely utilize them.",
+    "originDesc1": "A crucible is a vessel for collecting various materials and creating new value. Like a crucible that gathers diverse materials, Crucible consolidates various AI tools into one place, creating an environment where AI agents can freely utilize them.",
     "originDesc2": "The MCP ecosystem has platforms like Smithery (a forge). Crucible also has roots in metallurgy — before tools are forged at the smithy, materials come together in the crucible. Crucible is that first step.",
     "approachTitle": "Crucible's Approach",
     "approachDesc1": "Unlike open platforms such as Smithery or Tooluniverse, Crucible aims to let each user or group set up their own crucible in a closed environment.",
-    "approachDesc2": "Not a large shared furnace, but a small crucible you can keep close at hand. Manage your own MCP servers on your own infrastructure, empowering your own AI agents — that's the sovereign MCP platform that Crucible provides.",
+    "approachDesc2": "Not a large shared furnace, but a small crucible you can keep close at hand. Manage your own AI tools on your own infrastructure, empowering your own AI agents — that's the sovereign AI tool platform that Crucible provides.",
     "approachHighlight": "their own crucible",
     "logoTitle": "About the Logo",
-    "logoDesc": "The Crucible logo depicts a server bent into a U-shape to represent a crucible, with circles inside representing MCP servers. It symbolically shows diverse servers gathering in one vessel."
+    "logoDesc": "The Crucible logo depicts a server bent into a U-shape to represent a crucible, with circles inside representing AI tools. It symbolically shows diverse tools gathering in one vessel."
   },
   "releaseNotes": {
     "title": "Release Notes",

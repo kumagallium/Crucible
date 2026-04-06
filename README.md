@@ -4,35 +4,35 @@
 
 # Crucible
 
-> **Your team's AI tool shelf — deploy MCP servers, register CLI libraries and skills.**
+> **Your team's AI tool shelf — deploy servers, register CLI libraries and skills.**
 > Build, deploy, and manage all your AI tools in one place.
 
 **Crucible** is a self-hosted platform that manages three types of AI tools:
 
-- **MCP Servers** — Build and deploy from GitHub URLs. Automatically containerized with Docker and exposed as SSE endpoints.
-- **CLI / Libraries** — Register pip/npm packages without Docker. Track install commands and metadata alongside your MCP servers.
+- **Servers** — Build and deploy from GitHub URLs. Automatically containerized with Docker and exposed as SSE endpoints. Supports MCP servers out of the box.
+- **CLI / Libraries** — Register pip/npm packages without Docker. Track install commands and metadata alongside your deployed servers.
 - **Skills** — Register markdown-based prompts and procedures. Lightweight entries that require no deployment.
 
-Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-detects whether a repository is an MCP server (by checking for MCP SDK dependencies) or a CLI library, and routes it to the appropriate registration path.
+Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-detects the tool type from repository dependencies and routes it to the appropriate registration path.
 
 ## Key Features
 
-- **Three-layer tool model** — Manage MCP servers, CLI libraries, and skills in one place with type-aware filtering and display.
-- **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys MCP servers automatically. Dockerfile auto-generated if missing.
+- **Three-layer tool model** — Manage servers, CLI libraries, and skills in one place with type-aware filtering and display.
+- **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys servers automatically. Dockerfile auto-generated if missing.
 - **Lightweight registration** — CLI libraries and skills are registered instantly without Docker deployment. Just metadata and install commands.
 - **Private repository support** — Works with private GitHub repositories. Develop behind closed doors and deploy without ever making them public.
-- **Auto-detect tool type** — Crucible inspects dependencies (e.g., `mcp` in pyproject.toml, `@modelcontextprotocol/sdk` in package.json) to classify tools automatically.
+- **Auto-detect tool type** — Crucible inspects dependencies to classify tools automatically (MCP servers, CLI libraries, etc.).
 - **Instant iteration** — Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
 - **Auto-update** — Enable `auto_update` on a server and Crucible will periodically check its GitHub repository for new commits and redeploy automatically.
-- **Automatic stdio → SSE** — stdio-only MCP servers are automatically exposed as SSE endpoints.
+- **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints.
 - **Management UI** — See all your tools in one dashboard. Filter by status and type. Start, stop, remove — keep your environment clean.
 - **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges.
 
 ## Who is Crucible for?
 
-- **MCP server developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first.
-- **Research teams and organizations** building a shared library of AI tools — MCP servers for heavy automation, CLI tools for quick utilities, skills for reusable prompts.
-- **Anyone exploring GitHub** for AI tools — paste the URL and register it, whether it's an MCP server, a pip package, or something in between.
+- **AI tool developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first.
+- **Research teams and organizations** building a shared library of AI tools — servers for heavy automation, CLI tools for quick utilities, skills for reusable prompts.
+- **Anyone exploring GitHub** for AI tools — paste the URL and register it, whether it's a server, a pip package, or something in between.
 
 > [See detailed use cases and scenarios on our website](https://kumagallium.github.io/Crucible/)
 
@@ -44,7 +44,7 @@ graph TB
         UI["🖥️ UI<br/><i>Next.js</i>"]
         API["⚡ API<br/><i>FastAPI</i>"]
         Proxy["🔒 Socket Proxy<br/><i>Docker ops</i>"]
-        subgraph MCP ["MCP Servers (Docker)"]
+        subgraph MCP ["Servers (Docker)"]
             MCP_A["MCP-A"]
             MCP_B["MCP-B"]
         end
@@ -141,7 +141,7 @@ SSH_PORT=<your-port> sudo bash setup-server.sh
 | `CRUCIBLE_HOST` | `127.0.0.1` | IP address to bind ports to |
 | `CRUCIBLE_API_PORT` | `8080` | API port |
 | `CRUCIBLE_UI_PORT` | `8081` | UI port |
-| `CRUCIBLE_BASE_URL` | `http://127.0.0.1` | Base URL for MCP server SSE endpoints |
+| `CRUCIBLE_BASE_URL` | `http://127.0.0.1` | Base URL for server SSE endpoints |
 | `CRUCIBLE_CORS_ORIGINS` | *(localhost)* | Allowed CORS origins (comma-separated) |
 | `REGISTRY_API_KEY` | *(none)* | API authentication key |
 | `TOKEN_ENCRYPTION_KEY` | *(none)* | Encryption key for GitHub tokens |
@@ -162,9 +162,9 @@ CRUCIBLE_CORS_ORIGINS=http://10.0.0.1:8081,http://localhost:8081
 
 No configuration is needed for local-only use (default).
 
-## Connecting from MCP Clients
+## Connecting from Clients
 
-MCP servers deployed on Crucible are accessible via SSE endpoints. CLI/Library and Skill entries are metadata-only and don't expose endpoints.
+Servers deployed on Crucible are accessible via SSE endpoints. CLI/Library and Skill entries are metadata-only and don't expose endpoints.
 
 ### Claude Code
 
@@ -184,7 +184,7 @@ Claude Desktop does not natively support SSE. Use [mcp-remote](https://www.npmjs
 
 ### Dify
 
-Crucible can automatically register deployed MCP servers as tools in Dify.
+Crucible can automatically register deployed servers as tools in Dify.
 Set `DIFY_EMAIL` and `DIFY_PASSWORD` in your `.env` to enable.
 
 ## Tech Stack
@@ -220,11 +220,11 @@ graph LR
 
 | Repository | Role | Link |
 |------------|------|------|
-| **Crucible** | AI tool management & deployment (MCP servers, CLI/Lib, Skills) | *(this repo)* |
-| **Crucible Agent** | AI agent runtime with MCP tool support | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
+| **Crucible** | AI tool management & deployment (Servers, CLI/Lib, Skills) | *(this repo)* |
+| **Crucible Agent** | AI agent runtime with tool support | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **Graphium** | PROV-DM provenance tracking editor | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-Each project works independently. Together, they form a complete pipeline: Crucible manages AI tools (MCP servers, CLI libraries, skills) → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
+Each project works independently. Together, they form a complete pipeline: Crucible manages AI tools (servers, CLI libraries, skills) → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
 
 ## License
 

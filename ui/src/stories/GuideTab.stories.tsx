@@ -14,5 +14,5 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** MCP サーバー接続ガイド */
+/** サーバー接続ガイド */
 export const Default: Story = {};

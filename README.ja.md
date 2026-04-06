@@ -4,35 +4,35 @@
 
 # Crucible
 
-> **チームの AI ツール棚 — MCP サーバーをデプロイ、CLI ライブラリやスキルを登録・管理。**
+> **チームの AI ツール棚 — サーバーをデプロイ、CLI ライブラリやスキルを登録・管理。**
 > ビルド、デプロイ、管理をすべて一箇所で。
 
 **Crucible** は 3 種類の AI ツールを管理するセルフホスト型プラットフォームです：
 
-- **MCP Servers** — GitHub URL からビルド・デプロイ。Docker で自動コンテナ化し、SSE エンドポイントとして公開
-- **CLI / Libraries** — pip/npm パッケージを Docker なしで登録。インストールコマンドとメタデータを MCP サーバーと一緒に管理
+- **Servers** — GitHub URL からビルド・デプロイ。Docker で自動コンテナ化し、SSE エンドポイントとして公開。MCP サーバーにも対応
+- **CLI / Libraries** — pip/npm パッケージを Docker なしで登録。インストールコマンドとメタデータをデプロイ済みサーバーと一緒に管理
 - **Skills** — マークダウンベースの手順書やプロンプトテンプレートを登録。デプロイ不要の軽量エントリ
 
-チームの共有ツール棚としても、個人のサンドボックスとしても使えます。Crucible はリポジトリの依存関係（pyproject.toml の `mcp` や package.json の `@modelcontextprotocol/sdk`）を自動検査し、MCP サーバーか CLI ライブラリかを判別して適切な登録パスに振り分けます。
+チームの共有ツール棚としても、個人のサンドボックスとしても使えます。Crucible はリポジトリの依存関係からツール種別を自動検出し、適切な登録パスに振り分けます。
 
 ## 特徴
 
-- **3 層ツールモデル** — MCP サーバー、CLI ライブラリ、スキルを一箇所で管理。種別ごとのフィルタリングと表示
-- **GitHub URL からビルド** — リポジトリ URL を貼るだけで MCP サーバーを自動ビルド＆デプロイ。Dockerfile がなくても自動生成
+- **3 層ツールモデル** — サーバー、CLI ライブラリ、スキルを一箇所で管理。種別ごとのフィルタリングと表示
+- **GitHub URL からビルド** — リポジトリ URL を貼るだけでサーバーを自動ビルド＆デプロイ。Dockerfile がなくても自動生成
 - **軽量登録** — CLI ライブラリとスキルは Docker デプロイなしで即座に登録。メタデータとインストールコマンドのみ
 - **プライベートリポジトリ対応** — プライベート GitHub リポジトリに対応。非公開のまま開発・デプロイ可能
-- **ツール種別の自動検出** — 依存関係を検査して MCP サーバーか CLI ライブラリかを自動分類
+- **ツール種別の自動検出** — 依存関係を検査してツール種別（MCP サーバー、CLI ライブラリ等）を自動分類
 - **即座にイテレーション** — GitHub に push して再デプロイするだけ。コードから動作確認までのフィードバックループが最短に
 - **自動更新** — `auto_update` を有効にすると、GitHub の新しいコミットを定期チェックして自動再デプロイ
-- **stdio → SSE 自動変換** — stdio MCP サーバーも自動的に SSE エンドポイントとして公開
+- **stdio → SSE 自動変換** — stdio のみのサーバーも自動的に SSE エンドポイントとして公開
 - **管理 UI** — 全ツールをダッシュボードで一覧管理。ステータス・種別でフィルタリング
 - **セキュア＆セルフホスト** — すべてあなたのインフラ上で動作。Docker Socket Proxy で最小権限に制限
 
 ## こんな方に
 
-- **MCP サーバー開発者** — `git push` から数秒でサーバーを動かしたい方。パッケージ公開や Dockerfile 作成は不要
-- **研究チーム・組織** — AI ツールの共有ライブラリを構築したい環境に。MCP サーバーで重い自動化、CLI ツールで軽いユーティリティ、スキルで再利用可能なプロンプトを管理
-- **GitHub で AI ツールを探している方** — MCP サーバーでも pip パッケージでも、URL を貼るだけで登録・管理できる
+- **AI ツール開発者** — `git push` から数秒でサーバーを動かしたい方。パッケージ公開や Dockerfile 作成は不要
+- **研究チーム・組織** — AI ツールの共有ライブラリを構築したい環境に。サーバーで重い自動化、CLI ツールで軽いユーティリティ、スキルで再利用可能なプロンプトを管理
+- **GitHub で AI ツールを探している方** — サーバーでも pip パッケージでも、URL を貼るだけで登録・管理できる
 
 > [詳しいユースケースとシナリオはウェブサイトをご覧ください](https://kumagallium.github.io/Crucible/)
 
@@ -44,7 +44,7 @@ graph TB
         UI["🖥️ UI<br/><i>Next.js</i>"]
         API["⚡ API<br/><i>FastAPI</i>"]
         Proxy["🔒 Socket Proxy<br/><i>Docker 操作</i>"]
-        subgraph MCP ["MCP Servers (Docker)"]
+        subgraph MCP ["Servers (Docker)"]
             MCP_A["MCP-A"]
             MCP_B["MCP-B"]
         end
@@ -141,7 +141,7 @@ SSH_PORT=<your-port> sudo bash setup-server.sh
 | `CRUCIBLE_HOST` | `127.0.0.1` | ポートバインド先 IP |
 | `CRUCIBLE_API_PORT` | `8080` | API 公開ポート |
 | `CRUCIBLE_UI_PORT` | `8081` | UI 公開ポート |
-| `CRUCIBLE_BASE_URL` | `http://127.0.0.1` | MCP サーバーの SSE ベース URL |
+| `CRUCIBLE_BASE_URL` | `http://127.0.0.1` | サーバーの SSE ベース URL |
 | `CRUCIBLE_CORS_ORIGINS` | *(localhost)* | CORS 許可オリジン（カンマ区切り） |
 | `REGISTRY_API_KEY` | *(なし)* | API 認証キー |
 | `TOKEN_ENCRYPTION_KEY` | *(なし)* | GitHub Token 暗号化キー |
@@ -162,9 +162,9 @@ CRUCIBLE_CORS_ORIGINS=http://10.0.0.1:8081,http://localhost:8081
 
 ローカルで利用する場合（デフォルト）は設定不要です。
 
-## MCP クライアントからの接続
+## クライアントからの接続
 
-Crucible にデプロイした MCP サーバーは SSE エンドポイント経由で接続できます。CLI/Library と Skill はメタデータのみの登録で、エンドポイントは公開されません。
+Crucible にデプロイしたサーバーは SSE エンドポイント経由で接続できます。CLI/Library と Skill はメタデータのみの登録で、エンドポイントは公開されません。
 
 ### Claude Code
 
@@ -184,7 +184,7 @@ Claude Desktop は SSE に直接対応していないため、[mcp-remote](https
 
 ### Dify
 
-Crucible はデプロイした MCP サーバーを Dify にツールとして自動登録できます。
+Crucible はデプロイしたサーバーを Dify にツールとして自動登録できます。
 `.env` に `DIFY_EMAIL` と `DIFY_PASSWORD` を設定して有効化してください。
 
 ## 技術スタック
@@ -220,11 +220,11 @@ graph LR
 
 | リポジトリ | 役割 | リンク |
 |-----------|------|--------|
-| **Crucible** | AI ツール管理 & デプロイ（MCP サーバー、CLI/Lib、Skills） | *(このリポジトリ)* |
-| **Crucible Agent** | MCP ツール対応 AI エージェントランタイム | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
+| **Crucible** | AI ツール管理 & デプロイ（Servers、CLI/Lib、Skills） | *(このリポジトリ)* |
+| **Crucible Agent** | AI エージェントランタイム（ツール連携対応） | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
 | **Graphium** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-各プロジェクトは単体でも使えます。組み合わせると、Crucible が AI ツール（MCP サーバー、CLI ライブラリ、スキル）を管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
+各プロジェクトは単体でも使えます。組み合わせると、Crucible が AI ツール（サーバー、CLI ライブラリ、スキル）を管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
 
 ## ライセンス
 

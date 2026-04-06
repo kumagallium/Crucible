@@ -8,7 +8,7 @@ import type { Server, ReleaseNote } from "@/lib/types";
 export const mockServerRunning: Server = {
   name: "web-search",
   display_name: "Web Search MCP",
-  description: "Web 検索を MCP ツールとして提供するサーバー。Google Custom Search API を使用。",
+  description: "Web 検索をツールとして提供するサーバー。Google Custom Search API を使用。",
   icon: "🔍",
   github_url: "https://github.com/example-org/web-search-mcp",
   branch: "main",
@@ -28,7 +28,7 @@ export const mockServerRunning: Server = {
 export const mockServerStopped: Server = {
   name: "pdf-reader",
   display_name: "PDF Reader",
-  description: "PDF ファイルを読み取ってテキストを返す MCP サーバー。",
+  description: "PDF ファイルを読み取ってテキストを返すツール。",
   icon: "📄",
   github_url: "https://github.com/example-org/pdf-reader-mcp",
   branch: "main",
@@ -48,7 +48,7 @@ export const mockServerStopped: Server = {
 export const mockServerError: Server = {
   name: "slack-notifier",
   display_name: "Slack Notifier",
-  description: "Slack チャンネルにメッセージを送信する MCP サーバー。Webhook URL を設定して使用。",
+  description: "Slack チャンネルにメッセージを送信するツール。Webhook URL を設定して使用。",
   icon: "💬",
   github_url: "https://github.com/example-org/slack-notifier-mcp",
   branch: "develop",
@@ -68,7 +68,7 @@ export const mockServerError: Server = {
 export const mockServerDeploying: Server = {
   name: "github-tools",
   display_name: "GitHub Tools",
-  description: "GitHub API を使った Issue 作成・PR レビューなどの操作を提供する MCP サーバー。",
+  description: "GitHub API を使った Issue 作成・PR レビューなどの操作を提供するツール。",
   icon: "🐙",
   github_url: "https://github.com/example-org/github-tools-mcp",
   branch: "main",
@@ -97,7 +97,7 @@ export const mockServers: Server[] = [
 export const mockReleaseNotes: ReleaseNote[] = [
   {
     sha: "abc1234",
-    message: "[feat] MCP サーバー自動デプロイ機能を追加",
+    message: "[feat] サーバー自動デプロイ機能を追加",
     date: "2025-06-10",
   },
   {
