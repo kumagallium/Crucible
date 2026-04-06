@@ -759,6 +759,7 @@ def register_simple(req: RegisterRequest, log: LogFn) -> ServerRecord:
         tool_type=req.tool_type,
         install_command=req.install_command,
         content=req.content,
+        cli_execution=req.cli_execution,
         group=req.group,
         port=0,
         static_ip="",
@@ -772,6 +773,8 @@ def register_simple(req: RegisterRequest, log: LogFn) -> ServerRecord:
         log(f"  インストール: {req.install_command}")
     if req.content:
         log(f"  スキル本文: {len(req.content)} 文字")
+    if req.cli_execution:
+        log(f"  CLI 実行: {req.cli_execution.get('run_command', '(未設定)')}")
     log(f"=== 登録完了: {req.name} ===")
     return record
 

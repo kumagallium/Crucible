@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RotateCw, Square, RefreshCw, Link, Trash2, ExternalLink, Copy, Check } from "lucide-react";
+import { RotateCw, Square, RefreshCw, Link, Trash2, ExternalLink, Copy, Check, Pencil } from "lucide-react";
 import { stopServer, restartServer, difyConnectServer, deleteServer, fetchJobLogs } from "@/lib/api";
 import { useI18n } from "@/i18n";
 
@@ -167,51 +167,77 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-1 mb-1.5">
-          <div className="flex-1 text-xs font-mono text-muted-foreground bg-muted border rounded-lg px-2 py-1 truncate">
-            {server.status === "registered"
-              ? server.install_command || server.github_url.replace("https://github.com/", "")
-              : endpoint}
+        {/* コード欄: skill 以外で表示 */}
+        {server.tool_type !== "skill" && (
+          <div className="flex items-center gap-1 mb-1.5">
+            <div className="flex-1 text-xs font-mono text-muted-foreground bg-muted border rounded-lg px-2 py-1 truncate">
+              {server.status === "registered"
+                ? server.install_command || repoShort
+                : endpoint}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 shrink-0 text-muted-foreground"
+              onClick={() => {
+                const text = server.status === "registered"
+                  ? server.install_command || server.github_url
+                  : endpoint;
+                const textarea = document.createElement("textarea");
+                textarea.value = text;
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+            >
+              {copied ? <Check className="h-3 w-3 text-status-running" /> : <Copy className="h-3 w-3" />}
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 shrink-0 text-muted-foreground"
-            onClick={() => {
-              const textarea = document.createElement("textarea");
-              textarea.value = endpoint;
-              textarea.style.position = "fixed";
-              textarea.style.opacity = "0";
-              document.body.appendChild(textarea);
-              textarea.select();
-              document.execCommand("copy");
-              document.body.removeChild(textarea);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            }}
-          >
-            {copied ? <Check className="h-3 w-3 text-status-running" /> : <Copy className="h-3 w-3" />}
-          </Button>
-        </div>
+        )}
 
-        <div className="text-xs text-muted-foreground">
-          <a
-            href={server.github_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-foreground font-medium hover:underline"
-          >
-            <ExternalLink className="h-3 w-3" />
-            {repoShort}
-          </a>
-          <span className="ml-1">
-            · {server.branch}
-            {subdir}
-          </span>
-        </div>
+        {/* GitHub リンク: URL がある場合のみ表示 */}
+        {server.github_url && (
+          <div className="text-xs text-muted-foreground">
+            <a
+              href={server.github_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-foreground font-medium hover:underline"
+            >
+              <ExternalLink className="h-3 w-3" />
+              {repoShort}
+            </a>
+            {server.branch && server.tool_type !== "skill" && (
+              <span className="ml-1">
+                · {server.branch}
+                {subdir}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-1 px-3.5 py-2 border-t bg-muted/50">
+        {/* 編集ボタン: error / registered 時 */}
+        {(server.status === "error" || server.status === "registered") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-muted-foreground"
+            asChild
+          >
+            <a href={`/register?edit=${encodeURIComponent(server.name)}`}>
+              <Pencil className="h-3 w-3" />
+              {t("serverCard.edit")}
+            </a>
+          </Button>
+        )}
+
         {/* 停止ボタン: running 時のみ */}
         {server.status === "running" && (
           <Button

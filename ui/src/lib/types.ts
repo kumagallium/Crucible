@@ -15,12 +15,20 @@ export interface Server {
   port: number;
   static_ip: string;
   install_command?: string;
+  content?: string;
+  cli_execution?: CliExecution;
   status: "running" | "stopped" | "error" | "deploying" | "registered";
   created_at: string;
   updated_at: string;
   error_message: string | null;
   dify_registered: boolean;
   endpoint_path?: string;
+}
+
+export interface CliExecution {
+  run_command: string;
+  output_format: string;
+  install_command: string;
 }
 
 export interface RegisterRequest {
@@ -34,6 +42,7 @@ export interface RegisterRequest {
   tool_type?: ToolType;
   install_command?: string;
   content?: string;
+  cli_execution?: CliExecution;
   github_token?: string;
   group: "default" | "user";
   dify_auto_register: boolean;
@@ -91,6 +100,8 @@ export interface CatalogEntry {
   tools_json: CatalogTool[];
   env_vars_json: CatalogEnvVar[];
   config_json: Record<string, unknown>;
+  skill_content: string;
+  cli_execution: CliExecution | Record<string, never>;
   trust_level: "e4m" | "official" | "verified" | "community";
   featured: boolean;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,15 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Rocket, ChevronDown, ChevronRight, CheckCircle2, XCircle, Plus, BookOpen, GitBranch, Upload, FileText } from "lucide-react";
-import { registerServer, fetchJobLogs } from "@/lib/api";
-import type { RegisterRequest, CatalogEntry, ToolType } from "@/lib/types";
+import { registerServer, fetchJobLogs, fetchServer } from "@/lib/api";
+import type { RegisterRequest, CatalogEntry, ToolType, Server } from "@/lib/types";
 import { useI18n } from "@/i18n";
+import { useSearchParams } from "next/navigation";
 import { CatalogImport } from "./catalog-import";
 
 type Mode = "catalog" | "manual";
 
 export function RegisterTab() {
   const { t } = useI18n();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<Mode>("catalog");
   const [deploying, setDeploying] = useState(false);
   const [deployStatus, setDeployStatus] = useState<"success" | "error" | null>(null);
@@ -32,9 +34,43 @@ export function RegisterTab() {
   const [selectedEntry, setSelectedEntry] = useState<CatalogEntry | null>(null);
   const [toolType, setToolType] = useState<ToolType>("mcp_server");
   const [skillContent, setSkillContent] = useState("");
+  const [editServer, setEditServer] = useState<Server | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ?edit=name パラメータがあれば既存サーバー情報をロード
+  useEffect(() => {
+    const editName = searchParams.get("edit");
+    if (!editName) return;
+    fetchServer(editName)
+      .then((srv) => {
+        setEditServer(srv);
+        setToolType((srv.tool_type as ToolType) || "mcp_server");
+        setMode("manual");
+        setShowAdvanced(true);
+        if (srv.tool_type === "skill" && srv.content) {
+          setSkillContent(srv.content);
+        }
+      })
+      .catch(() => {
+        // サーバーが見つからない場合は通常の登録画面
+      });
+  }, [searchParams]);
+
+  // 編集モード用: editServer があればそこからデフォルト値を取る
+  const isEdit = !!editServer;
+  const defaults = {
+    name: editServer?.name ?? "",
+    displayName: editServer?.display_name ?? "",
+    description: editServer?.description ?? "",
+    icon: editServer?.icon ?? "",
+    group: editServer?.group ?? "user",
+    githubUrl: editServer?.github_url ?? "",
+    branch: editServer?.branch ?? "main",
+    subdir: editServer?.subdir ?? "",
+    installCommand: editServer?.install_command ?? "",
+  };
 
   function handleReset() {
     setDeployStatus(null);
@@ -42,8 +78,13 @@ export function RegisterTab() {
     setDeploying(false);
     setShowAdvanced(false);
     setSelectedEntry(null);
+    setEditServer(null);
     setSkillContent("");
     formRef.current?.reset();
+    // URL パラメータをクリア
+    if (typeof window !== "undefined" && window.location.search) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }
 
   // .md ファイルアップロード → skillContent に読み込む
@@ -61,6 +102,28 @@ export function RegisterTab() {
     e.target.value = "";
   }
 
+  // カタログエントリからスキルテンプレートを生成
+  function buildSkillTemplate(entry: CatalogEntry): string {
+    const lines: string[] = [];
+    lines.push(`${entry.description}`);
+    lines.push("");
+    if (entry.tools_json.length > 0) {
+      lines.push("## Tools");
+      lines.push("");
+      for (const tool of entry.tools_json) {
+        lines.push(`- **${tool.name}** — ${tool.description}`);
+      }
+      lines.push("");
+    }
+    if (entry.repo) {
+      lines.push(`## Reference`);
+      lines.push("");
+      lines.push(`- Repository: ${entry.repo}`);
+      lines.push("");
+    }
+    return lines.join("\n");
+  }
+
   function handleCatalogSelect(entry: CatalogEntry) {
     setSelectedEntry(entry);
     setShowAdvanced(true);
@@ -71,6 +134,11 @@ export function RegisterTab() {
       setToolType(types[0]);
     }
     // 複数の場合は現在の選択を維持（ユーザーに選ばせる）
+
+    // skill モードの場合、skill_content を流し込む（なければテンプレート生成）
+    if (toolType === "skill" || (types.length === 1 && types[0] === "skill")) {
+      setSkillContent(entry.skill_content || buildSkillTemplate(entry));
+    }
 
     // モードを手動に切り替え、フォームにカタログデータを流し込む
     setMode("manual");
@@ -114,14 +182,20 @@ export function RegisterTab() {
       display_name: (fd.get("display_name") as string)?.trim() || null,
       description: (fd.get("description") as string)?.trim() || "",
       icon: (fd.get("icon") as string)?.trim() || "🔧",
+      github_url: "",
+      branch: "main",
       group: (fd.get("group") as "default" | "user") || "user",
       dify_auto_register: false,
       env_vars: {},
     };
 
     if (currentToolType === "skill") {
-      // skill: マークダウン本文を送信（GitHub 不要）
+      // skill: マークダウン本文を送信
       data.content = skillContent;
+      // カタログから選択した場合、元の GitHub URL を保持
+      if (selectedEntry?.repo) {
+        data.github_url = selectedEntry.repo;
+      }
     } else {
       // mcp_server / cli_library: GitHub ベースの登録
       data.github_url = (fd.get("github_url") as string).trim();
@@ -131,6 +205,11 @@ export function RegisterTab() {
       data.github_token = (fd.get("github_token") as string)?.trim() || "";
       data.dify_auto_register = currentToolType === "mcp_server" && fd.get("dify_auto") === "on";
       data.env_vars = envVars;
+
+      // cli_library: カタログから cli_execution を引き継ぐ
+      if (currentToolType === "cli_library" && selectedEntry?.cli_execution && "run_command" in selectedEntry.cli_execution) {
+        data.cli_execution = selectedEntry.cli_execution as import("@/lib/types").CliExecution;
+      }
     }
 
     try {
@@ -266,6 +345,21 @@ export function RegisterTab() {
         </div>
       )}
 
+      {/* 編集モード時のバナー */}
+      {isEdit && (
+        <div className="flex items-center gap-3 p-4 rounded-xl border bg-info-bg border-info-border mb-6">
+          <BookOpen className="h-4 w-4 text-info shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-info">
+              {t("register.editMode", { name: editServer!.display_name })}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t("register.editModeHint")}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* モード切替タブ */}
       <div className="flex gap-1 p-1 rounded-lg bg-muted mb-6">
         <button
@@ -335,7 +429,7 @@ export function RegisterTab() {
                     placeholder="my-skill"
                     required
                     pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]"
-                    defaultValue={selectedEntry ? selectedEntry.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") : ""}
+                    defaultValue={defaults.name || (selectedEntry ? selectedEntry.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") : "")}
                   />
                   <p className="text-xs text-muted-foreground mt-1">{t("register.serverNameHint")}</p>
                 </div>
@@ -345,7 +439,7 @@ export function RegisterTab() {
                     id="display_name"
                     name="display_name"
                     placeholder="My Skill"
-                    defaultValue={selectedEntry?.name ?? ""}
+                    defaultValue={defaults.displayName || selectedEntry?.name || ""}
                   />
                 </div>
               </div>
@@ -356,7 +450,7 @@ export function RegisterTab() {
                   id="description"
                   name="description"
                   placeholder={t("register.skillDescriptionPlaceholder")}
-                  defaultValue={selectedEntry?.description ?? ""}
+                  defaultValue={defaults.description || selectedEntry?.description || ""}
                 />
               </div>
 
@@ -367,12 +461,13 @@ export function RegisterTab() {
                     id="icon"
                     name="icon"
                     placeholder="📝"
+                    defaultValue={defaults.icon}
                     maxLength={4}
                   />
                 </div>
                 <div>
                   <Label htmlFor="group">{t("register.group")}</Label>
-                  <Select name="group" defaultValue={selectedEntry?.trust_level === "e4m" || selectedEntry?.trust_level === "official" ? "default" : "user"}>
+                  <Select name="group" defaultValue={defaults.group || (selectedEntry?.trust_level === "e4m" || selectedEntry?.trust_level === "official" ? "default" : "user")}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -453,13 +548,13 @@ export function RegisterTab() {
                       id="github_url"
                       name="github_url"
                       placeholder="https://github.com/your-org/your-mcp-server"
-                      defaultValue={selectedEntry?.repo ?? ""}
+                      defaultValue={defaults.githubUrl || selectedEntry?.repo || ""}
                       required
                     />
                   </div>
                   <div>
                     <Label htmlFor="branch">{t("register.branch")}</Label>
-                    <Input id="branch" name="branch" defaultValue="main" />
+                    <Input id="branch" name="branch" defaultValue={defaults.branch || "main"} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
@@ -470,7 +565,7 @@ export function RegisterTab() {
                         id="subdir"
                         name="subdir"
                         placeholder={t("register.subdirPlaceholder")}
-                        defaultValue={selectedEntry ? extractSubdir(selectedEntry) : ""}
+                        defaultValue={defaults.subdir || (selectedEntry ? extractSubdir(selectedEntry) : "")}
                       />
                     </div>
                   )}
@@ -481,7 +576,7 @@ export function RegisterTab() {
                         id="install_command"
                         name="install_command"
                         placeholder="pip install package-name"
-                        defaultValue={selectedEntry?.install_command ?? ""}
+                        defaultValue={defaults.installCommand || selectedEntry?.install_command || ""}
                       />
                     </div>
                   )}
@@ -522,7 +617,7 @@ export function RegisterTab() {
                           id="name"
                           name="name"
                           placeholder="my-server"
-                          defaultValue={selectedEntry ? selectedEntry.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") : ""}
+                          defaultValue={defaults.name || (selectedEntry ? selectedEntry.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") : "")}
                           pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]"
                         />
                         <p className="text-xs text-muted-foreground mt-1">{t("register.serverNameHint")}</p>
@@ -533,7 +628,7 @@ export function RegisterTab() {
                           id="display_name"
                           name="display_name"
                           placeholder="My MCP Server"
-                          defaultValue={selectedEntry?.name ?? ""}
+                          defaultValue={defaults.displayName || selectedEntry?.name || ""}
                         />
                       </div>
                     </div>
@@ -544,12 +639,13 @@ export function RegisterTab() {
                           id="icon"
                           name="icon"
                           placeholder="🔧"
+                          defaultValue={defaults.icon}
                           maxLength={4}
                         />
                       </div>
                       <div>
                         <Label htmlFor="group">{t("register.group")}</Label>
-                        <Select name="group" defaultValue={selectedEntry?.trust_level === "e4m" || selectedEntry?.trust_level === "official" ? "default" : "user"}>
+                        <Select name="group" defaultValue={defaults.group || (selectedEntry?.trust_level === "e4m" || selectedEntry?.trust_level === "official" ? "default" : "user")}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -570,7 +666,7 @@ export function RegisterTab() {
                         id="description"
                         name="description"
                         placeholder={t("register.descriptionPlaceholder")}
-                        defaultValue={selectedEntry?.description ?? ""}
+                        defaultValue={defaults.description || selectedEntry?.description || ""}
                         rows={2}
                       />
                     </div>

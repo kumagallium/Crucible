@@ -37,6 +37,8 @@ const mockEntries: CatalogEntry[] = [
     ],
     env_vars_json: [],
     config_json: {},
+    skill_content: "",
+    cli_execution: {},
   },
   {
     id: 2,
@@ -55,6 +57,8 @@ const mockEntries: CatalogEntry[] = [
     tools_json: [],
     env_vars_json: [],
     config_json: {},
+    skill_content: "",
+    cli_execution: {},
   },
   {
     id: 3,
@@ -75,6 +79,8 @@ const mockEntries: CatalogEntry[] = [
       { name: "MP_API_KEY", description: "Materials Project API キー", required: true },
     ],
     config_json: {},
+    skill_content: "",
+    cli_execution: {},
   },
   {
     id: 4,
@@ -93,6 +99,8 @@ const mockEntries: CatalogEntry[] = [
     tools_json: [],
     env_vars_json: [],
     config_json: {},
+    skill_content: "",
+    cli_execution: {},
   },
   {
     id: 5,
@@ -113,6 +121,8 @@ const mockEntries: CatalogEntry[] = [
       { name: "GITHUB_PERSONAL_ACCESS_TOKEN", description: "GitHub PAT", required: true },
     ],
     config_json: {},
+    skill_content: "",
+    cli_execution: {},
   },
   {
     id: 6,
@@ -133,6 +143,8 @@ const mockEntries: CatalogEntry[] = [
       { name: "NCBI_API_KEY", description: "NCBI E-utilities API キー", required: true },
     ],
     config_json: {},
+    skill_content: "",
+    cli_execution: {},
   },
 ];
 

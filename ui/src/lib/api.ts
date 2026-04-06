@@ -53,6 +53,15 @@ export async function fetchHealth(): Promise<{ status: string }> {
 
 // --- クライアントサイド用（Route Handler 経由のプロキシ） ---
 
+export async function fetchServer(name: string): Promise<Server> {
+  const res = await fetch(`/api/servers/${encodeURIComponent(name)}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(extractDetail(err) || `API error: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function registerServer(data: RegisterRequest): Promise<JobResponse> {
   const res = await fetch("/api/servers", {
     method: "POST",

@@ -49,6 +49,10 @@ class RegisterRequest(BaseModel):
     content: str = Field(
         "", description="スキル定義のマークダウン本文 (skill 専用)"
     )
+    cli_execution: dict = Field(
+        default_factory=dict,
+        description="CLI 実行情報 (cli_library 用。run_command, output_format, install_command)",
+    )
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="コンテナに渡す環境変数"
     )
@@ -116,6 +120,10 @@ class ServerRecord(BaseModel):
     group: str
     install_command: str = ""
     content: str = Field("", description="スキル定義のマークダウン本文 (skill 専用)")
+    cli_execution: dict = Field(
+        default_factory=dict,
+        description="CLI 実行情報 (cli_library 用。run_command, output_format, install_command)",
+    )
     port: int
     static_ip: str
     status: Literal["running", "stopped", "error", "deploying", "registered"] = "deploying"

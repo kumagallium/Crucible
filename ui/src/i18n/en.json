@@ -27,6 +27,7 @@
     "deleteTitle": "Delete Server",
     "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
     "cancel": "Cancel",
+    "edit": "Edit",
     "deleteButton": "Delete"
   },
   "register": {
@@ -72,7 +73,10 @@
     "skillUpload": "Upload .md",
     "skillChars": "chars",
     "skillRegister": "Register Skill",
-    "skillDescriptionPlaceholder": "Describe what this skill does"
+    "skillDescriptionPlaceholder": "Describe what this skill does",
+    "editMode": "Editing \"{name}\"",
+    "editModeHint": "Modify the details and re-register.",
+    "reRegister": "Re-register"
   },
   "catalog": {
     "loading": "Loading catalog...",
