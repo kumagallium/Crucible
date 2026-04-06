@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crucible — Self-hosted Deployment Platform for MCP Servers</title>
-  <meta name="description" content="Paste a GitHub URL to auto-build, deploy, and connect MCP servers. Works with private repos.">
+  <title>Crucible — Self-hosted AI Tool Management Platform</title>
+  <meta name="description" content="Deploy servers, register CLI libraries and skills from GitHub URLs. Works with private repos.">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
@@ -28,7 +28,7 @@
   <!-- Hero -->
   <section class="hero">
     <img src="logo.png" alt="Crucible" class="hero-logo">
-    <p class="tagline">The self-hosted deployment platform for MCP servers.</p>
+    <p class="tagline">Your team's AI tool shelf — self-hosted.</p>
     <p class="description">
       Paste a GitHub URL — build, deploy, and connect in minutes.
     </p>
@@ -42,9 +42,9 @@
   <section class="section" id="about">
     <h2 class="section-title">What is Crucible?</h2>
     <p class="about-text">
-      Crucible is a self-hosted platform that builds and deploys MCP servers
-      directly from GitHub repositories — including private repos.
-      Paste a URL and it automatically builds, deploys, and exposes it as an SSE endpoint.
+      Crucible is a self-hosted platform that manages AI tools —
+      deploy servers from GitHub repositories, register CLI libraries and skills.
+      Paste a URL and it automatically builds, deploys, and exposes it as an endpoint.
     </p>
     <br>
     <p class="about-text">
@@ -65,12 +65,12 @@
 
       <!-- Scenario 1 -->
       <div class="scenario">
-        <div class="scenario-header">MCP Server Developer — The gap from code to running server is too wide</div>
+        <div class="scenario-header">AI Tool Developer — The gap from code to running server is too wide</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>You wrote an MCP server</li>
+              <li>You wrote a server</li>
               <li>To test it, you need to build locally, write config files, connect a client...</li>
               <li>Every small change means repeating this cycle</li>
               <li>To let others try it, you'd need to publish to npm or PyPI</li>
@@ -90,12 +90,12 @@
 
       <!-- Scenario 2 -->
       <div class="scenario">
-        <div class="scenario-header">Project Leader — You want members to build MCP servers</div>
+        <div class="scenario-header">Project Leader — You want members to build AI tools</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>You want each member to build domain-specific MCP servers</li>
+              <li>You want each member to build domain-specific AI tools</li>
               <li>But the build-to-deploy workflow varies by person</li>
               <li>Some get stuck at "I built it, but how do I share it?"</li>
               <li>Servers stay trapped on individual machines — no one else can try them</li>
@@ -106,8 +106,8 @@
             <ul>
               <li>Deploy Crucible as the project's shared platform</li>
               <li>Members just push code to GitHub and register the URL in Crucible</li>
-              <li>Everyone's MCP servers in one place — anyone can try any of them</li>
-              <li>A true crucible — diverse MCP servers mixing together, sparking new possibilities</li>
+              <li>Everyone's AI tools in one place — anyone can try any of them</li>
+              <li>A true crucible — diverse AI tools mixing together, sparking new possibilities</li>
             </ul>
           </div>
         </div>
@@ -115,12 +115,12 @@
 
       <!-- Scenario 3 -->
       <div class="scenario">
-        <div class="scenario-header">Explorer — You found an MCP server on GitHub and want to try it</div>
+        <div class="scenario-header">Explorer — You found an AI tool on GitHub and want to try it</div>
         <div class="scenario-columns">
           <div class="scenario-before">
             <div class="scenario-label">Before</div>
             <ul>
-              <li>Found an interesting MCP server on GitHub</li>
+              <li>Found an interesting AI tool on GitHub</li>
               <li>But it's not on npm, PyPI, or Docker Hub</li>
               <li>Read the README, figure out build steps, install dependencies...</li>
               <li>"Too much hassle, never mind" — and you move on</li>
@@ -153,7 +153,7 @@
       <div class="feature-card">
         <div class="feature-icon">&#128274;</div>
         <h3>Private Repository Support</h3>
-        <p>Works with private GitHub repositories. Develop your MCP servers behind closed doors and deploy them without ever making them public.</p>
+        <p>Works with private GitHub repositories. Develop your AI tools behind closed doors and deploy them without ever making them public.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128260;</div>
@@ -163,7 +163,7 @@
       <div class="feature-card">
         <div class="feature-icon">&#128259;</div>
         <h3>Automatic stdio to SSE</h3>
-        <p>stdio-only servers are automatically exposed as SSE endpoints, so you can test them from any MCP client, local or remote.</p>
+        <p>stdio-only servers are automatically exposed as SSE endpoints, so you can test them from any client, local or remote.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">&#128421;</div>
@@ -186,7 +186,7 @@
       <div class="step">
         <div class="step-number">1</div>
         <h3>Push code to GitHub</h3>
-        <p>Your MCP server repository — public or private.</p>
+        <p>Your tool repository — public or private.</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
@@ -201,7 +201,7 @@
       <div class="step">
         <div class="step-number">4</div>
         <h3>Connect &amp; test</h3>
-        <p>Any MCP client. Made a change? Just redeploy.</p>
+        <p>Any compatible client. Made a change? Just redeploy.</p>
       </div>
     </div>
   </section>
