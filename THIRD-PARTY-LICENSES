@@ -1,0 +1,52 @@
+Third-Party Licenses for Crucible Registry
+============================================
+
+This file lists third-party dependencies with non-permissive or
+attribution-required licenses used by Crucible Registry.
+
+Crucible Registry itself is licensed under the MIT License.
+See LICENSE for details.
+
+
+================================================================================
+@img/sharp-libvips (via Next.js / sharp)
+================================================================================
+
+License:  LGPL-3.0-or-later (GNU Lesser General Public License v3.0)
+Source:   https://github.com/lovell/sharp-libvips
+Usage:    Pre-built shared library used by sharp for image processing.
+          Loaded dynamically at runtime by Next.js image optimization.
+
+LGPL-3.0 permits use as a dynamically linked library without imposing
+copyleft obligations on the application code. sharp uses libvips as a
+shared library, so Crucible Registry's own source code is not affected.
+
+Full license text: https://www.gnu.org/licenses/lgpl-3.0.html
+
+
+================================================================================
+certifi (Python, via requests/httpx)
+================================================================================
+
+License:  MPL-2.0 (Mozilla Public License 2.0)
+Source:   https://github.com/certifi/python-certifi
+Usage:    CA certificate bundle, used as-is without modification.
+
+MPL-2.0 is a file-level copyleft license. Using certifi as an
+unmodified dependency does not impose copyleft obligations on
+the application code.
+
+Full license text: https://www.mozilla.org/en-US/MPL/2.0/
+
+
+================================================================================
+caniuse-lite
+================================================================================
+
+License:  CC-BY-4.0 (Creative Commons Attribution 4.0 International)
+Source:   https://github.com/browserslist/caniuse-lite
+Data:     Based on https://caniuse.com/ data by Alexis Deveria
+
+CC-BY-4.0 requires attribution. This notice serves as attribution.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/
