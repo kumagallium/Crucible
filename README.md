@@ -28,6 +28,27 @@ Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-
 - **Management UI** — See all your tools in one dashboard. Filter by status and type. Start, stop, remove — keep your environment clean.
 - **Secure & self-hosted** — Runs entirely on your infrastructure. Docker Socket Proxy limits Docker operations to minimum privileges.
 
+### Screenshots
+
+<table>
+  <tr>
+    <td><b>Server dashboard</b></td>
+    <td><b>Server card</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/servers-dashboard.png" alt="Server dashboard" width="400" /></td>
+    <td><img src="docs/screenshots/server-card-running.png" alt="Server card" width="400" /></td>
+  </tr>
+  <tr>
+    <td><b>e4m catalog import</b></td>
+    <td><b>Guide</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/catalog-import.png" alt="Catalog import" width="400" /></td>
+    <td><img src="docs/screenshots/guide.png" alt="Guide" width="400" /></td>
+  </tr>
+</table>
+
 ## Who is Crucible for?
 
 - **AI tool developers** who want to go from `git push` to a running server in seconds — without publishing packages or writing Dockerfiles first.

@@ -28,6 +28,27 @@
 - **管理 UI** — 全ツールをダッシュボードで一覧管理。ステータス・種別でフィルタリング
 - **セキュア＆セルフホスト** — すべてあなたのインフラ上で動作。Docker Socket Proxy で最小権限に制限
 
+### スクリーンショット
+
+<table>
+  <tr>
+    <td><b>サーバーダッシュボード</b></td>
+    <td><b>サーバーカード</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/servers-dashboard.png" alt="サーバーダッシュボード" width="400" /></td>
+    <td><img src="docs/screenshots/server-card-running.png" alt="サーバーカード" width="400" /></td>
+  </tr>
+  <tr>
+    <td><b>e4m カタログインポート</b></td>
+    <td><b>ガイド</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/catalog-import.png" alt="カタログインポート" width="400" /></td>
+    <td><img src="docs/screenshots/guide.png" alt="ガイド" width="400" /></td>
+  </tr>
+</table>
+
 ## こんな方に
 
 - **AI ツール開発者** — `git push` から数秒でサーバーを動かしたい方。パッケージ公開や Dockerfile 作成は不要
