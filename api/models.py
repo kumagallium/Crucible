@@ -169,3 +169,30 @@ class LogsResponse(BaseModel):
     status: str
     logs: list[str]
     total: int
+
+
+class CliRunRequest(BaseModel):
+    """CLI 実行リクエスト"""
+
+    name: str = Field(..., description="実行対象のツール名（Registry 登録名）")
+    command: str = Field("", description="直接実行するコマンド (run_command テンプレートより優先)")
+    args: dict[str, str] = Field(
+        default_factory=dict,
+        description="run_command テンプレートに埋め込む引数",
+    )
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("name は必須です")
+        return v.strip()
+
+
+class CliRunResponse(BaseModel):
+    """CLI 実行レスポンス"""
+
+    name: str
+    success: bool
+    output: str
+    install_message: str = ""
