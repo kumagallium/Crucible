@@ -22,6 +22,7 @@ ALLOWED_INSTALL_PREFIXES = (
     "pip install",
     "pip3 install",
     "uv pip install",
+    "uv add",
     "npm install -g",
     "npx ",
 )
