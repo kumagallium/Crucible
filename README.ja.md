@@ -18,6 +18,7 @@
 ## 特徴
 
 - **3 層ツールモデル** — サーバー、CLI ライブラリ、スキルを一箇所で管理。種別ごとのフィルタリングと表示
+- **CLI 実行エンジン** — 登録済み CLI/Library ツールを API 経由で直接実行（`POST /api/cli/run`）。プロセス分離・タイムアウト・同時実行制限で安全に動作
 - **GitHub URL からビルド** — リポジトリ URL を貼るだけでサーバーを自動ビルド＆デプロイ。Dockerfile がなくても自動生成
 - **軽量登録** — CLI ライブラリとスキルは Docker デプロイなしで即座に登録。メタデータとインストールコマンドのみ
 - **プライベートリポジトリ対応** — プライベート GitHub リポジトリに対応。非公開のまま開発・デプロイ可能
@@ -227,25 +228,21 @@ Crucible はエコシステムの一部として機能します：
 
 ```mermaid
 graph LR
-    Registry["🔧 <b>Crucible</b><br/><i>AI ツール管理<br/>& デプロイ</i>"]
-    Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI エージェント<br/>ランタイム</i>"]
+    Registry["🔧 <b>Crucible</b><br/><i>AI ツール管理・<br/>デプロイ・実行</i>"]
     Graphium["📝 <b>Graphium</b><br/><i>プロヴェナンス<br/>追跡エディタ</i>"]
 
-    Registry -- "ツール自動検出" --> Agent
-    Agent -- "POST /agent/run" --> Graphium
+    Registry -- "ツール検出<br/>+ CLI 実行" --> Graphium
 
     style Registry fill:#edf5ee,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
-    style Agent fill:#ede8f5,stroke:#8b7ab5,stroke-width:2px,color:#4a3d6e
     style Graphium fill:#e8f0f8,stroke:#5b8fb9,stroke-width:2px,color:#2d4a6e
 ```
 
 | リポジトリ | 役割 | リンク |
 |-----------|------|--------|
-| **Crucible** | AI ツール管理 & デプロイ（Servers、CLI/Lib、Skills） | *(このリポジトリ)* |
-| **Crucible Agent** | AI エージェントランタイム（ツール連携対応） | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
+| **Crucible** | AI ツール管理・デプロイ・実行 | *(このリポジトリ)* |
 | **Graphium** | PROV-DM プロヴェナンス追跡エディタ | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-各プロジェクトは単体でも使えます。組み合わせると、Crucible が AI ツール（サーバー、CLI ライブラリ、スキル）を管理 → Agent が LLM と接続 → Graphium がプロヴェナンス付きの UI を提供、というパイプラインになります。
+Crucible が AI ツール（サーバー、CLI ライブラリ、スキル）の管理と実行を担い、Graphium がツール検出・CLI 実行の API を通じて連携しながら、プロヴェナンス追跡付きの AI エディタを提供します。
 
 ## ライセンス
 

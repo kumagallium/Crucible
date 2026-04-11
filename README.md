@@ -18,6 +18,7 @@ Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-
 ## Key Features
 
 - **Three-layer tool model** — Manage servers, CLI libraries, and skills in one place with type-aware filtering and display.
+- **CLI execution engine** — Run registered CLI/Library tools directly via API (`POST /api/cli/run`). Process-isolated with timeouts and concurrency limits.
 - **Build from any GitHub URL** — Paste a repository URL and Crucible builds and deploys servers automatically. Dockerfile auto-generated if missing.
 - **Lightweight registration** — CLI libraries and skills are registered instantly without Docker deployment. Just metadata and install commands.
 - **Private repository support** — Works with private GitHub repositories. Develop behind closed doors and deploy without ever making them public.
@@ -227,25 +228,21 @@ Crucible is part of a broader ecosystem:
 
 ```mermaid
 graph LR
-    Registry["🔧 <b>Crucible</b><br/><i>AI tool management<br/>& deployment</i>"]
-    Agent["🤖 Crucible<br/><b>Agent</b><br/><i>AI agent<br/>runtime</i>"]
+    Registry["🔧 <b>Crucible</b><br/><i>AI tool management,<br/>deployment & execution</i>"]
     Graphium["📝 <b>Graphium</b><br/><i>Provenance<br/>tracking editor</i>"]
 
-    Registry -- "tool discovery" --> Agent
-    Agent -- "POST /agent/run" --> Graphium
+    Registry -- "tool discovery<br/>+ CLI execution" --> Graphium
 
     style Registry fill:#edf5ee,stroke:#4B7A52,stroke-width:2px,color:#2d4a32
-    style Agent fill:#ede8f5,stroke:#8b7ab5,stroke-width:2px,color:#4a3d6e
     style Graphium fill:#e8f0f8,stroke:#5b8fb9,stroke-width:2px,color:#2d4a6e
 ```
 
 | Repository | Role | Link |
 |------------|------|------|
-| **Crucible** | AI tool management & deployment (Servers, CLI/Lib, Skills) | *(this repo)* |
-| **Crucible Agent** | AI agent runtime with tool support | [kumagallium/Crucible-Agent](https://github.com/kumagallium/Crucible-Agent) |
+| **Crucible** | AI tool management, deployment & execution | *(this repo)* |
 | **Graphium** | PROV-DM provenance tracking editor | [kumagallium/Graphium](https://github.com/kumagallium/Graphium) |
 
-Each project works independently. Together, they form a complete pipeline: Crucible manages AI tools (servers, CLI libraries, skills) → Agent connects them to LLMs → Graphium provides a UI with provenance tracking.
+Crucible manages and executes AI tools (servers, CLI libraries, skills). Graphium connects to Crucible for tool discovery and execution, while providing a provenance-tracking editor with built-in AI capabilities.
 
 ## License
 

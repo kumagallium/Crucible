@@ -13,6 +13,7 @@ MCP Registry API — FastAPI バックエンド
   POST   /api/servers/update-check         — 全サーバーの自動更新チェック
   GET    /api/jobs/{job_id}                — ジョブ状態取得
   GET    /api/jobs/{job_id}/logs            — ログポーリング (offset パラメータ付き)
+  POST   /api/cli/run                      — CLI/Library ツールの実行
 """
 from __future__ import annotations
 
@@ -31,7 +32,10 @@ from fastapi.security.api_key import APIKeyHeader
 
 import deployer
 import registry
+from cli_executor import cli_executor
 from models import (
+    CliRunRequest,
+    CliRunResponse,
     DeployJob,
     LogsResponse,
     RegisterRequest,
@@ -464,6 +468,60 @@ def get_job_logs(
         status=status,
         logs=new_logs,
         total=len(all_logs),
+    )
+
+
+# ==============================================================================
+# CLI/Library ツール実行
+# ==============================================================================
+@app.post("/api/cli/run", response_model=CliRunResponse)
+async def run_cli_tool(req: CliRunRequest) -> CliRunResponse:
+    """登録済み CLI/Library ツールを実行する。
+
+    子プロセスで隔離実行し、タイムアウト・同時実行制限で
+    Registry 本体への影響を防ぐ。
+    """
+    # ツールの登録情報を取得
+    record = registry.get(req.name)
+    if not record:
+        raise HTTPException(status_code=404, detail=f"ツールが見つかりません: {req.name}")
+    if record.tool_type != "cli_library":
+        raise HTTPException(
+            status_code=400,
+            detail=f"ツール '{req.name}' は cli_library ではありません (tool_type={record.tool_type})",
+        )
+
+    # インストール
+    install_cmd = (
+        record.cli_execution.get("install_command", "")
+        or record.install_command
+    )
+    install_message = ""
+    if install_cmd:
+        install_message = await cli_executor.ensure_installed(req.name, install_cmd)
+
+    # 実行コマンドの決定
+    if req.command:
+        # リクエストで直接コマンドが指定された場合
+        output = await cli_executor.execute(req.name, req.command)
+    elif record.cli_execution.get("run_command"):
+        # 登録時の run_command テンプレートを使用
+        output = await cli_executor.execute_with_template(
+            req.name, record.cli_execution["run_command"], req.args,
+        )
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"実行コマンドが指定されていません。"
+            f" request.command または cli_execution.run_command が必要です。",
+        )
+
+    success = not output.startswith("エラー") and not output.startswith("コマンドがタイムアウト")
+    return CliRunResponse(
+        name=req.name,
+        success=success,
+        output=output,
+        install_message=install_message,
     )
 
 
