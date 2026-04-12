@@ -30,7 +30,7 @@ export default function RootLayout({
         <I18nProvider>
           <div className="min-h-screen bg-background">
             <HeaderNav />
-            <main className="mx-auto max-w-[1200px] px-6 py-6">
+            <main className="mx-auto max-w-[1200px] px-4 md:px-6 py-6">
               {children}
             </main>
           </div>
