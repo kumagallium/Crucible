@@ -12,7 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Callable, Generator
 
@@ -934,6 +934,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         github_token_enc=token_enc,
         auto_update=req.auto_update,
         last_commit_hash=commit_hash,
+        last_deployed_at=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
     )
     registry.upsert(record)
 
@@ -1159,6 +1160,7 @@ def update(name: str, log: LogFn) -> ServerRecord:
     record.status = "running"
     record.error_message = None
     record.last_commit_hash = commit_hash
+    record.last_deployed_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     registry.upsert(record)
 
     log(f"=== 更新完了: {name} ({commit_hash[:7]}) ===")

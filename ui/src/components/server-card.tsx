@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RotateCw, Square, RefreshCw, CloudDownload, Link, Trash2, ExternalLink, Copy, Check, Pencil } from "lucide-react";
+import { RotateCw, Square, RefreshCw, CloudDownload, Link, Trash2, ExternalLink, Copy, Check, Pencil, Clock } from "lucide-react";
 import { stopServer, restartServer, updateServer, difyConnectServer, deleteServer, fetchJobLogs } from "@/lib/api";
 import { useI18n } from "@/i18n";
 
@@ -39,6 +39,15 @@ const toolTypeBadge: Record<string, { variant: "mcpServer" | "cliLibrary" | "ski
   skill: { variant: "skill", label: "Skill" },
 };
 
+/** ISO 8601 文字列を "YYYY-MM-DD HH:MM"（ローカル時刻）に整形する */
+function formatDateTime(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 interface ServerCardProps {
   server: Server;
   baseUrl: string;
@@ -54,6 +63,8 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
   const endpoint = `${baseUrl}:${server.port}${server.endpoint_path ?? "/sse"}`;
   const repoShort = server.github_url.replace("https://github.com/", "");
   const subdir = server.subdir ? ` / ${server.subdir}` : "";
+  // デプロイ/再デプロイ日時。専用フィールドが無い既存レコードは作成日時にフォールバック
+  const deployTs = formatDateTime(server.last_deployed_at || server.created_at);
 
   async function waitForJob(jobId: string) {
     const poll = async (): Promise<string> => {
@@ -233,20 +244,31 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             )}
           </div>
         )}
+
+        {/* デプロイ/登録日時 */}
+        {deployTs && (
+          <div className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3 shrink-0" />
+            {server.status === "registered"
+              ? t("serverCard.registeredAt")
+              : t("serverCard.deployedAt")}
+            : {deployTs}
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-wrap justify-end gap-1 px-3.5 py-2 border-t bg-muted/50">
+      <div className="flex items-center gap-1 px-3.5 py-2 border-t bg-muted/50">
         {/* 編集ボタン: error / registered 時 */}
         {(server.status === "error" || server.status === "registered") && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
+            className="h-7 w-7 p-0 text-muted-foreground"
+            title={t("serverCard.edit")}
             asChild
           >
             <a href={`/register?edit=${encodeURIComponent(server.name)}`}>
               <Pencil className="h-3 w-3" />
-              {t("serverCard.edit")}
             </a>
           </Button>
         )}
@@ -256,12 +278,12 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
+            className="h-7 w-7 p-0 text-muted-foreground"
+            title={t("serverCard.stop")}
             onClick={handleStop}
             disabled={loading}
           >
             <Square className="h-3 w-3" />
-            {t("serverCard.stop")}
           </Button>
         )}
 
@@ -270,12 +292,12 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
+            className="h-7 w-7 p-0 text-muted-foreground"
+            title={t("serverCard.restart")}
             onClick={handleRestart}
             disabled={loading}
           >
             <RotateCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-            {t("serverCard.restart")}
           </Button>
         )}
 
@@ -285,12 +307,12 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 gap-1 text-xs text-muted-foreground"
+              className="h-7 w-7 p-0 text-muted-foreground"
+              title={t("serverCard.redeploy")}
               onClick={handleRedeploy}
               disabled={loading}
             >
               <CloudDownload className={`h-3 w-3 ${loading ? "animate-pulse" : ""}`} />
-              {t("serverCard.redeploy")}
             </Button>
           )}
 
@@ -299,12 +321,12 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
+            className="h-7 w-7 p-0 text-muted-foreground"
+            title={t("serverCard.retry")}
             onClick={handleRestart}
             disabled={loading}
           >
             <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-            {t("serverCard.retry")}
           </Button>
         )}
 
@@ -313,12 +335,12 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
+            className="h-7 w-7 p-0 text-muted-foreground"
+            title={t("serverCard.difyConnect")}
             onClick={handleDifyConnect}
             disabled={loading}
           >
             <Link className="h-3 w-3" />
-            {t("serverCard.difyConnect")}
           </Button>
         )}
 
@@ -327,11 +349,11 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 gap-1 text-xs text-muted-foreground hover:text-destructive hover:bg-status-error-bg"
+              className="ml-auto h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-status-error-bg"
+              title={t("serverCard.delete")}
               disabled={loading}
             >
               <Trash2 className="h-3 w-3" />
-              {t("serverCard.delete")}
             </Button>
           </DialogTrigger>
           <DialogContent>
