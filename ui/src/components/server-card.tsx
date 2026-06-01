@@ -13,8 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RotateCw, Square, RefreshCw, Link, Trash2, ExternalLink, Copy, Check, Pencil } from "lucide-react";
-import { stopServer, restartServer, difyConnectServer, deleteServer, fetchJobLogs } from "@/lib/api";
+import { RotateCw, Square, RefreshCw, CloudDownload, Link, Trash2, ExternalLink, Copy, Check, Pencil } from "lucide-react";
+import { stopServer, restartServer, updateServer, difyConnectServer, deleteServer, fetchJobLogs } from "@/lib/api";
 import { useI18n } from "@/i18n";
 
 const bannerStyles: Record<string, string> = {
@@ -82,6 +82,19 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
     setLoading(true);
     try {
       const result = await restartServer(server.name);
+      await waitForJob(result.job_id);
+      onAction();
+    } catch {
+      // silently handle
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRedeploy() {
+    setLoading(true);
+    try {
+      const result = await updateServer(server.name);
       await waitForJob(result.job_id);
       onAction();
     } catch {
@@ -265,6 +278,21 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             {t("serverCard.restart")}
           </Button>
         )}
+
+        {/* 再デプロイボタン: running / stopped かつ GitHub リポジトリがある場合 */}
+        {(server.status === "running" || server.status === "stopped") &&
+          server.github_url && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground"
+              onClick={handleRedeploy}
+              disabled={loading}
+            >
+              <CloudDownload className={`h-3 w-3 ${loading ? "animate-pulse" : ""}`} />
+              {t("serverCard.redeploy")}
+            </Button>
+          )}
 
         {/* リトライボタン: error 時 */}
         {server.status === "error" && (
