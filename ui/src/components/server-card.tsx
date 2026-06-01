@@ -235,13 +235,13 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
         )}
       </div>
 
-      <div className="flex justify-end gap-1 px-3.5 py-2 border-t bg-muted/50">
+      <div className="flex flex-wrap justify-end gap-1 px-3.5 py-2 border-t bg-muted/50">
         {/* 編集ボタン: error / registered 時 */}
         {(server.status === "error" || server.status === "registered") && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
             asChild
           >
             <a href={`/register?edit=${encodeURIComponent(server.name)}`}>
@@ -256,7 +256,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
             onClick={handleStop}
             disabled={loading}
           >
@@ -270,7 +270,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
             onClick={handleRestart}
             disabled={loading}
           >
@@ -285,7 +285,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-muted-foreground"
+              className="h-7 px-2 gap-1 text-xs text-muted-foreground"
               onClick={handleRedeploy}
               disabled={loading}
             >
@@ -299,7 +299,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
             onClick={handleRestart}
             disabled={loading}
           >
@@ -313,7 +313,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-xs text-muted-foreground"
+            className="h-7 px-2 gap-1 text-xs text-muted-foreground"
             onClick={handleDifyConnect}
             disabled={loading}
           >
@@ -327,7 +327,7 @@ export function ServerCard({ server, baseUrl, onAction }: ServerCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-muted-foreground hover:text-destructive hover:bg-status-error-bg"
+              className="h-7 px-2 gap-1 text-xs text-muted-foreground hover:text-destructive hover:bg-status-error-bg"
               disabled={loading}
             >
               <Trash2 className="h-3 w-3" />
