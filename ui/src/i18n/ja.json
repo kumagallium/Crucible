@@ -29,7 +29,9 @@
     "deleteConfirm": "「{name}」を削除しますか？この操作は取り消せません。",
     "cancel": "キャンセル",
     "edit": "編集",
-    "deleteButton": "削除する"
+    "deleteButton": "削除する",
+    "deployedAt": "デプロイ",
+    "registeredAt": "登録"
   },
   "register": {
     "title": "新規ツールを登録",

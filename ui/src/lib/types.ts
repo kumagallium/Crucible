@@ -20,6 +20,7 @@ export interface Server {
   status: "running" | "stopped" | "error" | "deploying" | "registered";
   created_at: string;
   updated_at: string;
+  last_deployed_at?: string;
   error_message: string | null;
   dify_registered: boolean;
   endpoint_path?: string;

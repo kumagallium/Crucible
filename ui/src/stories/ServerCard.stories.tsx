@@ -58,10 +58,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Running 状態 — 正常稼働中 */
+/** Running 状態 — 正常稼働中 (Dify 接続済み: ボタン 4 個) */
 export const Running: Story = {
   args: {
     server: mockServerRunning,
+  },
+};
+
+/** Running 状態 — Dify 未接続 (ボタン最多 5 個。フッターのはみ出し/一貫性検証用) */
+export const RunningDifyDisconnected: Story = {
+  args: {
+    server: {
+      ...mockServerRunning,
+      dify_registered: false,
+      // 再デプロイ後を想定した更新日時
+      last_deployed_at: "2025-06-15T08:42:00Z",
+    },
   },
 };
 

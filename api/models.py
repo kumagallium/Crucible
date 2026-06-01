@@ -147,6 +147,9 @@ class ServerRecord(BaseModel):
     last_commit_hash: str = Field(
         "", description="最後にデプロイしたコミットハッシュ"
     )
+    last_deployed_at: str = Field(
+        "", description="最後にデプロイ/再デプロイした日時 (ISO 8601, UTC)"
+    )
 
 
 class DeployJob(BaseModel):

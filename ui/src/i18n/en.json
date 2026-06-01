@@ -29,7 +29,9 @@
     "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
     "cancel": "Cancel",
     "edit": "Edit",
-    "deleteButton": "Delete"
+    "deleteButton": "Delete",
+    "deployedAt": "Deployed",
+    "registeredAt": "Registered"
   },
   "register": {
     "title": "Register New Tool",
