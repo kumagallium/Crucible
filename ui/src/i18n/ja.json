@@ -21,6 +21,7 @@
   "serverCard": {
     "stop": "停止",
     "restart": "再起動",
+    "redeploy": "再デプロイ",
     "retry": "リトライ",
     "difyConnect": "Dify 接続",
     "delete": "削除",

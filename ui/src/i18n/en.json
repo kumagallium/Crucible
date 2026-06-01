@@ -21,6 +21,7 @@
   "serverCard": {
     "stop": "Stop",
     "restart": "Restart",
+    "redeploy": "Redeploy",
     "retry": "Retry",
     "difyConnect": "Connect Dify",
     "delete": "Delete",

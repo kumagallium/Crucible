@@ -93,6 +93,15 @@ export async function restartServer(name: string): Promise<JobResponse> {
   return res.json();
 }
 
+export async function updateServer(name: string): Promise<JobResponse> {
+  const res = await fetch(`/api/servers/${name}/update`, { method: "POST" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(extractDetail(err) || `API error: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function difyConnectServer(name: string): Promise<JobResponse> {
   const res = await fetch(`/api/servers/${name}/dify-connect`, { method: "POST" });
   if (!res.ok) {
