@@ -1,6 +1,6 @@
 // AboutTab コンポーネントのストーリー
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { AboutTab } from "@/components/about-tab";
 
 const meta = {

@@ -1,6 +1,6 @@
 // GuideTab コンポーネントのストーリー
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { GuideTab } from "@/components/guide-tab";
 
 const meta = {

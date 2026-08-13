@@ -1,7 +1,7 @@
 // ServersTab コンポーネントのストーリー
 // API をモックしてデモデータ付きで表示
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ServersTab } from "@/components/servers-tab";
 import { mockServers } from "./mock-data";
 
