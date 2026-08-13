@@ -1,7 +1,7 @@
 // ReleaseNotesTab コンポーネントのストーリー
 // fetch をモックしてデモデータを表示
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ReleaseNotesTab } from "@/components/release-notes-tab";
 import { mockReleaseNotes } from "./mock-data";
 

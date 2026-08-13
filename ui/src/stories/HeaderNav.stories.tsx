@@ -1,7 +1,7 @@
 // HeaderNav コンポーネントのストーリー
 // Next.js の usePathname をモックしてアクティブ状態を再現
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { HeaderNav } from "@/components/header-nav";
 
 const meta = {

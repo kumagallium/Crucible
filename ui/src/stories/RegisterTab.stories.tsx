@@ -1,7 +1,7 @@
 // RegisterTab コンポーネントのストーリー
 // カタログモード（デフォルト）と手動モードの両方を表示
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { RegisterTab } from "@/components/register-tab";
 
 // カタログ + 登録 API をモック

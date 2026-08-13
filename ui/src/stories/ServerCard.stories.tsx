@@ -1,7 +1,7 @@
 // ServerCard コンポーネントのストーリー
 // 各ステータス (running, stopped, error, deploying) をデモデータで表示
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ServerCard } from "@/components/server-card";
 import {
   mockServerRunning,

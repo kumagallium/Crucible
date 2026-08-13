@@ -1,7 +1,7 @@
 // Badge コンポーネントのストーリー
 // 全 variant を一覧で表示
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Badge } from "@/components/ui/badge";
 
 const meta = {

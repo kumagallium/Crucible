@@ -1,7 +1,7 @@
 // CatalogImport コンポーネントのストーリー
 // e4m カタログからツールを検索・選択する UI
 
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { CatalogImport } from "@/components/catalog-import";
 import type { CatalogEntry, CatalogCategory } from "@/lib/types";
 
