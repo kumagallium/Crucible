@@ -444,6 +444,26 @@ class TestStartContainer:
         idx = run_cmd.index("-e")
         assert run_cmd[idx + 1] == "FOO=bar"
 
+    @patch("deployer._run")
+    @patch("subprocess.run")
+    def test_passes_volumes_read_only(self, mock_subproc, mock_run):
+        mock_subproc.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        deployer._start_container(
+            "srv", 8100, "172.20.0.10", {}, _log,
+            {"/srv/catalog": "/data/catalog"},
+        )
+        run_cmd = mock_run.call_args[0][0]
+        idx = run_cmd.index("-v")
+        assert run_cmd[idx + 1] == "/srv/catalog:/data/catalog:ro"
+
+    @patch("deployer._run")
+    @patch("subprocess.run")
+    def test_no_volume_flag_when_empty(self, mock_subproc, mock_run):
+        mock_subproc.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        deployer._start_container("srv", 8100, "172.20.0.10", {}, _log)
+        run_cmd = mock_run.call_args[0][0]
+        assert "-v" not in run_cmd
+
 
 # ---------------------------------------------------------------------------
 # _health_check

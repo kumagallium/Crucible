@@ -106,6 +106,75 @@ class TestRegisterRequestEnvVars:
             )
 
 
+class TestRegisterRequestVolumes:
+    def test_default_is_empty(self):
+        req = RegisterRequest(github_url="https://github.com/owner/repo")
+        assert req.volumes == {}
+
+    def test_valid_absolute_paths(self):
+        req = RegisterRequest(
+            github_url="https://github.com/owner/repo",
+            volumes={"/srv/catalog": "/data/catalog"},
+        )
+        assert req.volumes == {"/srv/catalog": "/data/catalog"}
+
+    def test_normalizes_redundant_separators(self):
+        req = RegisterRequest(
+            github_url="https://github.com/owner/repo",
+            volumes={"/srv//catalog/": "/data/catalog"},
+        )
+        assert req.volumes == {"/srv/catalog": "/data/catalog"}
+
+    def test_rejects_relative_host_path(self):
+        with pytest.raises(ValidationError, match="絶対パス"):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"srv/catalog": "/data/catalog"},
+            )
+
+    def test_rejects_relative_container_path(self):
+        with pytest.raises(ValidationError, match="絶対パス"):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"/srv/catalog": "data/catalog"},
+            )
+
+    def test_rejects_parent_traversal(self):
+        with pytest.raises(ValidationError, match=r"\.\."):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"/srv/../etc": "/data/catalog"},
+            )
+
+    def test_rejects_colon_in_path(self):
+        with pytest.raises(ValidationError, match="':'"):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"/srv/cat:alog": "/data/catalog"},
+            )
+
+    def test_rejects_docker_socket(self):
+        with pytest.raises(ValidationError, match="マウントできません"):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"/var/run/docker.sock": "/var/run/docker.sock"},
+            )
+
+    def test_rejects_etc(self):
+        with pytest.raises(ValidationError, match="マウントできません"):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"/etc": "/host-etc"},
+            )
+
+    def test_rejects_root(self):
+        with pytest.raises(ValidationError, match="マウントできません"):
+            RegisterRequest(
+                github_url="https://github.com/owner/repo",
+                volumes={"/": "/host"},
+            )
+
+
 class TestRegisterRequestDefaults:
     def test_group_default_is_user(self):
         req = RegisterRequest(github_url="https://github.com/owner/repo")

@@ -48,6 +48,7 @@ export interface RegisterRequest {
   group: "default" | "user";
   dify_auto_register: boolean;
   env_vars: Record<string, string>;
+  volumes?: Record<string, string>;
 }
 
 export interface JobResponse {

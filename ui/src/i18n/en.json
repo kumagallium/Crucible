@@ -79,7 +79,8 @@
     "skillDescriptionPlaceholder": "Describe what this skill does",
     "editMode": "Editing \"{name}\"",
     "editModeHint": "Modify the details and re-register.",
-    "reRegister": "Re-register"
+    "reRegister": "Re-register",
+    "volumes": "Volumes (/host:/container, one per line. Mounted read-only)"
   },
   "catalog": {
     "loading": "Loading catalog...",
