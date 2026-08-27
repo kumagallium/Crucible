@@ -632,6 +632,26 @@ def _health_check(name: str, port: int, log: LogFn) -> None:
     )
 
 
+def _detect_endpoint_path(port: int, log: LogFn) -> str:
+    """稼働中のコンテナに HTTP プローブして MCP エンドポイントのパスを判定する。
+
+    ``/mcp`` を先に見る: Streamable HTTP は即座に応答するのに対し、``/sse`` は
+    ストリームなので接続したままになり判定が遅い。404 は「そのパスは無い」意味
+    なので ``/sse`` とみなす（サーバー自体は生きている）。
+    """
+    import requests as req_lib
+
+    try:
+        resp = req_lib.get(f"http://{HEALTH_CHECK_HOST}:{port}/mcp", timeout=3)
+        if resp.status_code != 404:
+            log("  トランスポート: Streamable HTTP (/mcp)")
+            return "/mcp"
+        log("  トランスポート: SSE (/sse)")
+    except Exception:
+        log("  トランスポート: SSE (/sse) — フォールバック")
+    return "/sse"
+
+
 def _register_dify(
     name: str, static_ip: str, port: int,
     icon: str, display_name: str,
@@ -679,25 +699,11 @@ def _register_dify(
         log("Dify ログイン失敗: access_token クッキーが見つかりません")
         return False, detected_path
 
-    # エンドポイント URL の決定: トランスポート自動検出
-    # /mcp を先にチェック（即座にレスポンスが返る）→ /sse はストリームでハングするため後
-    # ヘルスチェック同様、HEALTH_CHECK_HOST:port でプローブし、
+    # エンドポイント URL の決定。プローブは HEALTH_CHECK_HOST:port に対して行い、
     # Dify 登録用の URL は static_ip:8000 で構築する
     dify_base_url = f"http://{static_ip}:8000"
-    probe_base_url = f"http://{HEALTH_CHECK_HOST}:{port}"
-    server_url = f"{dify_base_url}/sse"  # デフォルトは SSE
-    try:
-        # /mcp を確認（Streamable HTTP: 即座にレスポンスが返る）
-        mcp_resp = req_lib.get(f"{probe_base_url}/mcp", timeout=3)
-        if mcp_resp.status_code != 404:
-            server_url = f"{dify_base_url}/mcp"
-            detected_path = "/mcp"
-            log(f"  トランスポート: Streamable HTTP (/mcp)")
-        else:
-            log(f"  トランスポート: SSE (/sse)")
-    except Exception:
-        # /mcp に接続できない場合は /sse をデフォルトで使用
-        log(f"  トランスポート: SSE (/sse) — フォールバック")
+    detected_path = _detect_endpoint_path(port, log)
+    server_url = f"{dify_base_url}{detected_path}"
 
     # MCP ツールプロバイダーとして登録
     # http.client を使用: requests の DefaultCookiePolicy (シングルラベルホスト名の
@@ -913,11 +919,17 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         _step(6, TOTAL, "ヘルスチェック...", log)
         _health_check(req.name, port, log)
 
+        # エンドポイントパスの確定。Dify を使わない構成でも UI・クライアントは
+        # 正しい URL を必要とするので、登録の成否とは切り離してここで判定する。
+        endpoint_path = _detect_endpoint_path(port, log)
+
         # Dify 登録
         _step(7, TOTAL, "Dify への登録...", log)
-        dify_ok, endpoint_path = _register_dify(
+        dify_ok, dify_endpoint_path = _register_dify(
             req.name, static_ip, port, req.icon, req.display_name, log
         )
+        if dify_ok:
+            endpoint_path = dify_endpoint_path
 
     finally:
         # 一時ディレクトリを削除
@@ -1162,13 +1174,17 @@ def update(name: str, log: LogFn) -> ServerRecord:
 
         # Dify 再登録（既に登録済みの場合のみ）
         _step(5, TOTAL, "Dify への登録確認...", log)
+        # 再ビルドでトランスポートが変わることがあるので毎回判定し直す
+        record.endpoint_path = _detect_endpoint_path(record.port, log)
+
         if record.dify_registered:
-            dify_ok, endpoint_path = _register_dify(
+            dify_ok, dify_endpoint_path = _register_dify(
                 name, record.static_ip, record.port,
                 record.icon, record.display_name, log,
             )
             record.dify_registered = dify_ok
-            record.endpoint_path = endpoint_path
+            if dify_ok:
+                record.endpoint_path = dify_endpoint_path
         else:
             log("  Dify 未登録のためスキップ")
 

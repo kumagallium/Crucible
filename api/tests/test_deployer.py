@@ -553,6 +553,31 @@ class TestHealthCheck:
 # _register_dify
 # ---------------------------------------------------------------------------
 
+class TestDetectEndpointPath:
+    """エンドポイント判定は Dify 登録から独立していること。"""
+
+    @patch("requests.get")
+    def test_mcp_when_not_404(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=200)
+        assert deployer._detect_endpoint_path(8100, _log) == "/mcp"
+
+    @patch("requests.get")
+    def test_mcp_when_406(self, mock_get):
+        # FastMCP の Streamable HTTP は素の GET に 406 を返す
+        mock_get.return_value = MagicMock(status_code=406)
+        assert deployer._detect_endpoint_path(8100, _log) == "/mcp"
+
+    @patch("requests.get")
+    def test_sse_when_mcp_404(self, mock_get):
+        mock_get.return_value = MagicMock(status_code=404)
+        assert deployer._detect_endpoint_path(8100, _log) == "/sse"
+
+    @patch("requests.get")
+    def test_sse_when_probe_fails(self, mock_get):
+        mock_get.side_effect = Exception("connection refused")
+        assert deployer._detect_endpoint_path(8100, _log) == "/sse"
+
+
 class TestRegisterDify:
     def test_skips_when_no_credentials(self):
         with patch.object(deployer, "DIFY_EMAIL", ""), patch.object(deployer, "DIFY_PASSWORD", ""):
