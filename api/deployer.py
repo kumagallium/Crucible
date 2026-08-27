@@ -529,9 +529,19 @@ def _build_image(
 
 
 def _start_container(
-    name: str, port: int, static_ip: str, env_vars: dict[str, str], log: LogFn
+    name: str,
+    port: int,
+    static_ip: str,
+    env_vars: dict[str, str],
+    log: LogFn,
+    volumes: dict[str, str] | None = None,
 ) -> None:
-    """コンテナを起動する。既存コンテナは停止・削除する。"""
+    """コンテナを起動する。既存コンテナは停止・削除する。
+
+    ``volumes`` (ホスト側パス -> コンテナ側パス) は **常に read-only** でマウントする。
+    イメージに焼けないホスト側のデータ（設定ファイル・カタログ等）を渡すための口で、
+    書き込みは許さない。パスの検証は models.validate_volume_map が済ませている。
+    """
     # 既存コンテナを停止・削除
     existing = subprocess.run(
         ["docker", "ps", "-a", "--format", "{{.Names}}"],
@@ -553,6 +563,11 @@ def _start_container(
     # 環境変数を追加
     for k, v in env_vars.items():
         cmd += ["-e", f"{k}={v}"]
+
+    # ボリュームを追加（read-only 固定）
+    for host_path, container_path in (volumes or {}).items():
+        cmd += ["-v", f"{host_path}:{container_path}:ro"]
+        log(f"  ボリューム (read-only): {host_path} -> {container_path}")
 
     # mcp-net が存在する場合は固定 IP で接続
     net_check = subprocess.run(
@@ -858,6 +873,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
             port=0,
             static_ip="",
             status="deploying",
+            volumes=req.volumes,
         )
         registry.upsert(provisional)
 
@@ -891,7 +907,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
 
         # コンテナ起動
         _step(5, TOTAL, "コンテナを起動中...", log)
-        _start_container(req.name, port, static_ip, req.env_vars, log)
+        _start_container(req.name, port, static_ip, req.env_vars, log, req.volumes)
 
         # ヘルスチェック
         _step(6, TOTAL, "ヘルスチェック...", log)
@@ -935,6 +951,7 @@ def deploy(req: RegisterRequest, log: LogFn) -> ServerRecord:
         auto_update=req.auto_update,
         last_commit_hash=commit_hash,
         last_deployed_at=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        volumes=req.volumes,
     )
     registry.upsert(record)
 
@@ -1135,7 +1152,9 @@ def update(name: str, log: LogFn) -> ServerRecord:
                 if k not in ("PATH", "HOME", "HOSTNAME", "LANG", "TERM"):
                     env_vars[k] = v
 
-        _start_container(name, record.port, record.static_ip, env_vars, log)
+        _start_container(
+            name, record.port, record.static_ip, env_vars, log, record.volumes
+        )
 
         # ヘルスチェック
         _step(4, TOTAL, "ヘルスチェック...", log)

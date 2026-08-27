@@ -7,10 +7,58 @@ from datetime import UTC, datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+import posixpath
 import re
 
 
 ToolType = Literal["mcp_server", "cli_library", "skill"]
+
+# ボリュームとして晒すことを禁じるホスト側パス。
+# マウントは常に read-only なので書き換えの心配は無いが、read できるだけで
+# 危険なもの（Docker socket・認証情報・カーネル疑似ファイルシステム）は塞ぐ。
+DENIED_VOLUME_HOST_PATHS: frozenset[str] = frozenset({
+    "/",
+    "/boot",
+    "/dev",
+    "/etc",
+    "/proc",
+    "/root",
+    "/sys",
+    "/var/run/docker.sock",
+    "/run/docker.sock",
+})
+
+
+def validate_volume_map(value: dict[str, str]) -> dict[str, str]:
+    """volumes（ホスト側パス -> コンテナ側パス）を検証して正規化する。
+
+    マウントは deployer 側で ``:ro`` 固定にするため、ここでは「読まれて困る場所を
+    渡していないか」と「パスが素直か」だけを見る。
+    """
+    normalized: dict[str, str] = {}
+    for host_path, container_path in value.items():
+        for label, raw in (("ホスト側", host_path), ("コンテナ側", container_path)):
+            if not isinstance(raw, str) or not raw.strip():
+                raise ValueError(f"volumes の{label}パスが空です")
+            if not raw.startswith("/"):
+                raise ValueError(
+                    f"volumes の{label}パスは絶対パスで指定してください: {raw}"
+                )
+            if ".." in raw.split("/"):
+                raise ValueError(f"volumes の{label}パスに '..' は使えません: {raw}")
+            if ":" in raw:
+                raise ValueError(
+                    f"volumes の{label}パスに ':' は使えません（マウント指定が壊れます）: {raw}"
+                )
+
+        host_norm = posixpath.normpath(host_path)
+        container_norm = posixpath.normpath(container_path)
+        if host_norm in DENIED_VOLUME_HOST_PATHS:
+            raise ValueError(
+                f"このホストパスはマウントできません: {host_norm}"
+            )
+        normalized[host_norm] = container_norm
+    return normalized
 
 
 class RegisterRequest(BaseModel):
@@ -56,6 +104,19 @@ class RegisterRequest(BaseModel):
     env_vars: dict[str, str] = Field(
         default_factory=dict, description="コンテナに渡す環境変数"
     )
+    volumes: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "ホスト側パス -> コンテナ側パスのマウント指定。**常に read-only** で"
+            "マウントされる。設定ファイルやカタログのように、イメージに焼けない"
+            "ホスト側のデータを渡すために使う"
+        ),
+    )
+
+    @field_validator("volumes")
+    @classmethod
+    def check_volumes(cls, v: dict[str, str]) -> dict[str, str]:
+        return validate_volume_map(v)
 
     @model_validator(mode="after")
     def validate_by_tool_type(self) -> "RegisterRequest":
@@ -150,6 +211,19 @@ class ServerRecord(BaseModel):
     last_deployed_at: str = Field(
         "", description="最後にデプロイ/再デプロイした日時 (ISO 8601, UTC)"
     )
+    volumes: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "ホスト側パス -> コンテナ側パスのマウント指定 (常に read-only)。"
+            "再デプロイ時にここから復元する。何を晒しているかを監査できるよう"
+            "レコードに残す"
+        ),
+    )
+
+    @field_validator("volumes")
+    @classmethod
+    def check_volumes(cls, v: dict[str, str]) -> dict[str, str]:
+        return validate_volume_map(v)
 
 
 class DeployJob(BaseModel):

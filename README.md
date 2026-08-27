@@ -24,6 +24,7 @@ Use it as your team's shared tool shelf or as a personal sandbox. Crucible auto-
 - **Private repository support** — Works with private GitHub repositories. Develop behind closed doors and deploy without ever making them public.
 - **Auto-detect tool type** — Crucible inspects dependencies to classify tools automatically (MCP servers, CLI libraries, etc.).
 - **Instant iteration** — Push to GitHub, redeploy from Crucible. The feedback loop from code to running server is as short as it gets.
+- **Read-only volumes** — Hand a deployed server host paths it cannot bake into its image (catalogs, config, credentials-free data) with `volumes`. Always mounted `:ro`, and paths like the Docker socket or `/etc` are refused.
 - **Auto-update** — Enable `auto_update` on a server and Crucible will periodically check its GitHub repository for new commits and redeploy automatically.
 - **Automatic stdio → SSE** — stdio-only servers are automatically exposed as SSE endpoints.
 - **Management UI** — See all your tools in one dashboard. Filter by status and type. Start, stop, remove — keep your environment clean.

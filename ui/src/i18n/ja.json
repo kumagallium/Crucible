@@ -79,7 +79,8 @@
     "skillDescriptionPlaceholder": "このスキルの概要を入力してください",
     "editMode": "「{name}」を編集中",
     "editModeHint": "内容を修正して再登録してください。",
-    "reRegister": "再登録"
+    "reRegister": "再登録",
+    "volumes": "ボリューム (/ホスト側:/コンテナ側、1行1件。read-only でマウント)"
   },
   "catalog": {
     "loading": "カタログを読み込み中...",

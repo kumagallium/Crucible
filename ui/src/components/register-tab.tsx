@@ -174,6 +174,18 @@ export function RegisterTab() {
       }
     }
 
+    // ボリューム: "/ホスト側:/コンテナ側" を 1 行 1 件。常に read-only でマウントされる
+    const volumes: Record<string, string> = {};
+    const volText = (fd.get("volumes") as string) || "";
+    for (const line of volText.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const idx = trimmed.indexOf(":");
+      if (idx > 0) {
+        volumes[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+      }
+    }
+
     const currentToolType = (fd.get("tool_type") as ToolType) || "mcp_server";
 
     const data: RegisterRequest = {
@@ -205,6 +217,7 @@ export function RegisterTab() {
       data.github_token = (fd.get("github_token") as string)?.trim() || "";
       data.dify_auto_register = currentToolType === "mcp_server" && fd.get("dify_auto") === "on";
       data.env_vars = envVars;
+      data.volumes = volumes;
 
       // cli_library: カタログから cli_execution を引き継ぐ
       if (currentToolType === "cli_library" && selectedEntry?.cli_execution && "run_command" in selectedEntry.cli_execution) {
@@ -705,6 +718,16 @@ export function RegisterTab() {
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="volumes">{t("register.volumes")}</Label>
+                    <Textarea
+                      id="volumes"
+                      name="volumes"
+                      placeholder="/srv/catalog:/data/catalog"
+                      rows={2}
+                    />
                   </div>
                 </>
               )}
